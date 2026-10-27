@@ -40,11 +40,35 @@ def load_predictions(path, gold_ids):
     return by_note
 
 
+def recall_by_gold_type(gold, predictions, bootstrap):
+    """Recall per gold identifier type, counting a hit when any prediction of any
+    type overlaps. Precision is not meaningful in this view, so it is omitted."""
+    out = {}
+    for t in TYPES:
+        notes = [
+            score_note(
+                [s for s in n["spans"] if s["type"] == t],
+                [{**p, "type": t} for p in predictions.get(n["note_id"], [])],
+                (t,),
+            )
+            for n in gold
+        ]
+        m = evaluate(notes, (t,), bootstrap=bootstrap)[t]
+        out[t] = {
+            "gold": m["gold"],
+            "recall": m["overlap"]["recall"],
+            "recall_ci95": m["ci95"]["recall"],
+            "leaked_char_rate": m["leaked_char_rate"],
+        }
+    return out
+
+
 def run(gold_path, pred_path, name, split, out_dir, bootstrap=1000, agnostic=False):
     all_gold = read_jsonl(gold_path)
     predictions = load_predictions(pred_path, {n["note_id"] for n in all_gold})
     gold = all_gold if split == "all" else [n for n in all_gold if split_of(n["patient_id"]) == split]
     types = TYPES
+    by_gold_type = recall_by_gold_type(gold, predictions, bootstrap) if agnostic else None
     if agnostic:
         # Score "did the system cover this identifier", ignoring which type it chose.
         types = (AGNOSTIC_TYPE,)
@@ -63,6 +87,8 @@ def run(gold_path, pred_path, name, split, out_dir, bootstrap=1000, agnostic=Fal
         "bootstrap_resamples": bootstrap,
         "metrics": evaluate(per_note, types, bootstrap=bootstrap),
     }
+    if by_gold_type:
+        result["recall_by_gold_type"] = by_gold_type
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     with open(out_dir / f"{name}-{split}{'-agnostic' if agnostic else ''}.json", "w", encoding="utf-8", newline="\n") as handle:
@@ -99,6 +125,19 @@ def markdown(result):
             f"| {_pct(m['exact']['recall'])} | {_pct(m['exact']['precision'])} "
             f"| {_pct(m['leaked_char_rate'])} |"
         )
+    if "recall_by_gold_type" in result:
+        lines += [
+            "",
+            "Recall by gold identifier type (a prediction of any type counts as a hit):",
+            "",
+            "| Gold type | Gold | Recall % (95% CI) | Leaked chars % |",
+            "|---|---|---|---|",
+        ]
+        for t, m in result["recall_by_gold_type"].items():
+            lines.append(
+                f"| {t} | {m['gold']} | {_pct(m['recall'])}{_ci(m['recall_ci95'])} "
+                f"| {_pct(m['leaked_char_rate'])} |"
+            )
     return "\n".join(lines)
 
 
