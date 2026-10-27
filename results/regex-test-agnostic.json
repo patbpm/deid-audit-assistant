@@ -36,6 +36,62 @@
   "notes": 400,
   "notes_without_predictions": 0,
   "pred_file_sha256": "11ecff47327efd0e5d103fbad98a5d16297f344309cb6f2ab420a8a2b5c9fa1c",
+  "recall_by_gold_type": {
+    "ADDRESS": {
+      "gold": 300,
+      "leaked_char_rate": 0.07896003851709199,
+      "recall": 0.8066666666666666,
+      "recall_ci95": [
+        0.7604166666666666,
+        0.8485804416403786
+      ]
+    },
+    "DATE": {
+      "gold": 1700,
+      "leaked_char_rate": 0.03136350533294896,
+      "recall": 0.9347058823529412,
+      "recall_ci95": [
+        0.9226618705035972,
+        0.9478005865102639
+      ]
+    },
+    "EMAIL": {
+      "gold": 59,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "ID": {
+      "gold": 634,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "NAME": {
+      "gold": 2587,
+      "leaked_char_rate": 1.0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "PHONE": {
+      "gold": 712,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
   "split": "test",
   "type_agnostic": true
 }

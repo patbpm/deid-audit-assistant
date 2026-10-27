@@ -36,6 +36,62 @@
   "notes": 400,
   "notes_without_predictions": 0,
   "pred_file_sha256": "0b0eb06a3f1092df4ad7e9aa31967527bee780f281739e3d2d4a0733da458d60",
+  "recall_by_gold_type": {
+    "ADDRESS": {
+      "gold": 300,
+      "leaked_char_rate": 0.5685122773230621,
+      "recall": 0.9466666666666667,
+      "recall_ci95": [
+        0.9183006535947712,
+        0.9705882352941176
+      ]
+    },
+    "DATE": {
+      "gold": 1700,
+      "leaked_char_rate": 0.04969731911213604,
+      "recall": 0.9635294117647059,
+      "recall_ci95": [
+        0.955388180764774,
+        0.9714784633294529
+      ]
+    },
+    "EMAIL": {
+      "gold": 59,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "ID": {
+      "gold": 634,
+      "leaked_char_rate": 0.408016443987667,
+      "recall": 0.7634069400630915,
+      "recall_ci95": [
+        0.7302325581395349,
+        0.7973640856672158
+      ]
+    },
+    "NAME": {
+      "gold": 2587,
+      "leaked_char_rate": 0.08065831418192604,
+      "recall": 0.9725550831078469,
+      "recall_ci95": [
+        0.96669341894061,
+        0.9785358374856267
+      ]
+    },
+    "PHONE": {
+      "gold": 712,
+      "leaked_char_rate": 0.04677799186469711,
+      "recall": 0.9719101123595506,
+      "recall_ci95": [
+        0.9591240875912409,
+        0.9831697054698457
+      ]
+    }
+  },
   "split": "test",
   "type_agnostic": true
 }
