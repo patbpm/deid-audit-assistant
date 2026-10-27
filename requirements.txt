@@ -1,0 +1,1 @@
+# Day 1 uses only the standard library. Add pinned dependencies as they are introduced.

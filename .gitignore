@@ -1,0 +1,23 @@
+# Secrets: keys live in environment variables only
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Generated data and run output (regenerate from the seed; commit only on purpose)
+data/generated/
+runs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
