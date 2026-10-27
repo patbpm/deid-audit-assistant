@@ -57,12 +57,6 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(m["ALL"]["overlap"]["precision"], 1.0)
         self.assertEqual(m["NAME"]["overlap"]["recall"], 0.0)
 
-
-if __name__ == "__main__":
-    unittest.main()
-
-
-class AgnosticTests(EndToEndTests):
     def test_agnostic_ignores_type_labels(self):
         relabeled = {
             n["note_id"]: [{"start": s["start"], "end": s["end"], "type": "NAME"} for s in n["spans"]]
@@ -75,3 +69,7 @@ class AgnosticTests(EndToEndTests):
         self.assertLess(typed["metrics"]["ALL"]["overlap"]["recall"], 1.0)
         self.assertEqual(agnostic["metrics"]["PHI"]["overlap"]["recall"], 1.0)
         self.assertTrue(agnostic["type_agnostic"])
+
+
+if __name__ == "__main__":
+    unittest.main()
