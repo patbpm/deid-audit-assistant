@@ -49,3 +49,7 @@ Stretch features, then audit report polish, then the open-weights-vs-API compari
 - [ ] Limitations section (not a compliance certification)
 - [ ] Submitted on the CV platform before 5:00 PM Central on Nov 4
 - [ ] Optional: post the demo on X and submit the link (Most Viral prize, judged on engagement until Nov 8)
+
+## Progress log (verified results only)
+- Day 1 (Oct 26): repo, venv and smoke-test script created. The API smoke test has not been run; waiting for credits to show under Billing.
+- Day 2 (Oct 27): synthetic generator built (`deid/synth/`). 600 notes, 150 patients, 9,015 labeled spans across NAME, DATE, ID, PHONE, EMAIL and ADDRESS; reproducible with seed 20261027. See docs/DATASET.md for the format, counts and limitations.
