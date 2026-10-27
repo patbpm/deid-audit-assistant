@@ -36,10 +36,10 @@ def _covered_chars(gold, preds):
     return covered
 
 
-def score_note(gold_spans, pred_spans):
+def score_note(gold_spans, pred_spans, types=TYPES):
     """Return {type: {count_key: int}} for one note."""
-    counts = {t: dict.fromkeys(COUNT_KEYS, 0) for t in TYPES}
-    for t in TYPES:
+    counts = {t: dict.fromkeys(COUNT_KEYS, 0) for t in types}
+    for t in types:
         gold = [s for s in gold_spans if s["type"] == t]
         preds = [s for s in pred_spans if s["type"] == t]
         c = counts[t]
@@ -88,12 +88,13 @@ def _columns(per_note, types):
     return {k: [sum(n[t][k] for t in types) for n in per_note] for k in COUNT_KEYS}
 
 
-def evaluate(per_note, bootstrap=1000, seed=0):
+def evaluate(per_note, types=TYPES, bootstrap=1000, seed=0):
     """per_note: list of score_note results. Returns per-type + 'ALL' summaries
     with 95% bootstrap intervals (resampling notes) for overlap recall,
     overlap precision and the leaked-character rate."""
-    groups = {t: (t,) for t in TYPES}
-    groups["ALL"] = TYPES
+    groups = {t: (t,) for t in types}
+    if len(types) > 1:
+        groups["ALL"] = tuple(types)
     columns = {name: _columns(per_note, types) for name, types in groups.items()}
     result = {
         name: summarize({k: sum(v) for k, v in cols.items()}) for name, cols in columns.items()

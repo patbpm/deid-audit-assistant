@@ -60,3 +60,18 @@ class EndToEndTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AgnosticTests(EndToEndTests):
+    def test_agnostic_ignores_type_labels(self):
+        relabeled = {
+            n["note_id"]: [{"start": s["start"], "end": s["end"], "type": "NAME"} for s in n["spans"]]
+            for n in self.notes
+        }
+        pred = self.dir / "relabeled.jsonl"
+        write_predictions(relabeled, pred)
+        typed = run(self.gold, pred, "relabeled", "all", self.dir / "results", bootstrap=5)
+        agnostic = run(self.gold, pred, "relabeled", "all", self.dir / "results", bootstrap=5, agnostic=True)
+        self.assertLess(typed["metrics"]["ALL"]["overlap"]["recall"], 1.0)
+        self.assertEqual(agnostic["metrics"]["PHI"]["overlap"]["recall"], 1.0)
+        self.assertTrue(agnostic["type_agnostic"])
