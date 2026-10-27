@@ -37,7 +37,7 @@ python -m venv .venv
 
 Copy the variable names from `.env.example` into your environment and set values there. Never commit keys.
 
-For the API smoke test set `META_API_BASE_URL`, `META_API_KEY` and `META_API_MODEL`. The local-model variables in `.env.example` are optional and are not used by the hackathon demo.
+For the API smoke test set `MODEL_API_KEY`. The base URL (`https://api.meta.ai/v1`) and model (`muse-spark-1.3`) default to the values in Meta's docs; `META_API_BASE_URL` and `META_API_MODEL` override them. The local-model variables in `.env.example` are optional and are not used by the hackathon demo.
 
 ## Smoke test
 
