@@ -1,1 +1,7 @@
-# Day 1 uses only the standard library. Add pinned dependencies as they are introduced.
+# Baselines (installed Oct 27, 2026 on Python 3.14.7). The spaCy model is not on
+# PyPI; install it with:  python -m spacy download en_core_web_lg   (3.8.0)
+presidio-analyzer==2.2.366
+spacy==3.8.18
+philter-ucsf==1.0.3
+nltk==3.10.4
+chardet==7.7.0
