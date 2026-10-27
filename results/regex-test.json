@@ -207,5 +207,6 @@
   "notes": 400,
   "notes_without_predictions": 0,
   "pred_file_sha256": "11ecff47327efd0e5d103fbad98a5d16297f344309cb6f2ab420a8a2b5c9fa1c",
-  "split": "test"
+  "split": "test",
+  "type_agnostic": false
 }
