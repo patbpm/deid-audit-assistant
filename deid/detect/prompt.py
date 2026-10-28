@@ -1,0 +1,46 @@
+"""The detection prompt. Bump PROMPT_VERSION whenever the wording changes.
+
+The model is asked for identifier strings, not character offsets: models count
+characters badly, and offsets are recovered afterwards by deid.detect.matching.
+The labeling rules below restate the dataset's conventions (docs/DATASET.md), so
+the model is told what counts as an identifier here, as annotators would be.
+"""
+
+from deid.eval import TYPES
+
+PROMPT_VERSION = "v1"
+
+SYSTEM = """You find personal identifiers in clinical notes so they can be removed before the text is shared. The notes are synthetic. You are not giving medical advice.
+
+List every identifier in the note. Types:
+- NAME: names of patients, relatives and clinicians. Give the name only, without titles (Dr., Mr.) or credentials (MD, RN). "Last, First M" and "First M Last" are each one NAME.
+- DATE: any date tied to a person or encounter, in any format, including forms without a year (Apr 21, 4/21). Not durations or times of day.
+- ID: medical record, account, accession, insurance and social security numbers. Give the number or code only, without a label such as "MRN:".
+- PHONE: phone and fax numbers.
+- EMAIL: email addresses.
+- ADDRESS: street addresses, and a town or city name on its own with its state.
+
+Do not list: blood pressures, dose ratios (5/325 mg), pain scores (7/10), lab values, diagnosis codes, room numbers, ages under 90, drug names, or diseases named after a person (Wilson disease, Foley catheter).
+
+Rules:
+- Copy each identifier exactly as written in the note, character for character. Do not normalize, translate or fix spelling.
+- List each distinct string once, even if it appears many times.
+- If you are unsure whether something is an identifier, list it with a low confidence.
+- confidence is a number from 0 to 1.
+
+Reply with JSON only, no other text, in this form:
+{"identifiers": [{"text": "<exact string>", "type": "<one of NAME, DATE, ID, PHONE, EMAIL, ADDRESS>", "confidence": <0 to 1>}]}
+If there are none, reply {"identifiers": []}."""
+
+USER_TEMPLATE = "Note:\n<<<\n{text}\n>>>"
+
+
+def build_messages(text):
+    """Chat messages for one note. Only the note text is sent: never ground truth."""
+    return [
+        {"role": "system", "content": SYSTEM},
+        {"role": "user", "content": USER_TEMPLATE.format(text=text)},
+    ]
+
+
+assert all(t in SYSTEM for t in TYPES), "prompt must mention every identifier type"
