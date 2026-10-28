@@ -1,0 +1,31 @@
+{
+  "dates": {
+    "full_dates_checked": 804,
+    "patients": 50,
+    "patients_with_inconsistent_shift": 0,
+    "shift_matches_offset": true,
+    "shift_range_days": [
+      -355,
+      356
+    ],
+    "yearless_checked": 46,
+    "yearless_mismatches": 3
+  },
+  "flagged": 0,
+  "leak_examples": {},
+  "leaked_strings_by_type": {},
+  "names": {
+    "people": 161,
+    "people_with_inconsistent_tokens": 0,
+    "real_tokens": 103,
+    "surrogates_equal_to_a_real_token": 0,
+    "surrogates_shared_by_several_tokens": 0,
+    "tokens_with_several_surrogates": 0
+  },
+  "notes": 200,
+  "notes_with_changed_text_outside_spans": 0,
+  "seed": 0,
+  "shapes_not_preserved": 0,
+  "spans": 3023,
+  "split": "dev"
+}
