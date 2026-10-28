@@ -37,11 +37,12 @@ class Cache:
     """Raw replies keyed by model, parameters, prompt version and note text, so
     reruns and re-matching cost nothing."""
 
-    def __init__(self, directory):
+    def __init__(self, directory, version=PROMPT_VERSION):
         self.directory = Path(directory) if directory else None
+        self.version = version  # the prompt version whose replies these are
 
     def key(self, client, text):
-        blob = json.dumps([PROMPT_VERSION, client.model, client.params, text], sort_keys=True)
+        blob = json.dumps([self.version, client.model, client.params, text], sort_keys=True)
         return hashlib.sha256(blob.encode()).hexdigest()
 
     def get(self, key):
