@@ -63,10 +63,13 @@ def recall_by_gold_type(gold, predictions, bootstrap):
     return out
 
 
-def run(gold_path, pred_path, name, split, out_dir, bootstrap=1000, agnostic=False):
+def run(gold_path, pred_path, name, split, out_dir, bootstrap=1000, agnostic=False,
+        only_predicted=False):
     all_gold = read_jsonl(gold_path)
     predictions = load_predictions(pred_path, {n["note_id"] for n in all_gold})
     gold = all_gold if split == "all" else [n for n in all_gold if split_of(n["patient_id"]) == split]
+    if only_predicted:  # partial runs: score only the notes the system was run on
+        gold = [n for n in gold if n["note_id"] in predictions]
     types = TYPES
     by_gold_type = recall_by_gold_type(gold, predictions, bootstrap) if agnostic else None
     if agnostic:
@@ -80,6 +83,7 @@ def run(gold_path, pred_path, name, split, out_dir, bootstrap=1000, agnostic=Fal
         "name": name,
         "split": split,
         "type_agnostic": agnostic,
+        "only_predicted": only_predicted,
         "notes": len(gold),
         "notes_without_predictions": missing,
         "gold_file_sha256": hashlib.sha256(Path(gold_path).read_bytes()).hexdigest(),
@@ -150,8 +154,11 @@ def main(argv=None):
     parser.add_argument("--out", default="results")
     parser.add_argument("--bootstrap", type=int, default=1000)
     parser.add_argument("--agnostic", action="store_true", help="ignore type labels")
+    parser.add_argument("--only-predicted", action="store_true",
+                        help="score only notes that have a prediction record (partial runs)")
     args = parser.parse_args(argv)
-    print(markdown(run(args.gold, args.pred, args.name, args.split, args.out, args.bootstrap, args.agnostic)))
+    print(markdown(run(args.gold, args.pred, args.name, args.split, args.out, args.bootstrap,
+                       args.agnostic, args.only_predicted)))
 
 
 if __name__ == "__main__":

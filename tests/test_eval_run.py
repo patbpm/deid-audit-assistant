@@ -41,6 +41,18 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(all_["leaked_char_rate"], 1.0)
         self.assertIsNone(all_["overlap"]["precision"])
 
+    def test_only_predicted_scores_just_the_notes_that_were_run(self):
+        some = self.notes[:8]
+        oracle = {n["note_id"]: [{k: s[k] for k in ("start", "end", "type")} for s in n["spans"]]
+                  for n in some}
+        pred = self.dir / "partial.jsonl"
+        write_predictions(oracle, pred)
+        full = run(self.gold, pred, "partial", "all", self.dir / "results", bootstrap=5)
+        part = run(self.gold, pred, "partial", "all", self.dir / "results", bootstrap=5,
+                   only_predicted=True)
+        self.assertLess(full["metrics"]["ALL"]["overlap"]["recall"], 1.0)
+        self.assertEqual((part["notes"], part["metrics"]["ALL"]["overlap"]["recall"]), (8, 1.0))
+
     def test_unknown_note_is_rejected(self):
         with self.assertRaises(ValueError):
             self.score("bogus", {"N9999": []})
