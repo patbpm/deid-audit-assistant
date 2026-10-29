@@ -50,6 +50,32 @@ Read these with care:
 - **Intervals:** 20 notes per family. Where every note behaves the same (all hit or all missed) the interval collapses to a point, which is not certainty.
 - **Type-agnostic:** a hit means some prediction overlaps the span, whatever its label.
 
+## Muse Spark agent, one run (Oct 29)
+
+The full agent (`muse-spark-1.3`: detect, verify uncertain spans, replace, red-team review, feedback) was run once on all 180 notes with 4 workers, and scored here and in `results/adversarial/agent-meta-detector.json` and `-final.json` (identical: the red-team added nothing). Prompts were the ones tuned on the main dev split; nothing was changed after seeing this set. Error analysis: `results/adversarial/agent-meta-adv-errors.json`; run summary: `results/adversarial/runs/agent-meta-adv.json`.
+
+| Family | Gold | Agent: recall % / false positives per note | Philter | Presidio |
+|---|---|---|---|---|
+| ALL | 540 | 100.0 / 0.60 | 96.3 / 0.78 | 86.5 / 1.16 |
+| abbreviated_names | 60 | 100.0 / 0.00 | 100.0 / 0.00 | 98.3 / 0.00 |
+| address_variants | 60 | 100.0 / 0.00 | 100.0 / 0.60 | 85.0 / 0.00 |
+| common_word_names | 40 | 100.0 / 1.00 | 100.0 / 1.50 | 77.5 / 0.60 |
+| eponym_names | 40 | 100.0 / 1.05 | 100.0 / 1.75 | 97.5 / 2.00 |
+| identifier_variants | 80 | 100.0 / 0.00 | 100.0 / 0.50 | 97.5 / 0.10 |
+| lookalikes | 40 | 100.0 / 1.35 | 100.0 / 2.65 | 100.0 / 4.75 |
+| non_english_names | 60 | 100.0 / 0.00 | 100.0 / 0.00 | 100.0 / 0.00 |
+| odd_date_formats | 60 | 100.0 / 2.00 | 100.0 / 0.00 | 85.0 / 3.00 |
+| typos_and_noise | 100 | 100.0 / 0.00 | 80.0 / 0.00 | 58.0 / 0.00 |
+
+What the run shows, and what it does not:
+- **Coverage.** Every labeled identifier was overlapped by a predicted span, including the ones the baselines miss (typos and noise, names that are common words, MRNs with a letter inside). 539 of 540 had exact boundaries; the other kept a trailing period. Each family has 20 notes or fewer, so the intervals are wide even where they collapse to a point.
+- **Precision is where it loses.** 108 false positives, in two groups. (1) 41: the detector lists strings and the matcher marks every occurrence, so a surname that is also a common word or a disease name (Short, White, Page, Black, Stone, Bell, Cushing, Wilson, Foley) is replaced in "Short of breath" or "Wilson disease" as well as where it is the patient. (2) 67: "last Tuesday", "tomorrow" and "2019" were listed as dates; the dataset's rules do not label them. Philter has fewer false positives than the agent on the odd-date family (0.00 against 2.00 per note) and the same or more in every other family.
+- **Review.** 68 of the 108 false positives were flagged for a person; 40 were replaced with no flag. Of the 540 true identifiers, 52 were flagged for a person and 488 were not. The verifier was asked about 64 spans, said "not an identifier" for 15 (all of them false positives) and "identifier" for 49, of which 44 were false positives.
+- **Red-team.** 174 notes low risk, 6 medium (all eponym-name notes, where it quoted a rare condition such as Cushing syndrome as a clue). It added no spans, so the feedback loop did nothing here either.
+- **Review-burden curve** (`results/adversarial/burden-agent-meta-adv.json`): 56 candidates under 0.8 confidence, 5 of them true. Reading them in confidence order reached 90% of the gain after 6, near the best possible 5, against 52 in random order. A perfect reviewer is assumed, and the gain is under 1 point of recall.
+- **Cost.** About 685,000 tokens, 2.42 USD at list price.
+- **Now a tuned set.** These errors have been read, so this set can no longer judge a fix. Any change to the prompts or matching made because of them must be judged on a new adversarial set from a different seed, and on the 400 test notes.
+
 ## Rules for using it
 
 - Treat it as a test set. Do not tune prompts, thresholds or rules on it; run each final system on it once for reporting.
