@@ -85,19 +85,23 @@ The two causes of the 108 false positives were fixed in the code (nothing was ru
 
 **Replay of the saved set-A replies through the new rules** (`python -m deid.eval.replay`, no model call; `results/adversarial/rules-replay-a.json`): recall stays 540 of 540 and false positives fall from 108 to 18 (0.10 per note), all 18 in the common-word-names family, which needs the model check that a replay cannot run. The rules were written after reading these errors, so this shows what the rules do, **not** how well they generalize. The same replay over the 200 dev notes' saved replies changes nothing (3,023 of 3,023 found, no false positives, nothing set aside).
 
-**Set B** (`python -m deid.synth.adversarial --vocab b`, seed 20261030, `data/adversarial_b.json`): 200 notes, 600 labeled identifiers, the nine families again with different common words (Hall, Rice, Wood, Frost, Sharp...), eponyms (Marfan, Barrett, Glasgow, Apgar...), names, lookalike sentences and date phrasings, a second layout for the eponym notes, and a tenth family of notes dense in relative and year-only dates. Some eponym nouns (esophagus, sarcoma, thyroiditis, coma scale) and some relative phrasings ("a few weeks back", "in the spring", "the week before admission") are deliberately outside the rule lists, so the prompt and the model check have to do that part. Set B was written after set A's errors were known, so it is a test of the fixes, not an independent discovery set; its words are disjoint from set A's and from the examples in the prompts (tested). Baselines on set B (not tuned, run on Oct 29):
+**Set B** (`python -m deid.synth.adversarial --vocab b`, seed 20261030, `data/adversarial_b.json`): 200 notes, 609 labeled identifiers, the nine families again with different common words (Hall, Rice, Wood, Frost, Sharp...), eponyms (Marfan, Barrett, Glasgow, Apgar...), names, lookalike sentences and date phrasings, a second layout for the eponym notes, a tenth family of notes dense in relative and year-only dates, and **real patient surnames written bare** (no title or label before them, as in "Swift was cooperative throughout the visit") in about half of the common-word notes and some eponym notes.
+
+**Why the bare surnames:** a stress test (below) showed that the first version of set B could not see the one dangerous failure of the name check, a real name wrongly released as an ordinary word, because every real surname in it had a title or was part of a full name. Set B had not been run on any model, so it was corrected before use; set A was not touched. Some eponym nouns (esophagus, sarcoma, thyroiditis, coma scale) and some relative phrasings ("a few weeks back", "in the spring", "the week before admission") are deliberately outside the rule lists, so the prompt and the model check have to do that part. Set B was written after set A's errors were known, so it is a test of the fixes, not an independent discovery set; its words are disjoint from set A's and from the examples in the prompts (tested). Baselines on set B (not tuned, run on Oct 29):
 
 | Family | Gold | Philter: recall % / FP per note | Presidio | Regex |
 |---|---|---|---|---|
-| ALL | 600 | 96.3 / 0.83 | 84.7 / 1.50 | 12.5 / 0.00 |
-| relative_dates | 60 | 100.0 / 0.20 | 86.7 / 5.00 | 0.0 / 0.00 |
-| common_word_names | 40 | 100.0 / 1.85 | 80.0 / 0.35 | 0.0 / 0.00 |
-| eponym_names | 40 | 100.0 / 1.65 | 100.0 / 1.45 | 0.0 / 0.00 |
-| odd_date_formats | 60 | 100.0 / 0.45 | 73.3 / 3.90 | 3.3 / 0.00 |
+| ALL | 609 | 95.9 / 0.83 | 83.6 / 1.55 | 14.0 / 0.00 |
+| relative_dates | 60 | 100.0 / 0.15 | 86.7 / 5.00 | 0.0 / 0.00 |
+| common_word_names | 40 | 95.0 / 1.80 | 52.5 / 0.35 | 0.0 / 0.00 |
+| eponym_names | 49 | 100.0 / 1.80 | 98.0 / 1.70 | 0.0 / 0.00 |
+| odd_date_formats | 60 | 100.0 / 0.55 | 81.7 / 3.75 | 5.0 / 0.00 |
 
 (all families: `python -m deid.eval.adversarial --out results/adversarial-b --table`.)
 
-**Still to do, needs a live run:** the agent on set B (about 200 notes, 4 workers, roughly 700,000 tokens, about 2.5 USD at list price) with the pre-registered question: do the false positives per note fall below Philter's 0.83 while recall stays at or near 100%? Then a re-run on the 200 dev notes (the v2 prompt has new cache keys) to check it did not regress, and the 400 test notes once. If the name check removes a real name occurrence, that will show up as lost recall on set B and is a result to report, not hide.
+**Stress test of the name check, no model** (`python -m deid.eval.stress`, `results/adversarial-b/stress/`): a scripted detector lists exactly the true identifiers (plus, in the common-word and eponym families, every capitalized word of a true name, as the real model did) and flags those names; the name check then gives one fixed answer. With "name" or "unsure" every time (never release): recall 609 of 609, 51 false positives (0.26 per note), all ordinary uses that stay replaced and go to review. With "ordinary_word" every time (always release, the worst case): 0 false positives but recall 96.6% (21 real bare surnames left in the text). So the design is bounded: a model that leans cautious costs false positives, and a model that leans careless costs recall, and set B can now measure which one Muse Spark does. On the original set B (no bare surnames) the worst case lost nothing, which is why it was corrected.
+
+**Still to do, needs a live run:** the agent on set B (about 200 notes, 4 workers, roughly 700,000 tokens, about 2.5 USD at list price) with the pre-registered question: do the false positives per note fall below Philter's 0.83 while recall stays at or near 100% (and in particular, are any of the 21 bare surnames released)? Then a re-run on the 200 dev notes (the v2 prompt has new cache keys) to check it did not regress, and the 400 test notes once. If the name check removes a real name occurrence, that will show up as lost recall on set B and is a result to report, not hide.
 
 ## Rules for using it
 

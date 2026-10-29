@@ -2,44 +2,44 @@
   "bootstrap_resamples": 1000,
   "by_subtype": {
     "abbreviated_names/all_caps": {
-      "gold": 7,
-      "hit": 7
+      "gold": 5,
+      "hit": 5
     },
     "abbreviated_names/all_lower": {
-      "gold": 11,
-      "hit": 11
-    },
-    "abbreviated_names/initial_last": {
       "gold": 10,
       "hit": 10
+    },
+    "abbreviated_names/initial_last": {
+      "gold": 6,
+      "hit": 6
     },
     "abbreviated_names/last_initial": {
       "gold": 9,
       "hit": 9
     },
     "abbreviated_names/last_two_initials": {
-      "gold": 4,
-      "hit": 4
+      "gold": 12,
+      "hit": 12
     },
     "abbreviated_names/no_period_initials": {
-      "gold": 10,
-      "hit": 10
+      "gold": 12,
+      "hit": 12
     },
     "abbreviated_names/two_initials_last": {
-      "gold": 9,
-      "hit": 9
+      "gold": 6,
+      "hit": 6
     },
     "address_variants/no_commas": {
-      "gold": 13,
-      "hit": 13
+      "gold": 11,
+      "hit": 11
     },
     "address_variants/po_box": {
-      "gold": 15,
-      "hit": 15
+      "gold": 14,
+      "hit": 14
     },
     "address_variants/state_spelled_out": {
-      "gold": 8,
-      "hit": 8
+      "gold": 11,
+      "hit": 11
     },
     "address_variants/town": {
       "gold": 12,
@@ -54,8 +54,12 @@
       "hit": 20
     },
     "common_word_names/patient_surname": {
-      "gold": 20,
-      "hit": 20
+      "gold": 8,
+      "hit": 8
+    },
+    "common_word_names/patient_surname_bare": {
+      "gold": 12,
+      "hit": 10
     },
     "eponym_names/clinician_eponym": {
       "gold": 20,
@@ -65,45 +69,49 @@
       "gold": 20,
       "hit": 20
     },
-    "identifier_variants/acct_no": {
-      "gold": 8,
-      "hit": 8
-    },
-    "identifier_variants/dashed_policy": {
-      "gold": 7,
-      "hit": 7
-    },
-    "identifier_variants/dots_extension": {
-      "gold": 7,
-      "hit": 7
-    },
-    "identifier_variants/fax_dash": {
-      "gold": 2,
-      "hit": 2
-    },
-    "identifier_variants/intl_paren": {
-      "gold": 6,
-      "hit": 6
-    },
-    "identifier_variants/leading_one": {
-      "gold": 7,
-      "hit": 7
-    },
-    "identifier_variants/mr_hash": {
+    "eponym_names/patient_surname_bare": {
       "gold": 9,
       "hit": 9
     },
-    "identifier_variants/mrn_hash_no_space": {
+    "identifier_variants/acct_no": {
+      "gold": 5,
+      "hit": 5
+    },
+    "identifier_variants/dashed_policy": {
+      "gold": 8,
+      "hit": 8
+    },
+    "identifier_variants/dots_extension": {
       "gold": 6,
       "hit": 6
     },
-    "identifier_variants/plus_mixed_case": {
+    "identifier_variants/fax_dash": {
+      "gold": 5,
+      "hit": 5
+    },
+    "identifier_variants/intl_paren": {
       "gold": 4,
       "hit": 4
     },
+    "identifier_variants/leading_one": {
+      "gold": 8,
+      "hit": 8
+    },
+    "identifier_variants/mr_hash": {
+      "gold": 7,
+      "hit": 7
+    },
+    "identifier_variants/mrn_hash_no_space": {
+      "gold": 3,
+      "hit": 3
+    },
+    "identifier_variants/plus_mixed_case": {
+      "gold": 7,
+      "hit": 7
+    },
     "identifier_variants/spaces": {
-      "gold": 5,
-      "hit": 5
+      "gold": 4,
+      "hit": 4
     },
     "identifier_variants/ssn_dashed": {
       "gold": 9,
@@ -114,8 +122,8 @@
       "hit": 6
     },
     "identifier_variants/underscore_subdomain": {
-      "gold": 4,
-      "hit": 4
+      "gold": 8,
+      "hit": 8
     },
     "lookalikes/paren": {
       "gold": 20,
@@ -127,7 +135,7 @@
     },
     "non_english_names/clinician": {
       "gold": 20,
-      "hit": 19
+      "hit": 18
     },
     "non_english_names/patient_full": {
       "gold": 20,
@@ -142,92 +150,92 @@
       "hit": 4
     },
     "odd_date_formats/dash_md": {
-      "gold": 7,
-      "hit": 7
-    },
-    "odd_date_formats/dash_mon_yy": {
-      "gold": 6,
-      "hit": 6
-    },
-    "odd_date_formats/dotted_dmy": {
       "gold": 4,
       "hit": 4
     },
+    "odd_date_formats/dash_mon_yy": {
+      "gold": 9,
+      "hit": 9
+    },
+    "odd_date_formats/dotted_dmy": {
+      "gold": 7,
+      "hit": 7
+    },
     "odd_date_formats/dotted_ymd": {
+      "gold": 7,
+      "hit": 7
+    },
+    "odd_date_formats/mon_ordinal_no_year": {
+      "gold": 3,
+      "hit": 3
+    },
+    "odd_date_formats/month_ordinal": {
       "gold": 8,
       "hit": 8
     },
-    "odd_date_formats/mon_ordinal_no_year": {
-      "gold": 6,
-      "hit": 6
-    },
-    "odd_date_formats/month_ordinal": {
-      "gold": 7,
-      "hit": 7
-    },
     "odd_date_formats/ordinal_no_year": {
-      "gold": 1,
-      "hit": 1
-    },
-    "odd_date_formats/ordinal_of_month": {
-      "gold": 6,
-      "hit": 6
-    },
-    "odd_date_formats/run_together": {
-      "gold": 7,
-      "hit": 7
-    },
-    "odd_date_formats/unpadded_iso": {
-      "gold": 4,
-      "hit": 4
-    },
-    "relative_dates/abbrev_period": {
-      "gold": 6,
-      "hit": 6
-    },
-    "relative_dates/dash_md": {
-      "gold": 3,
-      "hit": 3
-    },
-    "relative_dates/dash_mon_yy": {
-      "gold": 5,
-      "hit": 5
-    },
-    "relative_dates/dotted_dmy": {
-      "gold": 1,
-      "hit": 1
-    },
-    "relative_dates/dotted_ymd": {
-      "gold": 5,
-      "hit": 5
-    },
-    "relative_dates/mon_ordinal_no_year": {
-      "gold": 3,
-      "hit": 3
-    },
-    "relative_dates/month_ordinal": {
       "gold": 2,
       "hit": 2
     },
-    "relative_dates/ordinal_no_year": {
+    "odd_date_formats/ordinal_of_month": {
       "gold": 5,
       "hit": 5
     },
-    "relative_dates/ordinal_of_month": {
+    "odd_date_formats/run_together": {
+      "gold": 6,
+      "hit": 6
+    },
+    "odd_date_formats/unpadded_iso": {
       "gold": 5,
       "hit": 5
+    },
+    "relative_dates/abbrev_period": {
+      "gold": 5,
+      "hit": 5
+    },
+    "relative_dates/dash_md": {
+      "gold": 6,
+      "hit": 6
+    },
+    "relative_dates/dash_mon_yy": {
+      "gold": 4,
+      "hit": 4
+    },
+    "relative_dates/dotted_dmy": {
+      "gold": 3,
+      "hit": 3
+    },
+    "relative_dates/dotted_ymd": {
+      "gold": 4,
+      "hit": 4
+    },
+    "relative_dates/mon_ordinal_no_year": {
+      "gold": 2,
+      "hit": 2
+    },
+    "relative_dates/month_ordinal": {
+      "gold": 4,
+      "hit": 4
+    },
+    "relative_dates/ordinal_no_year": {
+      "gold": 2,
+      "hit": 2
+    },
+    "relative_dates/ordinal_of_month": {
+      "gold": 4,
+      "hit": 4
     },
     "relative_dates/patient_full": {
       "gold": 20,
       "hit": 20
     },
     "relative_dates/run_together": {
-      "gold": 3,
-      "hit": 3
+      "gold": 5,
+      "hit": 5
     },
     "relative_dates/unpadded_iso": {
-      "gold": 2,
-      "hit": 2
+      "gold": 1,
+      "hit": 1
     },
     "typos_and_noise/double_slash": {
       "gold": 20,
@@ -255,10 +263,10 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 60,
-      "leaked_char_rate": 0.20249221183800625,
+      "leaked_char_rate": 0.22091310751104565,
       "notes": 20,
       "precision": 1.0,
-      "pred": 97,
+      "pred": 87,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -266,13 +274,13 @@
       ]
     },
     "address_variants": {
-      "false_positives": 15,
-      "false_positives_per_note": 0.75,
+      "false_positives": 14,
+      "false_positives_per_note": 0.7,
       "gold": 60,
-      "leaked_char_rate": 0.10464015151515149,
+      "leaked_char_rate": 0.10679611650485432,
       "notes": 20,
-      "precision": 0.9112426035502958,
-      "pred": 169,
+      "precision": 0.9186046511627907,
+      "pred": 172,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -280,27 +288,27 @@
       ]
     },
     "common_word_names": {
-      "false_positives": 37,
-      "false_positives_per_note": 1.85,
+      "false_positives": 36,
+      "false_positives_per_note": 1.8,
       "gold": 40,
-      "leaked_char_rate": 0.0,
+      "leaked_char_rate": 0.030405405405405372,
       "notes": 20,
-      "precision": 0.5194805194805194,
-      "pred": 77,
-      "recall": 1.0,
+      "precision": 0.5135135135135135,
+      "pred": 74,
+      "recall": 0.95,
       "recall_ci95": [
-        1.0,
+        0.875,
         1.0
       ]
     },
     "eponym_names": {
-      "false_positives": 33,
-      "false_positives_per_note": 1.65,
-      "gold": 40,
-      "leaked_char_rate": 0.05012531328320802,
+      "false_positives": 36,
+      "false_positives_per_note": 1.8,
+      "gold": 49,
+      "leaked_char_rate": 0.048034934497816595,
       "notes": 20,
-      "precision": 0.6024096385542169,
-      "pred": 83,
+      "precision": 0.625,
+      "pred": 96,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -308,13 +316,13 @@
       ]
     },
     "identifier_variants": {
-      "false_positives": 16,
-      "false_positives_per_note": 0.8,
+      "false_positives": 15,
+      "false_positives_per_note": 0.75,
       "gold": 80,
-      "leaked_char_rate": 0.04347826086956519,
+      "leaked_char_rate": 0.04194630872483218,
       "notes": 20,
-      "precision": 0.8709677419354839,
-      "pred": 124,
+      "precision": 0.8872180451127819,
+      "pred": 133,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -325,7 +333,7 @@
       "false_positives": 50,
       "false_positives_per_note": 2.5,
       "gold": 40,
-      "leaked_char_rate": 0.11428571428571432,
+      "leaked_char_rate": 0.11516314779270631,
       "notes": 20,
       "precision": 0.5454545454545454,
       "pred": 110,
@@ -339,24 +347,24 @@
       "false_positives": 2,
       "false_positives_per_note": 0.1,
       "gold": 60,
-      "leaked_char_rate": 0.06603773584905659,
+      "leaked_char_rate": 0.06823529411764706,
       "notes": 20,
-      "precision": 0.9666666666666667,
-      "pred": 60,
-      "recall": 0.9666666666666667,
+      "precision": 0.9661016949152542,
+      "pred": 59,
+      "recall": 0.95,
       "recall_ci95": [
-        0.9166666666666666,
+        0.8833333333333333,
         1.0
       ]
     },
     "odd_date_formats": {
-      "false_positives": 9,
-      "false_positives_per_note": 0.45,
+      "false_positives": 11,
+      "false_positives_per_note": 0.55,
       "gold": 60,
-      "leaked_char_rate": 0.04643962848297212,
+      "leaked_char_rate": 0.04692082111436946,
       "notes": 20,
-      "precision": 0.8928571428571429,
-      "pred": 84,
+      "precision": 0.8735632183908046,
+      "pred": 87,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -364,13 +372,13 @@
       ]
     },
     "relative_dates": {
-      "false_positives": 4,
-      "false_positives_per_note": 0.2,
+      "false_positives": 3,
+      "false_positives_per_note": 0.15,
       "gold": 60,
-      "leaked_char_rate": 0.03988603988603989,
+      "leaked_char_rate": 0.04105571847507328,
       "notes": 20,
-      "precision": 0.9487179487179487,
-      "pred": 78,
+      "precision": 0.961038961038961,
+      "pred": 77,
       "recall": 1.0,
       "recall_ci95": [
         1.0,
@@ -381,7 +389,7 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 100,
-      "leaked_char_rate": 0.20419426048565126,
+      "leaked_char_rate": 0.2048726467331119,
       "notes": 20,
       "precision": 1.0,
       "pred": 100,
@@ -393,21 +401,21 @@
     }
   },
   "name": "philter",
-  "notes_sha256": "342f3aa27f80ef0c2a717b8b44a88e88b74544b1d16936a8fdbe35df0674371d",
+  "notes_sha256": "d92baf81fed28ce4da2045489f5c88dbe51db552a540cc1a84f10c98b76fde8a",
   "overall": {
-    "false_positives": 166,
-    "false_positives_per_note": 0.83,
-    "gold": 600,
-    "leaked_char_rate": 0.09509803921568627,
+    "false_positives": 167,
+    "false_positives_per_note": 0.835,
+    "gold": 609,
+    "leaked_char_rate": 0.09791122715404699,
     "notes": 200,
-    "precision": 0.8309572301425662,
-    "pred": 982,
-    "recall": 0.9633333333333334,
+    "precision": 0.8321608040201005,
+    "pred": 995,
+    "recall": 0.9589490968801314,
     "recall_ci95": [
-      0.9492063492063492,
-      0.9759862778730704
+      0.9447077409162717,
+      0.9728813559322034
     ]
   },
-  "pred_file_sha256": "40a51f432adb290cb6bfdbff95135d0c3972569581f32032eac4395af4ce6268",
+  "pred_file_sha256": "fb30e444b6cdcab205b2a8182870443fb206070bea1b33aa5dbbd713fc08e1f1",
   "type_agnostic": true
 }

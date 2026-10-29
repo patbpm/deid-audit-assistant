@@ -2,15 +2,15 @@
   "bootstrap_resamples": 1000,
   "by_subtype": {
     "abbreviated_names/all_caps": {
-      "gold": 7,
+      "gold": 5,
       "hit": 0
     },
     "abbreviated_names/all_lower": {
-      "gold": 11,
+      "gold": 10,
       "hit": 0
     },
     "abbreviated_names/initial_last": {
-      "gold": 10,
+      "gold": 6,
       "hit": 0
     },
     "abbreviated_names/last_initial": {
@@ -18,27 +18,27 @@
       "hit": 0
     },
     "abbreviated_names/last_two_initials": {
-      "gold": 4,
+      "gold": 12,
       "hit": 0
     },
     "abbreviated_names/no_period_initials": {
-      "gold": 10,
+      "gold": 12,
       "hit": 0
     },
     "abbreviated_names/two_initials_last": {
-      "gold": 9,
+      "gold": 6,
       "hit": 0
     },
     "address_variants/no_commas": {
-      "gold": 13,
+      "gold": 11,
       "hit": 0
     },
     "address_variants/po_box": {
-      "gold": 15,
+      "gold": 14,
       "hit": 0
     },
     "address_variants/state_spelled_out": {
-      "gold": 8,
+      "gold": 11,
       "hit": 0
     },
     "address_variants/town": {
@@ -54,7 +54,11 @@
       "hit": 0
     },
     "common_word_names/patient_surname": {
-      "gold": 20,
+      "gold": 8,
+      "hit": 0
+    },
+    "common_word_names/patient_surname_bare": {
+      "gold": 12,
       "hit": 0
     },
     "eponym_names/clinician_eponym": {
@@ -65,44 +69,48 @@
       "gold": 20,
       "hit": 0
     },
-    "identifier_variants/acct_no": {
-      "gold": 8,
-      "hit": 0
-    },
-    "identifier_variants/dashed_policy": {
-      "gold": 7,
-      "hit": 0
-    },
-    "identifier_variants/dots_extension": {
-      "gold": 7,
-      "hit": 7
-    },
-    "identifier_variants/fax_dash": {
-      "gold": 2,
-      "hit": 2
-    },
-    "identifier_variants/intl_paren": {
-      "gold": 6,
-      "hit": 6
-    },
-    "identifier_variants/leading_one": {
-      "gold": 7,
-      "hit": 7
-    },
-    "identifier_variants/mr_hash": {
+    "eponym_names/patient_surname_bare": {
       "gold": 9,
       "hit": 0
     },
-    "identifier_variants/mrn_hash_no_space": {
-      "gold": 6,
+    "identifier_variants/acct_no": {
+      "gold": 5,
       "hit": 0
     },
-    "identifier_variants/plus_mixed_case": {
+    "identifier_variants/dashed_policy": {
+      "gold": 8,
+      "hit": 0
+    },
+    "identifier_variants/dots_extension": {
+      "gold": 6,
+      "hit": 6
+    },
+    "identifier_variants/fax_dash": {
+      "gold": 5,
+      "hit": 5
+    },
+    "identifier_variants/intl_paren": {
       "gold": 4,
       "hit": 4
     },
+    "identifier_variants/leading_one": {
+      "gold": 8,
+      "hit": 8
+    },
+    "identifier_variants/mr_hash": {
+      "gold": 7,
+      "hit": 0
+    },
+    "identifier_variants/mrn_hash_no_space": {
+      "gold": 3,
+      "hit": 0
+    },
+    "identifier_variants/plus_mixed_case": {
+      "gold": 7,
+      "hit": 7
+    },
     "identifier_variants/spaces": {
-      "gold": 5,
+      "gold": 4,
       "hit": 0
     },
     "identifier_variants/ssn_dashed": {
@@ -114,8 +122,8 @@
       "hit": 0
     },
     "identifier_variants/underscore_subdomain": {
-      "gold": 4,
-      "hit": 4
+      "gold": 8,
+      "hit": 8
     },
     "lookalikes/paren": {
       "gold": 20,
@@ -142,79 +150,79 @@
       "hit": 0
     },
     "odd_date_formats/dash_md": {
-      "gold": 7,
+      "gold": 4,
       "hit": 0
     },
     "odd_date_formats/dash_mon_yy": {
-      "gold": 6,
+      "gold": 9,
       "hit": 0
     },
     "odd_date_formats/dotted_dmy": {
-      "gold": 4,
+      "gold": 7,
       "hit": 0
     },
     "odd_date_formats/dotted_ymd": {
-      "gold": 8,
+      "gold": 7,
       "hit": 0
     },
     "odd_date_formats/mon_ordinal_no_year": {
-      "gold": 6,
+      "gold": 3,
       "hit": 0
     },
     "odd_date_formats/month_ordinal": {
-      "gold": 7,
+      "gold": 8,
       "hit": 0
     },
     "odd_date_formats/ordinal_no_year": {
-      "gold": 1,
-      "hit": 0
-    },
-    "odd_date_formats/ordinal_of_month": {
-      "gold": 6,
-      "hit": 0
-    },
-    "odd_date_formats/run_together": {
-      "gold": 7,
-      "hit": 0
-    },
-    "odd_date_formats/unpadded_iso": {
-      "gold": 4,
-      "hit": 2
-    },
-    "relative_dates/abbrev_period": {
-      "gold": 6,
-      "hit": 0
-    },
-    "relative_dates/dash_md": {
-      "gold": 3,
-      "hit": 0
-    },
-    "relative_dates/dash_mon_yy": {
-      "gold": 5,
-      "hit": 0
-    },
-    "relative_dates/dotted_dmy": {
-      "gold": 1,
-      "hit": 0
-    },
-    "relative_dates/dotted_ymd": {
-      "gold": 5,
-      "hit": 0
-    },
-    "relative_dates/mon_ordinal_no_year": {
-      "gold": 3,
-      "hit": 0
-    },
-    "relative_dates/month_ordinal": {
       "gold": 2,
       "hit": 0
     },
-    "relative_dates/ordinal_no_year": {
+    "odd_date_formats/ordinal_of_month": {
       "gold": 5,
       "hit": 0
     },
-    "relative_dates/ordinal_of_month": {
+    "odd_date_formats/run_together": {
+      "gold": 6,
+      "hit": 0
+    },
+    "odd_date_formats/unpadded_iso": {
       "gold": 5,
+      "hit": 3
+    },
+    "relative_dates/abbrev_period": {
+      "gold": 5,
+      "hit": 0
+    },
+    "relative_dates/dash_md": {
+      "gold": 6,
+      "hit": 0
+    },
+    "relative_dates/dash_mon_yy": {
+      "gold": 4,
+      "hit": 0
+    },
+    "relative_dates/dotted_dmy": {
+      "gold": 3,
+      "hit": 0
+    },
+    "relative_dates/dotted_ymd": {
+      "gold": 4,
+      "hit": 0
+    },
+    "relative_dates/mon_ordinal_no_year": {
+      "gold": 2,
+      "hit": 0
+    },
+    "relative_dates/month_ordinal": {
+      "gold": 4,
+      "hit": 0
+    },
+    "relative_dates/ordinal_no_year": {
+      "gold": 2,
+      "hit": 0
+    },
+    "relative_dates/ordinal_of_month": {
+      "gold": 4,
       "hit": 0
     },
     "relative_dates/patient_full": {
@@ -222,11 +230,11 @@
       "hit": 0
     },
     "relative_dates/run_together": {
-      "gold": 3,
+      "gold": 5,
       "hit": 0
     },
     "relative_dates/unpadded_iso": {
-      "gold": 2,
+      "gold": 1,
       "hit": 0
     },
     "typos_and_noise/double_slash": {
@@ -247,7 +255,7 @@
     },
     "typos_and_noise/unpadded_iso": {
       "gold": 20,
-      "hit": 2
+      "hit": 3
     }
   },
   "families": {
@@ -269,7 +277,7 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 60,
-      "leaked_char_rate": 0.790719696969697,
+      "leaked_char_rate": 0.7947295423023578,
       "notes": 20,
       "precision": 1.0,
       "pred": 12,
@@ -296,7 +304,7 @@
     "eponym_names": {
       "false_positives": 0,
       "false_positives_per_note": 0.0,
-      "gold": 40,
+      "gold": 49,
       "leaked_char_rate": 1.0,
       "notes": 20,
       "precision": null,
@@ -311,21 +319,21 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 80,
-      "leaked_char_rate": 0.4149338374291115,
+      "leaked_char_rate": 0.3120805369127517,
       "notes": 20,
       "precision": 1.0,
-      "pred": 39,
-      "recall": 0.4875,
+      "pred": 47,
+      "recall": 0.5875,
       "recall_ci95": [
-        0.375,
-        0.5875
+        0.4875,
+        0.675
       ]
     },
     "lookalikes": {
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 40,
-      "leaked_char_rate": 0.4666666666666667,
+      "leaked_char_rate": 0.4625719769673704,
       "notes": 20,
       "precision": 1.0,
       "pred": 20,
@@ -353,14 +361,14 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 60,
-      "leaked_char_rate": 0.9690402476780186,
+      "leaked_char_rate": 0.9560117302052786,
       "notes": 20,
       "precision": 1.0,
-      "pred": 2,
-      "recall": 0.03333333333333333,
+      "pred": 3,
+      "recall": 0.05,
       "recall_ci95": [
         0.0,
-        0.08333333333333333
+        0.1
       ]
     },
     "relative_dates": {
@@ -381,33 +389,33 @@
       "false_positives": 0,
       "false_positives_per_note": 0.0,
       "gold": 100,
-      "leaked_char_rate": 0.977924944812362,
+      "leaked_char_rate": 0.9667774086378738,
       "notes": 20,
       "precision": 1.0,
-      "pred": 2,
-      "recall": 0.02,
+      "pred": 3,
+      "recall": 0.03,
       "recall_ci95": [
         0.0,
-        0.05
+        0.07
       ]
     }
   },
   "name": "regex",
-  "notes_sha256": "342f3aa27f80ef0c2a717b8b44a88e88b74544b1d16936a8fdbe35df0674371d",
+  "notes_sha256": "d92baf81fed28ce4da2045489f5c88dbe51db552a540cc1a84f10c98b76fde8a",
   "overall": {
     "false_positives": 0,
     "false_positives_per_note": 0.0,
-    "gold": 600,
-    "leaked_char_rate": 0.8307598039215687,
+    "gold": 609,
+    "leaked_char_rate": 0.809636838357465,
     "notes": 200,
     "precision": 1.0,
-    "pred": 75,
-    "recall": 0.125,
+    "pred": 85,
+    "recall": 0.13957307060755336,
     "recall_ci95": [
-      0.09137055837563451,
-      0.15656565656565657
+      0.1054421768707483,
+      0.17398373983739837
     ]
   },
-  "pred_file_sha256": "3da39f40ba1cdd58a9f210ed7094e070abac7fcebdb69724e37ae38a339440ac",
+  "pred_file_sha256": "7828cef72070521a900c0c6224cf17349f39c4ce0c134d5a3727b506cc351bf5",
   "type_agnostic": true
 }

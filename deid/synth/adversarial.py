@@ -87,14 +87,23 @@ LAST_WORDS = {
 }
 
 
+def bare_surname(rng, name):
+    """Set B only: the patient's surname alone, no title or label before it, as clinicians often write it.
+    This is the case a wrong "ordinary word" answer would leak, so the set has to contain it."""
+    tail = rng.choice([" reports the pain is better and asks about driving.", " was cooperative throughout the visit.",
+                       " denies fever or chills."])
+    return [L(name, "NAME", "patient_surname_bare"), tail, " Follow up in clinic.\n"]
+
+
 def make_common_word_names(rng, i, v):
     first, last = rng.choice(sorted(v["first_words"])), rng.choice(sorted(v["last_words"]))
     return [
         "Patient: ", L(f"{first} {last}", "NAME", "patient_full"), "\n",
         v["last_words"][last], " ", v["first_words"][first], "\n",
+    ] + (bare_surname(rng, last) if v["bare_names"] and rng.random() < 0.5 else [
         "Spoke with Mr. " if rng.random() < 0.5 else "Spoke with Ms. ", L(last, "NAME", "patient_surname"),
         " by phone. Follow up in clinic.\n",
-    ]
+    ])
 
 
 # --- unusual date formats ----------------------------------------------------------------
@@ -284,7 +293,7 @@ def make_eponym_names(rng, i, v):
         return ["Patient: ", L(f"{first} {other}", "NAME", "patient_eponym"), "\n",
                 "Discussed the ", eponyms[doctor], " with the family. Referred by Dr. ",
                 L(doctor, "NAME", "clinician_eponym"), ".\n",
-                "Past history includes ", eponyms[other], ".\n"]
+                "Past history includes ", eponyms[other], ". ", *bare_surname(rng, other)]
     return ["Seen by Dr. ", L(doctor, "NAME", "clinician_eponym"), " today.\n",
             "History of ", eponyms[other], ". ",
             "The ", eponyms[doctor], " was discussed in the plan.\n",
@@ -308,7 +317,7 @@ def make_relative_dates(rng, i, v):
 VOCAB_A = {
     "first_words": FIRST_WORDS, "last_words": LAST_WORDS, "firsts": FIRSTS, "lasts": LASTS,
     "international": INTERNATIONAL, "lookalikes": LOOKALIKES, "eponyms": EPONYMS,
-    "date_tails": None, "eponym_layouts": 1,
+    "date_tails": None, "eponym_layouts": 1, "bare_names": False,
 }
 
 VOCAB_B = {
@@ -357,7 +366,7 @@ VOCAB_B = {
         "\nPain 2/10, BP 116/72. Onset a few weeks back; worse this morning; similar episode in 2021.\n",
         "\nPain 5/10, BP 126/82. Started in the spring, with a milder bout five years back.\n",
     ],
-    "eponym_layouts": 2,
+    "eponym_layouts": 2, "bare_names": True,
     "relative_phrases": ["two weeks ago", "yesterday", "last month", "next Friday", "in three days", "this morning",
                          "a few weeks back", "over the weekend", "at the start of the year", "in the spring",
                          "the week before admission", "earlier this year"],

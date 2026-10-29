@@ -194,7 +194,19 @@ class SetBTests(unittest.TestCase):
                 for s in note["spans"]:
                     after = note["text"][s["end"]:s["end"] + 1]
                     self.assertNotIn(after, ("-",))
-                self.assertEqual(sum(s["type"] == "NAME" for s in note["spans"]), 2)
+                bare = sum(s["subtype"] == "patient_surname_bare" for s in note["spans"])
+                self.assertEqual(sum(s["type"] == "NAME" for s in note["spans"]) - bare, 2)
+
+    def test_some_real_surnames_that_are_also_words_appear_bare_with_no_title_before_them(self):
+        """The case a wrong "ordinary word" answer would leak: it has to be in the set, or the set cannot see that."""
+        bare = [(n, s) for n in self.notes for s in n["spans"] if s["subtype"] == "patient_surname_bare"]
+        self.assertGreaterEqual(len(bare), 15)
+        self.assertEqual({n["family"] for n, _ in bare}, {"common_word_names", "eponym_names"})
+        from deid.detect.context import has_cue_before
+        for note, s in bare:
+            self.assertFalse(has_cue_before(note["text"], s["start"]))
+        self.assertFalse(any(s["subtype"] == "patient_surname_bare" for n in adversarial.generate_notes(
+            FROZEN["seed"], FROZEN["per_family"]) for s in n["spans"]))     # set A is untouched
 
     def test_replacement_runs_on_every_hard_note(self):
         from deid.replace.engine import Replacer
