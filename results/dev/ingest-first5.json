@@ -6,25 +6,25 @@
         "by_type": {
           "ID": {
             "checked": 7,
-            "still_present": 5
+            "still_present": 0
           },
           "NAME": {
-            "checked": 16,
-            "still_present": 10
+            "checked": 30,
+            "still_present": 0
           },
           "PHONE": {
             "checked": 8,
-            "still_present": 5
+            "still_present": 0
           }
         },
-        "checked_identifiers": 31,
-        "leak_rate": 0.6451612903225806,
-        "still_present": 20
+        "checked_identifiers": 45,
+        "leak_rate": 0.0,
+        "still_present": 0
       },
       "char_error_rate": 0.12235510579576817,
       "identifiers": 83,
       "notes": 5,
-      "recovered": 52,
+      "recovered": 66,
       "recovered_by_type": {
         "ADDRESS": {
           "found": 0,
@@ -43,7 +43,7 @@
           "of": 9
         },
         "NAME": {
-          "found": 16,
+          "found": 30,
           "of": 37
         },
         "PHONE": {
@@ -51,7 +51,7 @@
           "of": 10
         }
       },
-      "recovery_rate": 0.6265060240963856,
+      "recovery_rate": 0.7951807228915663,
       "word_error_rate": 0.3042654028436019
     },
     "scan": {
@@ -59,7 +59,7 @@
         "by_type": {
           "ADDRESS": {
             "checked": 4,
-            "still_present": 1
+            "still_present": 0
           },
           "EMAIL": {
             "checked": 2,
@@ -67,32 +67,32 @@
           },
           "ID": {
             "checked": 9,
-            "still_present": 3
+            "still_present": 0
           },
           "NAME": {
             "checked": 37,
-            "still_present": 9
+            "still_present": 0
           },
           "PHONE": {
             "checked": 10,
-            "still_present": 2
+            "still_present": 0
           }
         },
         "checked_identifiers": 62,
-        "leak_rate": 0.24193548387096775,
-        "still_present": 15
+        "leak_rate": 0.0,
+        "still_present": 0
       },
       "char_error_rate": 0.0,
       "identifiers": 83,
       "notes": 5,
-      "recovered": 75,
+      "recovered": 83,
       "recovered_by_type": {
         "ADDRESS": {
           "found": 4,
           "of": 4
         },
         "DATE": {
-          "found": 13,
+          "found": 21,
           "of": 21
         },
         "EMAIL": {
@@ -112,7 +112,7 @@
           "of": 10
         }
       },
-      "recovery_rate": 0.9036144578313253,
+      "recovery_rate": 1.0,
       "word_error_rate": 0.0
     }
   }

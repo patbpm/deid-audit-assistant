@@ -14,8 +14,11 @@ identifier in written and spoken form. Reported per source (audio or scan):
   - with --cleaned: how many of the recovered identifiers survive in the cleaned
     text. Dates are not checked there (their spoken and written forms differ, and
     the replacement check covers the shift).
-A match is a string check, so a surname that is also a common word can show as a
-false leak: leakage is an upper bound and recovery a lower bound.
+A match is a string check. A name or address word also matches a one-letter
+variant of itself (Larsen/Larson), since speech recognition respells names; so a
+surname that is also a common word, or a near-miss word, can show as a false leak.
+Leakage is an upper bound for names and addresses; for IDs, phones and emails an
+identifier respelled by the recognizer is not found (recovery is a lower bound).
 """
 
 import argparse
@@ -49,6 +52,14 @@ def edit_distance(a, b):
     return previous[-1]
 
 
+def has_token(token, have):
+    """The word is there, or a one-letter variant of it is (speech recognition often
+    respells names: Larsen -> Larson). Only for words of 5 or more letters."""
+    if token in have:
+        return True
+    return len(token) >= 5 and any(abs(len(h) - len(token)) <= 1 and edit_distance(token, h) <= 1 for h in have)
+
+
 def error_rates(reference, hypothesis):
     """(word edits, reference words, char edits, reference chars), on lowercase alphanumerics."""
     ref_w, hyp_w = words(reference), words(hypothesis)
@@ -61,14 +72,14 @@ def present(kind, written, text, any_token=False):
     have = set(words(text))
     if kind == "NAME":
         tokens = [w for w in words(written) if len(w) >= 3]
-        return bool(tokens) and (any if any_token else all)(t in have for t in tokens)
+        return bool(tokens) and (any if any_token else all)(has_token(t, have) for t in tokens)
     if kind in ("ID", "PHONE"):
         return alnum(written) in alnum(text)
     if kind == "EMAIL":
         return alnum(written) in alnum(re.sub(r"\b(dot|at)\b", " ", text.lower()))
     if kind == "ADDRESS":
         tokens = [w for w in words(written) if len(w) >= 3 or w.isdigit()]
-        return bool(tokens) and all(t in have for t in tokens)
+        return bool(tokens) and all(has_token(t, have) for t in tokens)
     if kind == "DATE":
         if alnum(written) in alnum(text):
             return True

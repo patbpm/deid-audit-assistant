@@ -1,6 +1,6 @@
 # Dictated and scanned notes
 
-Status: Day 6, built and tested offline against mocked services. **No live Muse Voice Transcribe or vision call has been made, so there are no accuracy numbers.** The API shapes come from Meta's documentation (read Oct 29, 2026) and may differ in practice until a first live run. This is an assistant for human review, not a compliance certification.
+Status: Day 6, built and tested offline, plus one live run on 5 dictated and 5 scanned dev notes (below). Both services worked as documented on that run. These are synthetic, clean test inputs, so the numbers say little about real recordings or paper. This is an assistant for human review, not a compliance certification.
 
 Both inputs end as plain text, so the existing pipeline (detect, verify, replace, red-team, audit, review) cleans them unchanged. What is lost on the way is stated below.
 
@@ -18,6 +18,30 @@ python -m deid.ingest.run --audio ... --images ... --truth data/generated/ingest
 python -m deid.agent.run --unlabeled --notes runs/ingest-first5.notes.jsonl --live --name agent-ingest-first5
 python -m deid.ingest.fidelity --truth data/generated/ingest/truth.jsonl --ingested runs/ingest-first5.notes.jsonl --cleaned runs/agent-ingest-first5.notes.jsonl --name first5
 ```
+
+## First live run (Oct 29)
+
+Muse Voice Transcribe (`muse-voice-transcribe-1.0`, `PUSH_TO_TALK`) on 5 WAV files (595 s) and `muse-spark-1.3` with prompt `ocr1` on 5 page images; the 10 resulting notes were then cleaned with `deid.agent.run --unlabeled` and checked with `deid.ingest.fidelity` (`results/dev/ingest-first5.json`, `ingest-first5-run.json`, `agent-ingest-first5.json`).
+
+| | Dictated (audio) | Scanned (vision) |
+|---|---|---|
+| Word error rate vs the script | 30.4% | 0.0% |
+| Character error rate | 12.2% | 0.0% |
+| True identifiers still readable in the text | 66 of 83 (names 30/37, IDs 7/9, phones 8/10, dates 21/21, addresses 0/4, emails 0/2) | 83 of 83 |
+| Of those, still present after cleaning (names, IDs, phones) | 0 of 45 | 0 of 62 (names, IDs, phones, emails, addresses) |
+
+Reading the table:
+- **Scans were copied exactly.** The vision model reproduced all five synthetic pages character for character. The pages are clean, large, machine-printed text with a fraction of a degree of tilt; this says nothing about handwriting, bad scans or tables.
+- **Dictation lost words.** The transcripts respell names (Larsen as Larson), repeat words ("physical. physical."), write a pain score as "7 tenths", and write addresses and emails in forms the string check does not match, so addresses and emails are not covered by the audio leak check at all. "Still readable" is a lower bound: a name or address word counts if a one-letter variant is present; IDs and phones count only if the digits are intact.
+- **Nothing readable survived cleaning** among the identifiers the check can see. For audio that is 45 identifiers, not 83, so it is weaker evidence than the scan result.
+- **Cost at list price:** audio $0.030 (595 s at $0.18 per hour); reading the scans 6,875 in and 11,064 out tokens, $0.056; cleaning the 10 notes 12,389 in and 50,674 out tokens in the final run, $0.231. The first, flawed cleaning attempt used 17,504 in and 63,901 out tokens ($0.29), so the whole experiment cost about $0.61, inside the credit.
+
+### What the live run exposed (and the fix)
+
+The first cleaning attempt ran with the default 4,096-token output limit. For 5 of the 10 notes the model used the whole limit on reasoning, so the reply was cut off or empty. The pipeline then wrote those notes as "cleaned" with nothing replaced: a silent failure, and the worst kind for a de-identification tool. Fixes (commit `1b7da3f`, `tests/test_failclosed.py`):
+- **Fail closed.** A note whose detection reply is unreadable or cut off is not written to the cleaned file. It is listed in `<name>.failed.json`, shown with a NOT CLEANED banner in the audit page and review page, counted in the summary, and withheld from the review export. It cannot be dismissed in the review page.
+- **Retry once with a larger limit** (16,384 tokens), counting both attempts' tokens; incomplete replies are never cached or reused.
+After the fix all 10 notes were cleaned with no unreadable replies; the feedback loop added 1 span.
 
 ## Dictated notes (`deid/ingest/audio.py`)
 
@@ -49,6 +73,6 @@ String-level, per source: word error rate (audio, against the script) and charac
 
 ## Limits
 
-- Untested against the real services: field names, the response shape, `PUSH_TO_TALK` behavior on a long file, and how the vision model handles the scan damage are all assumptions from the docs.
+- Confirmed on one live run: the endpoint, field names, response shape and `PUSH_TO_TALK` on files up to 164 s. Not tested: files near the 10 minute limit, other modes, noisy audio, accents, handwriting, or damaged scans.
 - Two hosted services see these files; synthetic data only.
 - Handwriting, tables, multi-page documents, other audio formats and languages other than English are not covered.

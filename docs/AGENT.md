@@ -45,6 +45,10 @@ Per note: at most 1 detection call, 1 verification call and 1 + `--max-rounds` r
 
 What this shows: the stages run end to end on a real model and the verifier clears confirmed low-confidence spans. What it does not show: how the verifier behaves when it should doubt a span, or how the feedback loop behaves when the detector misses something. Those paths need harder notes (for example the adversarial set, run once at the end) or a weaker detector setting. These 5 notes are easy synthetic text; no accuracy claim follows.
 
+## Failure handling (added after a live run on dictated and scanned notes)
+
+A note whose detection reply is unreadable or cut off at the output limit is **not cleaned**: it is left out of `<name>.notes.jsonl`, listed in `<name>.failed.json`, flagged in the audit and review page, and withheld from the review export. A reply cut off at the limit is first asked again once with a larger limit (`--retry-output-tokens`, default 16,384; 0 turns it off), and incomplete replies are never cached. Details: `docs/INGEST.md`.
+
 ## Known limits
 
 - The verifier prompt (`vf1`) has met a real model only on 2 spans, both confirmed, and the feedback loop has never had anything to correct on a real model. Expect to tune them on dev only.

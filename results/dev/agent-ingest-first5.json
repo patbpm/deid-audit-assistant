@@ -1,37 +1,36 @@
 {
   "audit": {
     "by_rule": {
-      "address-structured": 1,
-      "address-town": 2,
-      "date-shift": 20,
+      "address-structured": 4,
+      "date-shift": 37,
       "date-shift-assumed-month-first": 3,
-      "date-shift-no-year": 1,
-      "email-example-domain": 3,
+      "date-shift-no-year": 2,
+      "email-example-domain": 4,
       "fallback-tag": 4,
-      "id-format-preserving": 8,
-      "name-token": 41,
-      "phone-fictional": 11
+      "id-format-preserving": 19,
+      "name-token": 76,
+      "phone-fictional": 20
     },
     "by_type": {
-      "ADDRESS": 7,
-      "DATE": 24,
-      "EMAIL": 3,
-      "ID": 8,
-      "NAME": 41,
-      "PHONE": 11
+      "ADDRESS": 8,
+      "DATE": 42,
+      "EMAIL": 4,
+      "ID": 19,
+      "NAME": 76,
+      "PHONE": 20
     },
-    "changes": 94,
-    "changes_needing_review": 30,
+    "changes": 169,
+    "changes_needing_review": 15,
     "notes": 10,
-    "notes_with_review_items": 9,
-    "review_items": 34,
+    "notes_not_cleaned": 0,
+    "notes_with_review_items": 7,
+    "review_items": 16,
     "risk_levels": {
-      "low": 6,
-      "unknown": 4
+      "low": 10
     }
   },
-  "cost_usd": 0.29345925,
-  "latency_s_median_detect_verify": 12.746851650008466,
+  "cost_usd": 0.23085075,
+  "latency_s_median_detect_verify": 31.863481800013687,
   "low_confidence": 0.8,
   "max_rounds": 2,
   "max_total_tokens": 150000,
@@ -39,10 +38,11 @@
   "name": "agent-ingest-first5",
   "notes_detected": 10,
   "notes_finished": 10,
+  "notes_not_cleaned": 0,
   "notes_requested": 10,
   "parse_errors": {
-    "detect": 5,
-    "redteam": 4,
+    "detect": 0,
+    "redteam": 0,
     "verify": 0
   },
   "prompt_versions": {
@@ -51,30 +51,29 @@
     "verify": "vf1"
   },
   "provider": "meta",
-  "redteam_calls": 12,
+  "redteam_calls": 11,
   "request_params": {
     "max_completion_tokens": 4096
   },
+  "retry_output_tokens": 16384,
   "risk_after_feedback": {
-    "low": 6,
-    "unknown": 4
+    "low": 10
   },
   "risk_before_feedback": {
     "high": 1,
-    "low": 5,
-    "unknown": 4
+    "low": 9
   },
-  "spans_added_by_feedback": 25,
+  "spans_added_by_feedback": 1,
   "split": "dev",
   "stopped_early": false,
-  "tokens_in": 17504,
-  "tokens_out": 63901,
-  "truncated": 5,
-  "unmatched_strings": 0,
+  "tokens_in": 12389,
+  "tokens_out": 50674,
+  "truncated": 0,
+  "unmatched_strings": 1,
   "verifier": {
-    "spans_asked": 2,
+    "spans_asked": 8,
     "verdicts": {
-      "identifier": 2
+      "identifier": 8
     }
   }
 }

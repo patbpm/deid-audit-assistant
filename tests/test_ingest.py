@@ -235,6 +235,8 @@ class FidelityTests(unittest.TestCase):
         self.assertTrue(fidelity.present("NAME", "Colleen J Larsen-Hughes", "colleen larsen hughes"))
         self.assertFalse(fidelity.present("NAME", "Colleen Larsen-Hughes", "colleen larsen"))
         self.assertTrue(fidelity.present("NAME", "Colleen Larsen-Hughes", "mrs hughes", any_token=True))
+        self.assertTrue(fidelity.present("NAME", "Colleen Larsen-Hughes", "colleen larson hughes"))   # respelled
+        self.assertFalse(fidelity.present("NAME", "Kim Wu", "kin wu"))                                  # short words are exact
         self.assertTrue(fidelity.present("DATE", "1980-08-17", "born August 17th 1980"))
         self.assertFalse(fidelity.present("DATE", "1980-08-17", "born August 18 1980"))
         self.assertFalse(fidelity.present("ID", "6167853", "6 1 6 7 8 5 4"))
