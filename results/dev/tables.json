@@ -1,0 +1,311 @@
+{
+  "patients": 60,
+  "seed": 20261030,
+  "styles": {
+    "clean": {
+      "consistency": {
+        "encounter_rows": 121,
+        "id_columns_where_distinct_originals_collided": 0,
+        "rows_whose_links_broke": 0
+      },
+      "dates": {
+        "ages_at_admission_changed": 0,
+        "birth_dates_shifted_differently_from_their_encounters": 0,
+        "patients_with_encounters": 60,
+        "patients_with_more_than_one_shift": 0,
+        "stays_changed": 0
+      },
+      "leaks": {
+        "by_type": {
+          "EMAIL": {
+            "checked": 90,
+            "still_present": 0
+          },
+          "ID": {
+            "checked": 439,
+            "still_present": 0
+          },
+          "KEY": {
+            "checked": 181,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 254,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 103,
+            "still_present": 0
+          },
+          "STREET": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "TOWN": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "ZIP": {
+            "checked": 60,
+            "still_present": 0
+          }
+        },
+        "identifier_cells_checked": 1247,
+        "still_present_somewhere": 0
+      },
+      "style": "clean",
+      "typing": {
+        "columns": 24,
+        "identifier_columns_kept_as_is": 0,
+        "right": 24,
+        "unplaced": 0,
+        "wrong_examples": [],
+        "wrong_type": 0
+      },
+      "utility": {
+        "ages_correct": 60,
+        "ages_wrong": 0,
+        "cells_flagged": 121,
+        "columns_withheld": {
+          "encounters": [],
+          "patients": []
+        },
+        "safe_cells_changed": 0
+      }
+    },
+    "headerless": {
+      "consistency": {
+        "encounter_rows": 121,
+        "id_columns_where_distinct_originals_collided": 0,
+        "rows_whose_links_broke": 0
+      },
+      "dates": {
+        "ages_at_admission_changed": 0,
+        "birth_dates_shifted_differently_from_their_encounters": 0,
+        "patients_with_encounters": 60,
+        "patients_with_more_than_one_shift": 0,
+        "stays_changed": 0
+      },
+      "leaks": {
+        "by_type": {
+          "EMAIL": {
+            "checked": 90,
+            "still_present": 0
+          },
+          "ID": {
+            "checked": 439,
+            "still_present": 0
+          },
+          "KEY": {
+            "checked": 181,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 254,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 103,
+            "still_present": 0
+          },
+          "STREET": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "TOWN": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "ZIP": {
+            "checked": 60,
+            "still_present": 0
+          }
+        },
+        "identifier_cells_checked": 1247,
+        "still_present_somewhere": 0
+      },
+      "style": "headerless",
+      "typing": {
+        "columns": 24,
+        "identifier_columns_kept_as_is": 0,
+        "right": 15,
+        "unplaced": 6,
+        "wrong_examples": [
+          "patients.col1: ID (true KEY)",
+          "patients.col11: ID (true ZIP)",
+          "encounters.col2: ID (true KEY)"
+        ],
+        "wrong_type": 3
+      },
+      "utility": {
+        "ages_correct": 0,
+        "ages_wrong": 0,
+        "cells_flagged": 121,
+        "columns_withheld": {
+          "encounters": [
+            "col6",
+            "col8",
+            "col9"
+          ],
+          "patients": [
+            "col9",
+            "col12",
+            "col13"
+          ]
+        },
+        "safe_cells_changed": 0
+      }
+    },
+    "messy": {
+      "consistency": {
+        "encounter_rows": 121,
+        "id_columns_where_distinct_originals_collided": 0,
+        "rows_whose_links_broke": 0
+      },
+      "dates": {
+        "ages_at_admission_changed": 0,
+        "birth_dates_shifted_differently_from_their_encounters": 0,
+        "patients_with_encounters": 60,
+        "patients_with_more_than_one_shift": 0,
+        "stays_changed": 0
+      },
+      "leaks": {
+        "by_type": {
+          "EMAIL": {
+            "checked": 90,
+            "still_present": 0
+          },
+          "ID": {
+            "checked": 439,
+            "still_present": 0
+          },
+          "KEY": {
+            "checked": 181,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 254,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 103,
+            "still_present": 0
+          },
+          "STREET": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "TOWN": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "ZIP": {
+            "checked": 60,
+            "still_present": 0
+          }
+        },
+        "identifier_cells_checked": 1247,
+        "still_present_somewhere": 0
+      },
+      "style": "messy",
+      "typing": {
+        "columns": 24,
+        "identifier_columns_kept_as_is": 0,
+        "right": 24,
+        "unplaced": 0,
+        "wrong_examples": [],
+        "wrong_type": 0
+      },
+      "utility": {
+        "ages_correct": 60,
+        "ages_wrong": 0,
+        "cells_flagged": 121,
+        "columns_withheld": {
+          "encounters": [],
+          "patients": []
+        },
+        "safe_cells_changed": 0
+      }
+    },
+    "unseen": {
+      "consistency": {
+        "encounter_rows": 121,
+        "id_columns_where_distinct_originals_collided": 0,
+        "rows_whose_links_broke": 0
+      },
+      "dates": {
+        "ages_at_admission_changed": 0,
+        "birth_dates_shifted_differently_from_their_encounters": 0,
+        "patients_with_encounters": 60,
+        "patients_with_more_than_one_shift": 0,
+        "stays_changed": 0
+      },
+      "leaks": {
+        "by_type": {
+          "EMAIL": {
+            "checked": 90,
+            "still_present": 0
+          },
+          "ID": {
+            "checked": 439,
+            "still_present": 0
+          },
+          "KEY": {
+            "checked": 181,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 254,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 103,
+            "still_present": 0
+          },
+          "STREET": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "TOWN": {
+            "checked": 60,
+            "still_present": 0
+          },
+          "ZIP": {
+            "checked": 60,
+            "still_present": 0
+          }
+        },
+        "identifier_cells_checked": 1247,
+        "still_present_somewhere": 0
+      },
+      "style": "unseen",
+      "typing": {
+        "columns": 24,
+        "identifier_columns_kept_as_is": 0,
+        "right": 18,
+        "unplaced": 4,
+        "wrong_examples": [
+          "patients.Subject: ID (true KEY)",
+          "encounters.Subject: ID (true KEY)"
+        ],
+        "wrong_type": 2
+      },
+      "utility": {
+        "ages_correct": 0,
+        "ages_wrong": 0,
+        "cells_flagged": 121,
+        "columns_withheld": {
+          "encounters": [
+            "Days Inpatient",
+            "Billed"
+          ],
+          "patients": [
+            "Locality",
+            "Years"
+          ]
+        },
+        "safe_cells_changed": 0
+      }
+    }
+  }
+}

@@ -35,6 +35,7 @@ note ──► detect (Muse Spark) ──► verify uncertain spans ──► re
 | Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
 | Audit report, review page | built, tested offline and tried by hand |
 | Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | live run on 5 synthetic dictated and 5 synthetic scanned notes (`docs/INGEST.md`); clean synthetic inputs only |
+| Table mode (CSV): column typing, per-column replacement with consistent mapping across tables | rule-based, no model; checked on invented tables only (`docs/TABLES.md`); free-text cells need `--freetext-live`, tested with a scripted model |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
 | Full dev and test evaluation of the model-based system | not run |
@@ -66,6 +67,8 @@ All numbers are on synthetic notes and come from files in `results/`, reproducib
 **Agent run with `muse-spark-1.3`** (5 dev notes, `docs/AGENT.md`): all stages ran, no unreadable replies; the verifier confirmed the 2 low-confidence spans, the red-team rated all 5 notes low risk with no leftovers, and 83 of 83 identifiers were found. Detection reused cached replies from the smoke test. The red-team had nothing to catch, so this does not test the feedback loop.
 
 **Dictated and scanned input** (5 synthetic dictated and 5 synthetic scanned dev notes, `docs/INGEST.md`): the vision model copied the pages exactly; the speech model's transcripts had a 30% word error rate and respelled many names; after cleaning, none of the identifiers the check could still find in the text remained (0 of 107). The first attempt exposed a failure where notes were written out uncleaned; they are now withheld and flagged. Clean synthetic inputs, no handwriting or noisy audio.
+
+**Table mode** (60 invented patients and 121 encounters in two linked CSV tables, `docs/TABLES.md`): with plain headers every column was typed right; with differently worded headers 18 of 24 were, and the 4 left unplaced were withheld rather than guessed; with no headers 15 of 24. In all four header styles none of the 1,247 original identifiers remained, patient and MRN links between the two tables held, and each patient's dates moved by one offset. Invented, tidy tables: no claim for real ones, and quasi-identifiers (rare combinations) are not assessed.
 
 **Replacement check** (dev split, true spans, 200 notes): no original names, IDs, phones, emails or addresses left, one date shift per patient, no inconsistent or colliding name surrogates (`results/dev/replace-dev.json`). Because true spans were given, this shows the replacement step is sound, not that the pipeline is. Known weak spot: 3 of 46 year-less dates came out a day off across a leap day.
 
@@ -112,7 +115,7 @@ Keys live in environment variables; never commit them. API calls can be billed, 
 
 ## Docs
 
-`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
+`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/TABLES.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
 
 ## What was built during the hackathon
 

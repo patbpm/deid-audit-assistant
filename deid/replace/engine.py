@@ -222,6 +222,11 @@ class Replacer:
             return s.town_name(body), "address-town", False
         return TAGS["ADDRESS"], "fallback-tag", True
 
+    def replace_value(self, kind, value, key, ref_year=DEFAULT_YEAR):
+        """Replace one standalone value of a NAME, DATE, PHONE, EMAIL, ID or ADDRESS
+        type (a table cell, not a span in a note). -> (replacement, rule, flagged)."""
+        return self._replace(kind, value.strip(), key, ref_year)
+
     # --- audit -----------------------------------------------------------------------
     def key_tables(self):
         """Everything needed to reverse the mapping. Sensitive: never share it."""
