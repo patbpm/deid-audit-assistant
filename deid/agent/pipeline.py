@@ -17,6 +17,7 @@ from deid.redteam.assess import assess_note, masked_view
 from deid.redteam.loop import harden
 from deid.replace.engine import Replacer, clean_spans
 
+from .nameuse import check_name_use
 from .parallel import run_ordered
 from .verifier import select_uncertain, verify_spans
 
@@ -30,6 +31,7 @@ class Detected:
     detect_usage: dict = field(default_factory=dict)
     flags: dict = field(default_factory=dict)  # parse errors, truncation, cache use
     failures: list = field(default_factory=list)  # why detection cannot be trusted; empty when fine
+    ignored: list = field(default_factory=list)  # strings or occurrences left as written, with the reason
 
 
 @dataclass
@@ -46,24 +48,72 @@ class Outcome:
     calls: dict = field(default_factory=dict)
 
 
+def sum_usage(*usages):
+    out = {}
+    for u in usages:
+        for k, v in (u or {}).items():
+            if isinstance(v, (int, float)):
+                out[k] = out.get(k, 0) + v
+    return out
+
+
+def settle_name_use(note, spans, ignored, client, verify_cache, ask):
+    """Decide the occurrences the detector marked as doubtful ("Short of breath"). Returns
+    (spans, name verdicts, the check's result). Only a clear "ordinary_word" leaves an occurrence
+    as written, and that is recorded in `ignored`; every other answer, or no answer, keeps it replaced.
+    With ask=False (no second model) they stay replaced and are sent to a person."""
+    doubtful = [s for s in spans if s.get("doubt") == "name_use"]
+    if not doubtful:
+        return spans, {}, None
+    if not ask:
+        for s in doubtful:
+            s["confidence"] = min(s["confidence"] if s.get("confidence") is not None else 1.0, 0.5)
+        return spans, {}, None
+    check = check_name_use(client, note["text"], doubtful, verify_cache)
+    verdicts, drop = {}, set()
+    for s in doubtful:
+        key = (s["start"], s["end"])
+        v = check.verdicts[key]
+        if v["decision"] == "ordinary_word":
+            drop.add(key)
+            ignored.append({"text": note["text"][s["start"]:s["end"]], "type": "NAME", "start": s["start"],
+                            "end": s["end"], "source": "name-use check",
+                            "reason": "the model says this is an ordinary word here, not a person: " + (v["why"] or "no reason given")})
+        else:
+            verdicts[key] = ({"decision": "identifier", "why": v["why"]} if v["decision"] == "name"
+                             else {"decision": "unsure", "why": v["why"] or "name use not settled"})
+    return [s for s in spans if (s["start"], s["end"]) not in drop], verdicts, check
+
+
 def detect_one(note, client, detect_cache, verify_cache, low, verify):
-    """Detect one note and verify its uncertain spans. Touches no shared state, so notes can run in parallel.
-    Returns (Detected, the verifier's usage)."""
+    """Detect one note, settle doubtful name occurrences, and verify its uncertain spans. Touches no
+    shared state, so notes can run in parallel. Returns (Detected, the second looks' usage)."""
     found = detect_note(client, note["text"], detect_cache)
     failures = []
     if found.parse_error:
         failures.append("the detection reply could not be read")
     elif found.truncated:
         failures.append("the detection reply was cut off at the output limit, so identifiers may be missing")
-    uncertain = [] if failures or not verify else select_uncertain(note["text"], found.spans, low)
+    spans, ignored = found.spans, list(found.ignored)
+    name_verdicts, nu = {}, None
+    if not failures:
+        spans, name_verdicts, nu = settle_name_use(note, spans, ignored, client, verify_cache, verify)
+    uncertain = [] if failures or not verify else select_uncertain(note["text"], spans, low)
     check = verify_spans(client, note["text"], uncertain, verify_cache)
+    verdicts = dict(name_verdicts)
+    for key, v in check.verdicts.items():  # the more cautious answer of the two stands
+        if key not in verdicts or v["decision"] != "identifier":
+            verdicts[key] = v
     return Detected(
-        note, found.spans, found.unmatched, check.verdicts, found.usage,
+        note, spans, found.unmatched, verdicts, found.usage,
         {"detect_parse_error": found.parse_error, "detect_truncated": found.truncated,
          "detect_cached": found.cached, "verify_asked": check.asked,
          "verify_parse_error": check.parse_error, "verify_truncated": check.truncated,
          "verify_cached": check.cached,
-         "latency_s": found.latency_s + check.latency_s}, failures), check.usage
+         "nameuse_asked": nu.asked if nu else 0, "nameuse_parse_error": bool(nu and nu.parse_error),
+         "nameuse_truncated": bool(nu and nu.truncated),
+         "latency_s": found.latency_s + check.latency_s + (nu.latency_s if nu else 0.0)},
+        failures, ignored), sum_usage(check.usage, nu.usage if nu else None)
 
 
 def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, progress=None, verify=True, workers=1):
@@ -116,7 +166,7 @@ def replace_only(replacer, d, note, client, low):
     """One replacement pass with no red-team review; the audit says the risk was not assessed."""
     text, changes = replacer.apply({**note, "spans": clean_spans(note["text"], note["spans"])})
     audit = build_note_audit(d.note["note_id"], d.note["text"], d.spans, changes, client.model,
-                             unmatched=d.unmatched, low=low, verdicts=d.verdicts)
+                             unmatched=d.unmatched, low=low, verdicts=d.verdicts, ignored=d.ignored)
     return Outcome(d.note["note_id"], d, text, changes, clean_spans(note["text"], note["spans"]), [],
                    "not assessed", "not assessed", audit, {"redteam_calls": 0, "redteam_parse_errors": 0})
 
@@ -131,7 +181,7 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
             return outcomes, True, replacer
         if d.failures:  # fail closed: nothing is written as "cleaned" for this note
             audit = build_note_audit(d.note["note_id"], d.note["text"], [], [], client.model,
-                                     unmatched=d.unmatched, low=low, failures=d.failures)
+                                     unmatched=d.unmatched, low=low, failures=d.failures, ignored=d.ignored)
             outcomes.append(Outcome(d.note["note_id"], d, None, [], [], [], "not assessed", "not assessed", audit,
                                     {"redteam_calls": 0, "redteam_parse_errors": 0}))
             if progress:
@@ -151,7 +201,7 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
         audit = build_note_audit(
             d.note["note_id"], d.note["text"], d.spans, result.changes, client.model,
             unmatched=d.unmatched, low=low, verdicts=d.verdicts, added=result.added,
-            assessment={"risk": final.risk, "clues": final.clues})
+            assessment={"risk": final.risk, "clues": final.clues}, ignored=d.ignored)
         outcomes.append(Outcome(
             d.note["note_id"], d, result.text, result.changes, result.spans, result.added,
             result.assessments[0].risk, final.risk, audit,

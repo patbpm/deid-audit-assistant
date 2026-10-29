@@ -68,6 +68,16 @@ class DecisionTests(unittest.TestCase):
         final = self.do(op="item", index=3, decision="dismiss")
         self.assertEqual(final["decided"], 2)
 
+    def test_a_word_left_as_written_can_be_replaced_after_all_or_dismissed(self):
+        a = TEXT.index("town")
+        self.note["review"].append({"kind": "not-replaced", "ref": None, "category": "NAME", "text": "town",
+                                    "ranges": [[a, a + 4]], "reasons": ["left as written: 'town'"]})
+        final = self.do(op="item", index=4, decision="redact")
+        self.assertNotIn("in town", final["text"])
+        self.assertIn("[REDACTED]", final["text"])
+        self.assertIn("in town", self.do(op="item", index=4, decision="clear")["text"])
+        self.assertIn("in town", self.do(op="item", index=4, decision="dismiss")["text"])
+
     def test_marks_point_at_the_final_text(self):
         self.do(op="entry", id="N1:0", decision="reject")
         final = self.do(op="item", index=2, decision="redact")

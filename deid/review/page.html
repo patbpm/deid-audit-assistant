@@ -142,8 +142,9 @@ function reviewCard(n, st, i) {
     if (decision) buttons.push(h("button", {onclick: () => act({op: "entry", id: e.id, decision: "clear"})}, "Undo"));
   } else {
     buttons.push(h("button", {class: decision === "dismiss" ? "sel" : "", onclick: () => act({op: "item", index: i, decision: "dismiss"})}, "Dismiss"));
-    if (item.kind === "clue" && (item.ranges || []).length)
-      buttons.push(h("button", {class: decision === "redact" ? "sel" : "", onclick: () => act({op: "item", index: i, decision: "redact"})}, "Redact it"));
+    if ((item.kind === "clue" || item.kind === "not-replaced") && (item.ranges || []).length)
+      buttons.push(h("button", {class: decision === "redact" ? "sel" : "", onclick: () => act({op: "item", index: i, decision: "redact"})},
+        item.kind === "clue" ? "Redact it" : "Replace it after all"));
     if (decision) buttons.push(h("button", {onclick: () => act({op: "item", index: i, decision: "clear"})}, "Undo"));
   }
   const title = e ? [h("b", {}, e.type + ": "), e.original, " → ", e.replacement]

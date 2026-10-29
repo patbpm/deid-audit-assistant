@@ -70,6 +70,7 @@ class NoteResult:
     cached: bool = False
     usage: dict = field(default_factory=dict)
     latency_s: float = 0.0
+    ignored: list = field(default_factory=list)  # strings or occurrences set aside, with the reason
 
 
 def detect_note(client, text, cache=None):
@@ -94,6 +95,7 @@ def detect_note(client, text, cache=None):
         return NoteResult([], parse_error=True, truncated=truncated, cached=cached,
                           usage=usage, latency_s=completion.latency_s)
     items, dropped = clean_items(raw)
-    spans, unmatched = find_spans(text, items)
+    ignored = []
+    spans, unmatched = find_spans(text, items, ignored)
     return NoteResult(spans, unmatched, dropped, False, truncated, cached, usage,
-                      completion.latency_s)
+                      completion.latency_s, ignored)

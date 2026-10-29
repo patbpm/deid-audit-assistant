@@ -5,7 +5,8 @@ Decisions are stored beside the audit file and never change it. The rules:
   * A flagged replacement the reviewer accepts stays replaced; one they reject
     is restored to the original text. Anything undecided stays replaced, so
     leaving work unfinished never un-redacts anything.
-  * A clue the reviewer redacts is replaced with [REDACTED] (all its locations).
+  * A clue the reviewer redacts is replaced with [REDACTED] (all its locations); so is a word the
+    name check left as written, if the reviewer chooses to replace it after all.
     Other clues, unmatched strings and notes are dismissed (acknowledged).
   * Text the reviewer selects and redacts is replaced with its type tag, such as
     [NAME], not with a surrogate: the surrogate engine is not rerun here.
@@ -128,7 +129,7 @@ def record(note, state, op, reviewer="reviewer", now=now_iso):
         elif decision == "dismiss":
             new["items"][key] = {"decision": decision, **stamp}
         elif decision == "redact":
-            if item["kind"] != "clue" or not item.get("ranges"):
+            if item["kind"] not in ("clue", "not-replaced") or not item.get("ranges"):
                 raise ValueError("this item cannot be redacted")
             new["items"][key] = {"decision": decision, **stamp}
         else:

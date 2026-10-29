@@ -38,6 +38,7 @@ from deid.eval.run import split_of
 from deid.redteam.prompt import PROMPT_VERSION as REDTEAM_VERSION
 
 from .pipeline import detect_and_verify, prefetch_redteam, review_and_clean
+from .nameuse import PROMPT_VERSION as NAMEUSE_VERSION
 from .verifier import PROMPT_VERSION as VERIFY_VERSION
 
 
@@ -57,7 +58,8 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
     latencies = sorted(d.flags["latency_s"] for d in live)
     return {
         "name": args.name, "provider": args.provider, "model": client.model,
-        "prompt_versions": {"detect": DETECT_VERSION, "verify": VERIFY_VERSION, "redteam": REDTEAM_VERSION},
+        "prompt_versions": {"detect": DETECT_VERSION, "verify": VERIFY_VERSION, "nameuse": NAMEUSE_VERSION,
+                            "redteam": REDTEAM_VERSION},
         "request_params": client.params, "split": args.split, "max_rounds": args.max_rounds,
         "low_confidence": args.low_confidence,
         "notes_requested": args.requested, "notes_detected": len(batch), "notes_finished": len(outcomes),
@@ -66,10 +68,16 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
         "stopped_early": stopped,
         "parse_errors": {"detect": sum(d.flags["detect_parse_error"] for d in batch),
                          "verify": sum(d.flags["verify_parse_error"] for d in batch),
+                         "nameuse": sum(d.flags["nameuse_parse_error"] for d in batch),
                          "redteam": sum(o.calls["redteam_parse_errors"] for o in outcomes)},
         "truncated": sum(d.flags["detect_truncated"] or d.flags["verify_truncated"] for d in batch),
         "unmatched_strings": sum(len(d.unmatched) for d in batch),
         "verifier": {"spans_asked": sum(d.flags["verify_asked"] for d in batch), "verdicts": dict(verdicts)},
+        "name_use_check": {"occurrences_asked": sum(d.flags["nameuse_asked"] for d in batch),
+                           "left_as_written": sum(g["source"] == "name-use check" for d in batch for g in d.ignored)},
+        "set_aside_by_rule": {
+            "dates": sum(g["source"] == "rule" and g["type"] == "DATE" for d in batch for g in d.ignored),
+            "name_occurrences": sum(g["source"] == "rule" and g["type"] == "NAME" for d in batch for g in d.ignored)},
         "redteam_calls": sum(o.calls["redteam_calls"] for o in outcomes),
         "risk_before_feedback": dict(sorted(Counter(o.risk_before for o in outcomes).items())),
         "risk_after_feedback": dict(sorted(Counter(o.risk_after for o in outcomes).items())),
@@ -84,10 +92,12 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
 def dry_run(notes, provider, args):
     est = estimate_tokens(" ".join(m["content"] for m in build_messages(notes[0]["text"])))
     print(f"DRY RUN (nothing sent). Provider: {provider}. {len(notes)} dev notes.")
-    print(f"Stages per note: detect (prompt {DETECT_VERSION}), verify uncertain spans (prompt {VERIFY_VERSION}, "
+    print(f"Stages per note: detect (prompt {DETECT_VERSION}), check doubtful name occurrences (prompt "
+          f"{NAMEUSE_VERSION}, only when the detector marks a name as also an ordinary word), "
+          f"verify uncertain spans (prompt {VERIFY_VERSION}, "
           f"only if a span has confidence below {args.low_confidence} or an odd shape), replace, red-team review "
           f"(prompt {REDTEAM_VERSION}), and up to {args.max_rounds} more rounds if leftovers are found.")
-    print(f"Calls: at most {len(notes) * (2 + 1 + args.max_rounds)} "
+    print(f"Calls: at most {len(notes) * (3 + 1 + args.max_rounds)} "
           f"(the smoke tests averaged about 3.7k tokens per detection call and 2.3k per red-team call, "
           f"with more for extra rounds). First note's detection input is about {est} tokens.")
     print(f"Token cap: {args.max_total_tokens}.")
