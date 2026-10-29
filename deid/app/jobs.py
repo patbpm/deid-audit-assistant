@@ -60,9 +60,12 @@ class Ctx:
                         s["detail"] = detail
         self.store.update(self.id, change)
 
-    def tokens(self, budget):
+    def tokens(self, budget, prior=None):
+        """Show a budget's use. prior: tokens already spent earlier in the job (a dict with in and out)."""
+        before = prior or {"in": 0, "out": 0}
+        used_in, used_out = before["in"] + budget.tokens_in, before["out"] + budget.tokens_out
         self.store.update(self.id, lambda job: job["tokens"].update(
-            {"in": budget.tokens_in, "out": budget.tokens_out, "used": budget.total}))
+            {"in": used_in, "out": used_out, "used": used_in + used_out}))
 
     def result(self, value):
         self.store.update(self.id, lambda job: job.update(result=value))

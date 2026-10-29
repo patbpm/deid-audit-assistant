@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-29",
+  "engine": "muse-spark-1.3 (Meta Model API); Muse Voice Transcribe and scans not used",
+  "limits": "4 notes and 2 small tables of easy synthetic text; exact-string leak check only; one run; not an accuracy result",
+  "name": "app-live-check",
+  "notes_job": {
+    "by_type": {
+      "ADDRESS": 3,
+      "DATE": 17,
+      "EMAIL": 2,
+      "ID": 6,
+      "NAME": 28,
+      "PHONE": 8
+    },
+    "est_cost_usd_list": 0.078,
+    "gold_spans": 64,
+    "gold_spans_still_verbatim_in_cleaned_text": 0,
+    "name_without_cue_found": "yes (a first name in 'Lives with <name>' that the offline engine misses)",
+    "not_cleaned": 0,
+    "notes": 4,
+    "red_team_feedback_spans": 0,
+    "replacements": 64,
+    "review_items": 2,
+    "risk_levels": {
+      "low": 4
+    },
+    "same_notes_offline_engine": {
+      "replacements": 63,
+      "review_items": 7,
+      "risk": "not assessed"
+    },
+    "tokens_in": 6318,
+    "tokens_out": 16563,
+    "verifier_asked_about_spans": 1
+  },
+  "price_basis": "list price $1.25 in / $4.25 out per million tokens (docs/PRICES.md); reasoning-token billing unstated",
+  "tables_job": {
+    "cells_flagged": 0,
+    "cells_replaced": 527,
+    "columns": 24,
+    "columns_placed_by_model_and_confirmed_by_rules": 4,
+    "est_cost_usd_list": 0.09,
+    "free_text_cells_cleaned": 41,
+    "free_text_cells_left_masked": 0,
+    "original_value_check": "exact match of the original Chart No, SocSec, Contact, Mail, Home Street, Locality and Coverage ID values and every name part longer than 3 letters, anywhere in either cleaned table",
+    "original_values_found_in_cleaned_tables": 0,
+    "small_groups": "patients: 20 of 20 rows in groups under 5; encounters: 41 of 41 under 5 (3 of 41 when the offline engine left two columns out)",
+    "tables": 2,
+    "token_note": "the page showed 26,951 tokens: it dropped the 2,017 spent on column typing from the total (fixed)",
+    "tokens_in": 11008,
+    "tokens_out": 17960
+  },
+  "total_est_cost_usd_list": 0.17,
+  "what": "The front page (deid.app --live) run once on its two built-in samples with the hosted model; synthetic data from the project's generators"
+}

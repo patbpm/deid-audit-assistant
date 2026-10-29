@@ -320,6 +320,17 @@ class TableJobTests(unittest.TestCase):
         self.assertFalse((Path(self.tmp.name) / job["id"] / "tables-out").exists())
         self.assertIsNone(job["result"])
 
+    def test_the_confirm_step_says_whether_the_person_changed_anything(self):
+        job = self.plan()
+        key = job["plan"]["patients"]["key_column"]
+        self.store.submit_plan(job["id"], {"patients": {"types": {}, "key_column": key}})
+        done = wait(self.store, job["id"], ("done",))
+        self.assertIn("as proposed", done["steps"][2]["detail"])
+        job2 = self.plan()
+        self.store.submit_plan(job2["id"], {"patients": {"types": {"Locality": "TOWN", "Years": "AGE"}}})
+        done2 = wait(self.store, job2["id"], ("done",))
+        self.assertIn("2 change(s)", done2["steps"][2]["detail"])
+
     def test_unplaced_columns_are_left_out_unless_the_person_gives_a_type(self):
         job = self.plan()
         self.store.submit_plan(job["id"], {})
@@ -525,6 +536,28 @@ class HostedJobTests(unittest.TestCase):
         store.start(job["id"], {"confirm_synthetic": True})
         failed = wait(store, job["id"], ("failed",))
         self.assertIn("cut off", failed["error"])
+
+    def test_table_tokens_add_model_help_and_free_text_together(self):
+        class Quiet:
+            model, params = "scripted", {"max_tokens": 1}
+
+            def complete(self, messages):
+                return Completion('{"identifiers": []}', {"prompt_tokens": 30, "completion_tokens": 10}, 0.0, "stop")
+
+        quiet = Quiet()
+        store = JobStore(Path(self.tmp.name) / "quiet", Backend("scripted", "x", True, lambda: quiet, None, True, True, True, True))
+        job = store.create()
+        for name, data in samples.tables():
+            store.add_file(job["id"], name, data)
+        store.start(job["id"], {"confirm_synthetic": True, "freetext": "detector", "token_cap": 50_000})
+        planned = wait(store, job["id"], ("awaiting_plan", "failed"))
+        self.assertEqual(planned["state"], "awaiting_plan", planned["error"])
+        store.update(job["id"], lambda j: j["tokens"].update({"in": 700, "out": 1300, "used": 2000}))
+        store.submit_plan(job["id"], {})
+        done = wait(store, job["id"], ("done", "failed"))
+        self.assertEqual(done["state"], "done", done["error"])
+        self.assertGreater(done["tokens"]["used"], 2000)          # the earlier use is kept, the free-text use is added
+        self.assertEqual(done["tokens"]["used"], done["tokens"]["in"] + done["tokens"]["out"])
 
     def test_hosted_table_free_text_goes_through_the_chat_client(self):
         job = self.store.create()

@@ -249,15 +249,19 @@ def check_edits(directory, edits):
 
 
 def apply_edits(plans, edits):
+    """Apply the person's edits to the plans. Returns how many things they actually changed."""
+    changed = 0
     for name, edit in edits.items():
         plan = plans[name]
         for c in plan["columns"]:
             kind = (edit.get("types") or {}).get(c["column"])
             if kind and kind != c["type"]:
                 c.update(type=kind, action=ACTIONS[kind], decided_by="set by hand", reason="changed by you on the plan page")
-        if "key_column" in edit:
+                changed += 1
+        if "key_column" in edit and edit["key_column"] != plan["key_column"]:
             plan["key_column"], plan["key_reason"] = edit["key_column"], "chosen by you"
-    return plans
+            changed += 1
+    return changed
 
 
 def preview_of(header, rows, plan):
@@ -266,19 +270,30 @@ def preview_of(header, rows, plan):
 
 
 def apply_tables(ctx, backend, files, options, seed, edits, cache_root):
-    ctx.step("confirm", "done", "plan confirmed" + (" with your changes" if any(edits.values()) else ""))
-    ctx.step("clean", "running")
     tables, _ = read_tables(ctx, files, options["header"])
-    plans = apply_edits(load_plans(ctx.dir), edits)
+    plans = load_plans(ctx.dir)
+    changed = apply_edits(plans, edits)
+    ctx.step("confirm", "done", "plan confirmed" + (f" with {changed} change(s) by you" if changed else " as proposed"))
+    ctx.step("clean", "running")
     write_json(ctx.dir / "plan.json", {"plans": plans})
     outputs, changes, report, td = deidentify_tables(tables, seed, options["unknown"], plans)
     freetext = None
     if options["freetext"] == "detector" and any(c["type"] == "FREETEXT" for p in plans.values() for c in p["columns"]):
         box = [td]
-        args = SimpleNamespace(max_total_tokens=options["token_cap"], cache_dir=str(cache_root))
+        prior = ctx.store.get(ctx.id)["tokens"]   # what the model help for columns already used
+        args = SimpleNamespace(max_total_tokens=max(1, options["token_cap"] - prior["used"]), cache_dir=str(cache_root))
         cleaner = freetext_cleaner(args, box, backend.chat())
-        outputs, changes, report, td = deidentify_tables(tables, seed, options["unknown"], plans, cleaner)
-        ctx.tokens(cleaner.budget)
+        cells = [0]
+
+        def counted(value, key):
+            out = cleaner(value, key)
+            cells[0] += 1
+            ctx.step("clean", "running", f"{cells[0]} free-text cells cleaned")
+            ctx.tokens(cleaner.budget, prior)
+            return out
+
+        outputs, changes, report, td = deidentify_tables(tables, seed, options["unknown"], plans, counted)
+        ctx.tokens(cleaner.budget, prior)
         freetext = {"mode": backend.label, "cells": sum(c["rule"] == "freetext-cleaned" for c in changes),
                     "flagged": sum(c["rule"] == "freetext-cleaned" and c["flagged"] for c in changes)}
     out = ctx.dir / "tables-out"

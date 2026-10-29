@@ -35,7 +35,24 @@ The kind is decided from the bytes, not only the name. One job holds notes (text
 
 **Offline rules** (default, `deid/app/offline.py`). Patterns for emails, phones, dates, labeled numbers and street addresses, and names that follow a cue (`Dr. Wu`, `Patient: Kim Reyes`, `Kim Reyes, MD`), then every other place those names appear. It runs the same pipeline as the hosted engine (replace, audit, review) but there is no verifier and no re-identification reviewer, so risk is shown as "not assessed". **It misses any name that has no cue**: in the sample notes, a first name in "Lives with Kenneth" is not found. Few or no review items therefore does not mean a note is clean, and the results page says so. The patterns were written by someone who had already seen the project's synthetic note formats; **no accuracy is claimed for this engine, and it has not been scored on the held-out set.** It exists so the front page can be used and tested without a model.
 
-**Hosted** (`--live`). The detector, verifier and red-team reviewer of the agent (`docs/AGENT.md`), plus dictation and scan reading (`docs/INGEST.md`), and, for tables, the optional model help for unplaced columns and for free-text cells (`docs/TABLES.md`). Everything added is sent to the provider. Nothing is sent until a job is started, a job will not start without the "synthetic or public" tick, and the job stops at its token cap. **This path has been tested here only against scripted stand-ins; the front page has not made a live call.**
+**Hosted** (`--live`). The detector, verifier and red-team reviewer of the agent (`docs/AGENT.md`), plus dictation and scan reading (`docs/INGEST.md`), and, for tables, the optional model help for unplaced columns and for free-text cells (`docs/TABLES.md`). Everything added is sent to the provider. Nothing is sent until a job is started, a job will not start without the "synthetic or public" tick, and the job stops at its token cap. It was run once from the page on the two built-in samples (below). Dictation and scans have not been run from the page.
+
+## Live check (Oct 29)
+
+The page was started with `--live` and each sample run once with a 100,000-token cap (`results/dev/app-live-check.json`). Synthetic data from the project's generators, `muse-spark-1.3`.
+
+| | Offline rules | Hosted model |
+|---|---|---|
+| Sample notes (4 notes of one patient): replacements | 63 | 64 |
+| items left for a person to review | 7 | 2 |
+| re-identification risk | not assessed | low for all 4 (a model's rating, not a guarantee) |
+| true identifiers still present verbatim in the cleaned text | not checked | 0 of 64 |
+| a first name with no cue ("Lives with ...") | missed | found |
+
+- **Tables, with model help for columns and the detector on free text:** the model placed the 4 columns the rules could not (a town, an age, a length of stay, an amount), the rules confirmed each, and none of the original values I looked for remained in the cleaned tables (exact-string check of ids, SSNs, phones, emails, street, town, coverage ids and name parts). All 41 free-text comments were cleaned, none left masked. Because the model typed the length of stay and the amount as safe, the small-group check now counts them, and every encounter row falls in a group under 5.
+- **Size:** about 28,000 tokens for the tables and 23,000 for the notes, roughly 0.17 USD at list price in total.
+- **Bugs this run exposed, fixed:** the tables page said "with your changes" when nothing was changed; it gave no progress during the long free-text step; and it left the 2,017 tokens spent on column typing out of the job's total.
+- **Not a result:** four notes and two small tables of easy synthetic text, one run, an exact-string leak check. It shows the page works end to end with the hosted engine, not how accurate it is.
 
 ## What is kept, and what is offered
 
@@ -62,6 +79,5 @@ Binds to `127.0.0.1`; refuses any Host header that is not the local address (DNS
 - No sign-in or per-user separation: anyone who can reach `127.0.0.1:8780` on this computer can see every job. Do not run it on a shared machine.
 - Table cells flagged for review (41 in the sample) are counted but there is no cell-by-cell review page; `changes.jsonl` on disk lists them.
 - The review page decisions are recorded under one reviewer name (`--reviewer`).
-- Model help for columns and the detector for free-text cells are offered in the page but were only exercised with scripted models here.
 - A cancelled or restarted app marks a running job as failed; there is no resume.
 - Tested on Windows with Python 3.14 only.

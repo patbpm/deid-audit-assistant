@@ -42,7 +42,7 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
 | Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
 | Audit report, review page | built, tested offline and tried by hand |
-| Front page (`deid.app`): drop or paste input, auto-detect type, progress, table plan, review, downloads | built; tested offline with scripted models and by hand in a browser with the offline engine; the hosted path has not been run from the page (`docs/APP.md`) |
+| Front page (`deid.app`): drop or paste input, auto-detect type, progress, table plan, review, downloads | built; tested offline with scripted models and by hand in a browser; run once with the hosted model on its two samples (`docs/APP.md`); dictation and scans not yet run from the page |
 | Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | live run on 5 synthetic dictated and 5 synthetic scanned notes (`docs/INGEST.md`); clean synthetic inputs only |
 | Table mode (CSV): column typing, per-column replacement with consistent mapping across tables, small-group screen | checked on invented tables only (`docs/TABLES.md`); rules alone by default; optional model help for unplaced columns and for free-text cells, each run once live |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
