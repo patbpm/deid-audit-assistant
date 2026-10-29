@@ -1,0 +1,30 @@
+{
+  "check": "independent exact-boundary comparison: 2516 matches, 0 false positives, 0 missed, 0 wrong type; removing 20 spans from the predictions drops overlap recall to 0.992, so the scorer notices damage",
+  "detect_tokens_in": 126093,
+  "detect_tokens_out": 504475,
+  "est_cost_detect_usd_list": 2.302,
+  "first_missing_note": "N0167",
+  "fresh_tokens_billed_by_the_stopped_run": 615524,
+  "how": "the full agent run on 200 dev notes was stopped by the user during stage 1 (detect and verify) at note 166 because it was slow; this reads the replies that run had cached and scores the detector's spans; nothing was sent to the model for this summary",
+  "limits": "easy template text; the detection prompt restates the dataset's labeling rules; dev split only, tuned on; not a held-out result",
+  "median_detect_latency_s": 9.101175900024828,
+  "model": "muse-spark-1.3",
+  "name": "agent-meta-dev-partial",
+  "notes_with_cached_detection": 166,
+  "notes_with_failures": 0,
+  "of_dev_notes": 200,
+  "parse_errors": 0,
+  "scored_files": [
+    "agent-meta-dev-partial-detector-dev.json",
+    "burden-agent-meta-dev-partial.json"
+  ],
+  "split": "dev",
+  "stage_2_replace_and_red_team": "not run for any note",
+  "truncated": 0,
+  "unmatched_strings": 0,
+  "verifier_asked_spans": 6,
+  "verifier_verdicts": {
+    "identifier": 6
+  },
+  "verify_parse_errors": 0
+}

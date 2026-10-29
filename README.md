@@ -37,7 +37,7 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Synthetic note generator (600 notes, 9,015 labeled spans), frozen dev/test split | built, tested |
 | Evaluation harness; regex, Presidio and Philter baselines | built, scored on the 400-note test split |
 | Adversarial set (180 hard notes, nine families), baselines scored on it | built, scored |
-| Detector with Muse Spark (Meta Model API) | live smoke test on 5 dev notes only |
+| Detector with Muse Spark (Meta Model API) | run on 166 of the 200 dev notes (a full run was stopped early for time): all 2,516 labeled identifiers found with exact boundaries and no false positives. Easy template text on the split the prompt was tuned on; not a held-out result. Test split and adversarial set not run yet |
 | Replacement engine | checked on the dev split with true spans; not yet on a detector's full output |
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
 | Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
