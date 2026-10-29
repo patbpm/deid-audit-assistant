@@ -12,8 +12,10 @@ is the same in every file. Columns the rules cannot place are dropped
 unless --freetext-live sends each cell through the note detector (a hosted model:
 synthetic data only; capped by --max-total-tokens).
 
-Writes, in --out-dir: <table>.csv (cleaned), <table>.changes.jsonl and key.json
-(contain the original values: never share), plan.json and report.json (no values).
+Writes, in --out-dir: <table>.csv (cleaned), changes.jsonl and key.json (contain
+the original values: never share), plan.json and report.json (no values), and
+risk.json and risk-rows.csv: rows that share their age, ZIP, diagnosis and similar
+columns with fewer than --k others (deid.tables.risk), for review.
 No model is called unless --freetext-live is given.
 """
 
@@ -25,6 +27,7 @@ from pathlib import Path
 
 from .apply import TableDeidentifier
 from .columns import CHECKS, ACTIONS, build_plan
+from .risk import DEFAULT_K, analyse, summary_line, tables_from_outputs, write_report
 
 
 def looks_like_header(row):
@@ -107,6 +110,8 @@ def main(argv=None):
     parser.add_argument("--header", choices=("auto", "yes", "no"), default="auto")
     parser.add_argument("--unknown", choices=("withhold", "mask", "keep"), default="withhold")
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--k", type=int, default=DEFAULT_K, help="groups of fewer rows than this are reported as a risk")
+    parser.add_argument("--no-risk", action="store_true", help="skip the small-group (quasi-identifier) check")
     parser.add_argument("--freetext-live", action="store_true", help="clean free-text cells with the hosted detector")
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--cache-dir", default="runs")
@@ -148,6 +153,10 @@ def main(argv=None):
     print(f"{len(outputs)} tables -> {out}; {len(changes)} cells replaced, {flagged} flagged; "
           f"columns not placed ({args.unknown}): {unplaced or 'none'}")
     print("changes.jsonl and key.json contain original values: do not share them with the cleaned tables.")
+    if not args.no_risk:
+        risk = analyse(tables_from_outputs(outputs, report["plans"]), args.k)
+        write_report(risk, out)
+        print("small groups (see risk.json, risk-rows.csv): " + summary_line(risk))
     return 0
 
 

@@ -53,6 +53,49 @@
         "identifier_cells_checked": 1247,
         "still_present_somewhere": 0
       },
+      "small_groups": [
+        {
+          "quasi_identifiers": [
+            "town",
+            "state",
+            "zip",
+            "age",
+            "sex"
+          ],
+          "rows": 60,
+          "rows_below_k": 60,
+          "rows_below_k_after_generalizing": 60,
+          "rows_unique": 60,
+          "view": "patients"
+        },
+        {
+          "quasi_identifiers": [
+            "length_of_stay",
+            "diagnosis_code"
+          ],
+          "rows": 121,
+          "rows_below_k": 99,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": 16,
+          "view": "encounters"
+        },
+        {
+          "quasi_identifiers": [
+            "patients.town",
+            "patients.state",
+            "patients.zip",
+            "patients.age",
+            "patients.sex",
+            "encounters.length_of_stay",
+            "encounters.diagnosis_code"
+          ],
+          "rows": 121,
+          "rows_below_k": 121,
+          "rows_below_k_after_generalizing": 121,
+          "rows_unique": 119,
+          "view": "encounters joined to patients"
+        }
+      ],
       "style": "clean",
       "typing": {
         "columns": 24,
@@ -124,6 +167,36 @@
         "identifier_cells_checked": 1247,
         "still_present_somewhere": 0
       },
+      "small_groups": [
+        {
+          "quasi_identifiers": [
+            "col10"
+          ],
+          "rows": 60,
+          "rows_below_k": 7,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": 0,
+          "view": "patients"
+        },
+        {
+          "quasi_identifiers": [],
+          "rows": 121,
+          "rows_below_k": null,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": null,
+          "view": "encounters"
+        },
+        {
+          "quasi_identifiers": [
+            "patients.col10"
+          ],
+          "rows": 121,
+          "rows_below_k": 0,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": 0,
+          "view": "encounters joined to patients"
+        }
+      ],
       "style": "headerless",
       "typing": {
         "columns": 24,
@@ -207,6 +280,49 @@
         "identifier_cells_checked": 1247,
         "still_present_somewhere": 0
       },
+      "small_groups": [
+        {
+          "quasi_identifiers": [
+            "City",
+            "St",
+            "Zip",
+            "Age",
+            "Sex"
+          ],
+          "rows": 60,
+          "rows_below_k": 60,
+          "rows_below_k_after_generalizing": 60,
+          "rows_unique": 60,
+          "view": "patients"
+        },
+        {
+          "quasi_identifiers": [
+            "LOS",
+            "Dx Code"
+          ],
+          "rows": 121,
+          "rows_below_k": 99,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": 16,
+          "view": "encounters"
+        },
+        {
+          "quasi_identifiers": [
+            "patients.City",
+            "patients.St",
+            "patients.Zip",
+            "patients.Age",
+            "patients.Sex",
+            "encounters.LOS",
+            "encounters.Dx Code"
+          ],
+          "rows": 121,
+          "rows_below_k": 121,
+          "rows_below_k_after_generalizing": 121,
+          "rows_unique": 119,
+          "view": "encounters joined to patients"
+        }
+      ],
       "style": "messy",
       "typing": {
         "columns": 24,
@@ -278,6 +394,43 @@
         "identifier_cells_checked": 1247,
         "still_present_somewhere": 0
       },
+      "small_groups": [
+        {
+          "quasi_identifiers": [
+            "Region",
+            "PostalCode",
+            "Gender"
+          ],
+          "rows": 60,
+          "rows_below_k": 60,
+          "rows_below_k_after_generalizing": 60,
+          "rows_unique": 60,
+          "view": "patients"
+        },
+        {
+          "quasi_identifiers": [
+            "ICD"
+          ],
+          "rows": 121,
+          "rows_below_k": 0,
+          "rows_below_k_after_generalizing": null,
+          "rows_unique": 0,
+          "view": "encounters"
+        },
+        {
+          "quasi_identifiers": [
+            "patients.Region",
+            "patients.PostalCode",
+            "patients.Gender",
+            "encounters.ICD"
+          ],
+          "rows": 121,
+          "rows_below_k": 121,
+          "rows_below_k_after_generalizing": 121,
+          "rows_unique": 103,
+          "view": "encounters joined to patients"
+        }
+      ],
       "style": "unseen",
       "typing": {
         "columns": 24,

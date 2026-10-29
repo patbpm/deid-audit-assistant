@@ -14,6 +14,8 @@ Generates the synthetic tables (deid.synth.tables), cleans each header style
                match the cleaned patient row; distinct originals stay distinct
   dates        one shift per patient across both tables; stays and ages unchanged
   utility      safe columns identical; ages 90 and over shown as 90+
+  small_groups rows that share their age, ZIP, diagnosis and similar columns with
+               fewer than 5 others (deid.tables.risk); a screen, not a pass/fail
 
 String-level, on invented data with a known structure: it shows the table path
 works on this generator, not how it does on real tables.
@@ -30,6 +32,7 @@ from pathlib import Path
 from deid.ingest.fidelity import present
 from deid.synth import tables as synth
 
+from .risk import analyse, tables_from_outputs
 from .run import deidentify_tables, read_table
 
 LEAK_TYPES = ("NAME", "ID", "KEY", "PHONE", "EMAIL", "STREET", "TOWN", "ZIP")
@@ -166,6 +169,12 @@ def evaluate_style(style, patients, seed):
             expected = "90+" if int(o["age"]) >= 90 else o["age"]
             age_ok += r[out_pi[age_col]] == expected
             age_bad += r[out_pi[age_col]] != expected
+    small = analyse(tables_from_outputs(outputs, report["plans"]))
+    result["small_groups"] = [
+        {"view": v["view"], "quasi_identifiers": v["quasi_identifiers"], "rows": v["rows_total"],
+         "rows_below_k": v.get("rows_below_k"), "rows_unique": v.get("rows_unique"),
+         "rows_below_k_after_generalizing": (v.get("after_generalizing") or {}).get("rows_below_k")}
+        for v in small["views"]]
     result["utility"] = {"safe_cells_changed": changed_safe, "ages_correct": age_ok, "ages_wrong": age_bad,
                          "columns_withheld": {t: s["columns_withheld"] for t, s in report["tables"].items()},
                          "cells_flagged": sum(s["cells_flagged"] for s in report["tables"].values())}

@@ -267,5 +267,114 @@ class RunTests(unittest.TestCase):
                 self.assertNotIn("Kim Reyes", text)
 
 
+from deid.tables import risk  # noqa: E402
+
+
+def rows_of(*groups):
+    """groups: (count, age, zip, sex) -> rows [key, age, zip, sex]"""
+    out = []
+    for count, age, zip_code, sex in groups:
+        out += [[f"K{len(out) + i:04d}", str(age), zip_code, sex] for i in range(count)]
+    return out
+
+
+HEADER = ["patient_id", "age", "zip", "sex"]
+TYPES = {"patient_id": "KEY", "age": "AGE", "zip": "ZIP", "sex": "SAFE"}
+
+
+def one_table(rows, k=5, override=None):
+    return risk.analyse({"t": {"header": HEADER, "rows": rows, "types": TYPES, "key": "patient_id"}}, k, override)["views"][0]
+
+
+class RiskTests(unittest.TestCase):
+    ROWS = rows_of((10, 40, "55501", "F"), (3, 41, "55501", "F"), (1, "90+", "55502", "M"), (6, 49, "55503", "F"))
+
+    def test_planted_small_groups_are_found_exactly(self):
+        view = one_table(self.ROWS)
+        self.assertEqual(view["quasi_identifiers"], ["age", "zip", "sex"])      # the key is not a quasi-identifier
+        self.assertEqual((view["rows_total"], view["rows_below_k"], view["rows_unique"], view["smallest_group"]), (20, 4, 1, 1))
+        flagged = {r["row"]: r["group_size"] for r in view["flagged_rows"]}
+        self.assertEqual(flagged, {10: 3, 11: 3, 12: 3, 13: 1})
+        self.assertEqual(view["flagged_rows"][-1]["key"], "K0013")
+        self.assertEqual(view["flagged_rows"][-1]["quasi_identifiers"], {"age": "90+", "zip": "55502", "sex": "M"})
+
+    def test_k_changes_the_answer(self):
+        self.assertEqual(one_table(self.ROWS, k=2)["rows_below_k"], 1)
+        self.assertEqual(one_table(self.ROWS, k=7)["rows_below_k"], 4 + 6)
+        self.assertEqual(one_table(self.ROWS, k=1)["rows_below_k"], 0)
+
+    def test_generalizing_age_and_zip_merges_groups(self):
+        view = one_table(self.ROWS)
+        # ages 40 and 41 share the 40-49 band and the same ZIP prefix, and so does 49 with ZIP 555**: all of F merge
+        after = view["after_generalizing"]
+        self.assertEqual(after["rows_below_k"], 1)                     # only the lone 90+ / 555** / M row remains
+        self.assertIn("ZIP to its first 3 digits", after["generalized"].values())
+
+    def test_riskiest_column_sets_and_rare_values(self):
+        view = one_table(self.ROWS)
+        top = view["riskiest_column_sets"][0]
+        self.assertEqual(top["rows_in_groups_below_k"], 4)
+        self.assertEqual(view["rare_values_by_column"]["age"]["rows"], 4)
+        self.assertIn("90+", view["rare_values_by_column"]["age"]["examples"])
+
+    def test_empty_quasi_identifier_rows_are_not_flagged_and_override_works(self):
+        rows = self.ROWS + [["K9999", "", "", ""]]
+        self.assertEqual(one_table(rows)["rows_below_k"], 4)
+        view = one_table(self.ROWS, override=["sex"])
+        self.assertEqual(view["quasi_identifiers"], ["sex"])
+        self.assertEqual(view["rows_below_k"], 1)                      # only the single M
+
+    def test_a_table_with_nothing_to_group_on_says_so(self):
+        view = risk.analyse({"t": {"header": ["a"], "rows": [["x"]], "types": {"a": "NAME"}, "key": None}})["views"][0]
+        self.assertIn("no quasi-identifier columns", view["note"])
+
+    def test_joined_view_combines_tables_on_the_key(self):
+        tables = {
+            "patients": {"header": HEADER, "rows": rows_of((6, 40, "55501", "F"), (1, 71, "55502", "M")),
+                         "types": TYPES, "key": "patient_id"},
+            "visits": {"header": ["visit", "patient_id", "dx"],
+                       "rows": [["V1", "K0000", "A"], ["V2", "K0001", "A"], ["V3", "K0002", "A"], ["V4", "K0003", "A"],
+                                ["V5", "K0004", "A"], ["V6", "K0005", "A"], ["V7", "K0006", "RARE"]],
+                       "types": {"visit": "ID", "patient_id": "KEY", "dx": "SAFE"}, "key": "patient_id"}}
+        report = risk.analyse(tables, k=5)
+        names = [v["view"] for v in report["views"]]
+        self.assertEqual(names, ["patients", "visits", "visits joined to patients"])
+        joined = report["views"][2]
+        self.assertEqual(joined["rows_total"], 7)
+        self.assertEqual(joined["rows_below_k"], 1)                    # the rare diagnosis on the one 71-year-old
+        self.assertEqual(joined["flagged_rows"][0]["quasi_identifiers"]["visits.dx"], "RARE")
+
+    def test_report_files_hold_cleaned_values_only_and_no_row_detail_in_the_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = risk.analyse({"t": {"header": HEADER, "rows": self.ROWS, "types": TYPES, "key": "patient_id"}})
+            risk.write_report(report, tmp)
+            data = json.loads((Path(tmp) / "risk.json").read_text(encoding="utf-8"))
+            self.assertNotIn("flagged_rows", data["views"][0])
+            lines = (Path(tmp) / "risk-rows.csv").read_text(encoding="utf-8").splitlines()
+            self.assertEqual(len(lines), 1 + 4)
+            self.assertIn("55502", lines[-1])
+        self.assertIn("4 of 20 rows in groups under 5", risk.summary_line(report))
+
+    def test_the_standalone_command_and_the_run_integration(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            write_table(tmp / "patients.csv", PATIENTS[0], PATIENTS[1:])
+            write_table(tmp / "encounters.csv", ENCOUNTERS[0], ENCOUNTERS[1:])
+            argv = ["--in", str(tmp / "patients.csv"), str(tmp / "encounters.csv"), "--out-dir", str(tmp / "out")]
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                run_main(argv)
+            self.assertIn("small groups", out.getvalue())
+            self.assertTrue((tmp / "out" / "risk.json").exists())
+            self.assertTrue((tmp / "out" / "risk-rows.csv").exists())
+            with contextlib.redirect_stdout(io.StringIO()):
+                run_main(argv[:-1] + [str(tmp / "out2"), "--no-risk"])
+            self.assertFalse((tmp / "out2" / "risk.json").exists())
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                risk.main(["--in", str(tmp / "out" / "patients.csv"), str(tmp / "out" / "encounters.csv"),
+                           "--plan", str(tmp / "out" / "plan.json"), "--k", "3", "--out-dir", str(tmp / "again")])
+            self.assertIn("rows in groups under 3", out.getvalue())
+            self.assertTrue((tmp / "again" / "risk.json").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
