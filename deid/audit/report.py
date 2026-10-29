@@ -72,7 +72,8 @@ def note_html(audit):
         f'<td>{escape(e["original"])}</td><td>{escape(e["replacement"])}</td>'
         f'<td>{e["start"]}&ndash;{e["end"]}</td><td>{escape(e["detector"])}'
         f'{"" if e["confidence"] is None else f" ({e["confidence"]:.2f})"}'
-        f'{"<br>also: " + escape(", ".join(e["also_found_by"])) if e["also_found_by"] else ""}</td>'
+        f'{"<br>also: " + escape(", ".join(e["also_found_by"])) if e["also_found_by"] else ""}'
+        f'{"<br>verifier: " + escape(e["verifier"]["decision"]) if e.get("verifier") else ""}</td>'
         f'<td>{escape(e["rule"])}</td>'
         f'<td>{e["status"]}{"<br>" + escape("; ".join(e["checks"]["reasons"])) if e["checks"]["reasons"] else ""}</td></tr>'
         for e in entries)

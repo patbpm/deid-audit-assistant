@@ -16,24 +16,51 @@ def _overlap(a, b):
     return a["start"] < b["end"] and b["start"] < a["end"]
 
 
+FEEDBACK = "red-team feedback"
+
+
+def apply_verdict(checks, verdict):
+    """Fold the verifier's verdict into the rule checks. A confirmation clears
+    only the low-confidence objection; any doubt sends the span to a person."""
+    reasons = list(checks["reasons"])
+    if verdict["decision"] == "identifier":
+        reasons = [r for r in reasons if not r.startswith("detector confidence")]
+    elif verdict["decision"] == "not_identifier":
+        reasons.append("verifier thinks this is not an identifier: " + (verdict["why"] or "no reason given"))
+    else:
+        reasons.append("verifier is unsure: " + (verdict["why"] or "no reason given"))
+    return {"decision": "review" if reasons else "accept", "reasons": reasons}
+
+
 def build_note_audit(note_id, text, spans, changes, detector, others=None, unmatched=(),
-                     assessment=None, low=LOW_CONFIDENCE):
+                     assessment=None, low=LOW_CONFIDENCE, verdicts=None, added=()):
     """spans: the detector's spans (start, end, type, confidence?); changes: from
     Replacer.apply; others: {detector name: spans} from detectors that also ran;
-    assessment: {"risk", "clues"} from the red-team reviewer, or None."""
+    assessment: {"risk", "clues"} from the red-team reviewer, or None;
+    verdicts: {(start, end): {"decision", "why"}} from the verifier;
+    added: spans the red-team reviewer's feedback added after detection."""
     confidence = {(s["start"], s["end"]): s.get("confidence") for s in spans}
+    added_keys = {(s["start"], s["end"]) for s in added}
+    verdicts = verdicts or {}
     entries, review = [], []
     for i, c in enumerate(changes):
         agree = [name for name, other in (others or {}).items()
                  if any(_overlap(c, o) for o in other)]
         conf = confidence.get((c["start"], c["end"]))
         checks = verify_span(c, conf, low)
+        verdict = verdicts.get((c["start"], c["end"]))
+        if verdict:
+            checks = apply_verdict(checks, verdict)
+        from_feedback = (c["start"], c["end"]) in added_keys
+        if from_feedback:
+            checks = {"decision": "review", "reasons": checks["reasons"] + [
+                "found only by the red-team reviewer, not by the detector"]}
         entry = {
             "id": f"{note_id}:{i}", "type": c["type"],
             "start": c["start"], "end": c["end"], "new_start": c["new_start"], "new_end": c["new_end"],
             "original": c["original"], "replacement": c["replacement"], "rule": c["rule"],
-            "detector": detector, "confidence": conf, "also_found_by": agree,
-            "checks": checks, "status": checks["decision"],
+            "detector": FEEDBACK if from_feedback else detector, "confidence": conf,
+            "also_found_by": agree, "verifier": verdict, "checks": checks, "status": checks["decision"],
         }
         entries.append(entry)
         if checks["decision"] == "review":
