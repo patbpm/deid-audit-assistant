@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De-identification review</title>
+<style>
+:root{--bg:#fff;--fg:#1c1f23;--muted:#5b6470;--line:#d8dce1;--card:#f6f7f9;--accept:#d7efe0;--review:#fde3b5;--clue:#e5d9f6;--restored:#f7c9c9;--manual:#cfe3fb;--active:#9fc5ff;--warn:#fff4d6;--btn:#fff;--primary:#1f5fbf;--primary-fg:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2d333a;--card:#1d2228;--accept:#1f4a33;--review:#6b4a12;--clue:#46316b;--restored:#6b2a2a;--manual:#1f3f66;--active:#2f5d9e;--warn:#3a3014;--btn:#232a31;--primary:#4f8fe8;--primary-fg:#0b1220}}
+*{box-sizing:border-box}
+body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0}
+header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:1.15rem;margin:0}
+.banner{background:var(--warn);border-bottom:1px solid var(--line);padding:6px 16px;font-size:.85rem}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 100px)}
+@media (max-width:800px){.layout{grid-template-columns:1fr}}
+nav{border-right:1px solid var(--line);padding:8px;overflow:auto}
+nav button{display:block;width:100%;text-align:left;margin:2px 0}
+main{padding:12px 16px;min-width:0}
+button{font:inherit;border:1px solid var(--line);background:var(--btn);color:var(--fg);border-radius:6px;padding:2px 10px;cursor:pointer}
+button.primary{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+button.sel{outline:2px solid var(--primary)}
+.muted{color:var(--muted)}.small{font-size:.85rem}
+.badge{display:inline-block;border-radius:10px;padding:0 8px;font-size:.8rem;background:var(--card);border:1px solid var(--line)}
+.panes{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media (max-width:900px){.panes{grid-template-columns:1fr}}
+pre{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px;white-space:pre-wrap;word-break:break-word;font:13px/1.5 ui-monospace,monospace;margin:0;max-height:420px;overflow:auto}
+mark{border-radius:3px;padding:0 1px;color:inherit;cursor:pointer}
+mark.accept{background:var(--accept)}mark.review{background:var(--review)}mark.clue{background:var(--clue)}
+mark.restored{background:var(--restored)}mark.manual,mark.redacted{background:var(--manual)}mark.replaced{background:var(--accept)}
+.active{outline:2px solid var(--active);background:var(--active)!important}
+.card{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--card)}
+.card.current{outline:2px solid var(--primary)}
+.card.done{opacity:.75}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--line);padding:3px 6px;text-align:left;font-size:.85rem;vertical-align:top}
+#toolbar{position:fixed;display:none;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px;gap:4px;flex-wrap:wrap;max-width:360px;box-shadow:0 2px 8px #0003;z-index:5}
+#msg{color:var(--muted);font-size:.85rem}
+.err{color:#c33}
+</style>
+</head>
+<body>
+<header>
+  <h1>De-identification review</h1>
+  <span id="progress" class="badge"></span>
+  <button id="export" class="primary">Export reviewed notes</button>
+  <label class="small"><input type="checkbox" id="only"> only notes with items to review</label>
+  <span id="msg"></span>
+</header>
+<div class="banner"><b>Contains original identifiers; this computer only.</b> Synthetic data only. This is an assistant for human review, not a compliance certification. Anything you leave undecided stays replaced. Keys: <b>j</b>/<b>k</b> next/previous item, <b>a</b> accept, <b>r</b> reject (restore original), <b>d</b> dismiss.</div>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div id="toolbar"></div>
+<script>
+"use strict";
+const S = {audit: null, views: {}, cur: null, item: 0};
+const TYPES = ["NAME", "DATE", "ID", "PHONE", "EMAIL", "ADDRESS", "OTHER"];
+const $ = (id) => document.getElementById(id);
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return el;
+}
+
+async function api(path, body) {
+  const res = await fetch(path, body === undefined ? {} : {
+    method: "POST", headers: {"Content-Type": "application/json", "X-Review": "1"}, body: JSON.stringify(body)});
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function say(text, bad) { const m = $("msg"); m.textContent = text; m.className = bad ? "err" : ""; }
+const note = () => S.audit.notes.find((n) => n.note_id === S.cur);
+const view = () => S.views[S.cur];
+
+async function act(op) {
+  try {
+    S.views[S.cur] = await api("/api/op", {note_id: S.cur, op});
+    say("");
+    render();
+  } catch (e) { say(e.message, true); }
+}
+
+function marked(text, ranges) {
+  const frag = document.createDocumentFragment();
+  let cursor = 0;
+  for (const r of ranges.slice().sort((a, b) => a.start - b.start || a.end - b.end)) {
+    if (r.start < cursor || r.end > text.length) continue;
+    frag.append(text.slice(cursor, r.start));
+    const m = h("mark", {class: r.cls, "data-id": r.id, title: r.title || ""}, text.slice(r.start, r.end));
+    frag.append(m);
+    cursor = r.end;
+  }
+  frag.append(text.slice(cursor));
+  return frag;
+}
+
+function entryClass(e, st) {
+  const d = st.entries[e.id];
+  if (d) return d.decision === "reject" ? "restored" : "accept";
+  return e.status === "review" ? "review" : "accept";
+}
+
+function originalRanges(n, st) {
+  const out = n.entries.map((e) => ({start: e.start, end: e.end, id: e.id, cls: entryClass(e, st), title: e.type + " " + e.rule}));
+  const taken = n.entries.map((e) => [e.start, e.end]);
+  for (const m of st.manual) out.push({start: m.start, end: m.end, id: m.id, cls: "manual", title: "added by reviewer: " + m.type});
+  n.review.forEach((item, i) => (item.ranges || []).forEach(([a, b], k) => {
+    if (!taken.some(([s, e]) => a < e && s < b)) out.push({start: a, end: b, id: n.note_id + ":r" + i, cls: "clue", title: item.category + ": " + item.text});
+  }));
+  return out;
+}
+
+function itemDecision(n, st, i) {
+  const item = n.review[i];
+  return item.kind === "span" ? (st.entries[item.ref] || {}).decision : (st.items[n.note_id + ":r" + i] || {}).decision;
+}
+
+function reviewCard(n, st, i) {
+  const item = n.review[i], decision = itemDecision(n, st, i);
+  const key = n.note_id + ":r" + i;
+  const e = item.kind === "span" ? n.entries.find((x) => x.id === item.ref) : null;
+  const buttons = [];
+  if (e) {
+    buttons.push(h("button", {class: decision === "accept" ? "sel" : "", onclick: () => act({op: "entry", id: e.id, decision: "accept"})}, "Accept (keep replaced)"));
+    buttons.push(h("button", {class: decision === "reject" ? "sel" : "", onclick: () => act({op: "entry", id: e.id, decision: "reject"})}, "Reject (restore original)"));
+    if (decision) buttons.push(h("button", {onclick: () => act({op: "entry", id: e.id, decision: "clear"})}, "Undo"));
+  } else {
+    buttons.push(h("button", {class: decision === "dismiss" ? "sel" : "", onclick: () => act({op: "item", index: i, decision: "dismiss"})}, "Dismiss"));
+    if (item.kind === "clue" && (item.ranges || []).length)
+      buttons.push(h("button", {class: decision === "redact" ? "sel" : "", onclick: () => act({op: "item", index: i, decision: "redact"})}, "Redact it"));
+    if (decision) buttons.push(h("button", {onclick: () => act({op: "item", index: i, decision: "clear"})}, "Undo"));
+  }
+  const title = e ? [h("b", {}, e.type + ": "), e.original, " → ", e.replacement]
+    : [h("b", {}, item.kind + (item.category ? " (" + item.category + ")" : "") + ": "), item.text || ""];
+  return h("div", {class: "card" + (i === S.item ? " current" : "") + (decision ? " done" : ""), "data-id": e ? e.id : key, id: "item" + i,
+      onclick: (ev) => { if (!ev.target.closest("button")) { S.item = i; render(); } }},
+    h("div", {}, title, " ", decision ? h("span", {class: "badge"}, decision) : h("span", {class: "badge"}, "undecided")),
+    h("div", {class: "small muted"}, item.reasons.join("; ")),
+    e ? h("div", {class: "small muted"}, "found by " + e.detector + (e.confidence == null ? "" : " (confidence " + e.confidence.toFixed(2) + ")") +
+      (e.verifier ? "; verifier: " + e.verifier.decision : "") + "; rule " + e.rule) : null,
+    h("div", {class: "row"}, buttons));
+}
+
+function render() {
+  const total = S.audit.notes.reduce((a, n) => a + S.views[n.note_id].final.review_items, 0);
+  const done = S.audit.notes.reduce((a, n) => a + S.views[n.note_id].final.decided, 0);
+  $("progress").textContent = done + " of " + total + " review items decided";
+  const nav = $("nav");
+  nav.replaceChildren(...S.audit.notes.filter((n) => !$("only").checked || n.review.length).map((n) => {
+    const f = S.views[n.note_id].final;
+    return h("button", {class: n.note_id === S.cur ? "sel" : "", onclick: () => { S.cur = n.note_id; S.item = 0; render(); }},
+      n.note_id, " ", h("span", {class: "badge"}, f.undecided ? f.undecided + " open" : "done"));
+  }));
+  const n = note(), v = view(), st = v.state;
+  const main = $("main");
+  const parts = [
+    h("h2", {}, n.note_id, " ", h("span", {class: "badge"}, "re-identification risk: " + (n.risk || "not assessed")),
+      " ", h("span", {class: "badge"}, n.entries.length + " replacements, " + n.review.length + " to review")),
+    h("div", {class: "small muted"}, "Select text in the original to redact something the agent missed."),
+    h("div", {class: "panes"},
+      h("div", {}, h("div", {class: "muted small"}, "Original"), h("pre", {id: "orig"}, marked(n.text, originalRanges(n, st)))),
+      h("div", {}, h("div", {class: "muted small"}, "Result so far (undecided stays replaced)"),
+        h("pre", {id: "prev"}, marked(v.final.text, v.final.marks.map((m) => ({...m, cls: m.kind})))))),
+    h("h3", {}, "To review"),
+    n.review.length ? n.review.map((_, i) => reviewCard(n, st, i)) : h("div", {class: "muted"}, "Nothing flagged in this note."),
+    st.manual.length ? h("h3", {}, "Added by you") : null,
+    st.manual.map((m) => h("div", {class: "card", "data-id": m.id}, h("b", {}, m.type + ": "), n.text.slice(m.start, m.end), " ",
+      h("button", {onclick: () => act({op: "manual-remove", id: m.id})}, "Remove"))),
+    h("h3", {}, "All replacements"),
+    h("table", {}, h("tr", {}, ["Type", "Original", "Replacement", "Detector", "Status", ""].map((t) => h("th", {}, t))),
+      n.entries.map((e) => {
+        const d = (st.entries[e.id] || {}).decision;
+        return h("tr", {"data-id": e.id}, h("td", {}, e.type), h("td", {}, e.original), h("td", {}, e.replacement),
+          h("td", {}, e.detector), h("td", {}, d || e.status),
+          h("td", {}, d === "reject" ? h("button", {onclick: () => act({op: "entry", id: e.id, decision: "clear"})}, "Undo")
+            : h("button", {onclick: () => act({op: "entry", id: e.id, decision: "reject"})}, "Restore original")));
+      }))];
+  main.replaceChildren(...parts.flat().filter(Boolean));
+}
+
+document.addEventListener("click", (ev) => {
+  const t = ev.target.closest("mark[data-id], tr[data-id]");
+  if (!t) return;
+  const id = t.dataset.id, was = t.classList.contains("active");
+  document.querySelectorAll(".active").forEach((x) => x.classList.remove("active"));
+  if (!was) document.querySelectorAll("[data-id]").forEach((x) => { if (x.dataset.id === id) x.classList.add("active"); });
+});
+
+function offsetIn(pre, node, off) {
+  const r = document.createRange();
+  r.setStart(pre, 0);
+  r.setEnd(node, off);
+  return r.toString().length;
+}
+
+document.addEventListener("mouseup", (ev) => {
+  const tb = $("toolbar");
+  if (tb.contains(ev.target)) return;
+  tb.style.display = "none";
+  const sel = window.getSelection();
+  const pre = $("orig");
+  if (!pre || sel.isCollapsed || !pre.contains(sel.anchorNode) || !pre.contains(sel.focusNode)) return;
+  const text = note().text;
+  let a = offsetIn(pre, sel.anchorNode, sel.anchorOffset), b = offsetIn(pre, sel.focusNode, sel.focusOffset);
+  if (a > b) [a, b] = [b, a];
+  while (a < b && /\s/.test(text[a])) a++;
+  while (b > a && /\s/.test(text[b - 1])) b--;
+  if (a >= b) return;
+  const rect = sel.getRangeAt(0).getBoundingClientRect();
+  tb.replaceChildren(h("span", {class: "small"}, "Redact “" + text.slice(a, b).slice(0, 40) + "” as "),
+    ...TYPES.map((t) => h("button", {onmousedown: (ev) => ev.preventDefault(), onclick: () => { tb.style.display = "none"; sel.removeAllRanges(); act({op: "manual-add", start: a, end: b, type: t}); }}, t)));
+  tb.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 380)) + "px";
+  tb.style.top = Math.min(rect.bottom + 6, window.innerHeight - 90) + "px";
+  tb.style.display = "flex";
+});
+
+document.addEventListener("keydown", (ev) => {
+  if (ev.target.closest("input,textarea") || ev.ctrlKey || ev.metaKey || ev.altKey || !S.audit) return;
+  const n = note();
+  if (!n || !n.review.length) return;
+  if (ev.key === "j" || ev.key === "k") {
+    S.item = (S.item + (ev.key === "j" ? 1 : -1) + n.review.length) % n.review.length;
+    render();
+    const el = $("item" + S.item); if (el) el.scrollIntoView({block: "nearest"});
+    return;
+  }
+  const item = n.review[S.item];
+  if (!item) return;
+  if (item.kind === "span" && (ev.key === "a" || ev.key === "r"))
+    act({op: "entry", id: item.ref, decision: ev.key === "a" ? "accept" : "reject"});
+  else if (item.kind !== "span" && ev.key === "d") act({op: "item", index: S.item, decision: "dismiss"});
+});
+
+$("only").addEventListener("change", render);
+$("export").addEventListener("click", async () => {
+  try {
+    const s = await api("/api/export", {});
+    say("Exported " + s.notes + " notes: " + s.accepted + " accepted, " + s.rejected + " rejected, " + s.dismissed + " dismissed, " +
+      s.clues_redacted + " clues redacted, " + s.added_by_reviewer + " added by you; " + s.undecided + " items still undecided (kept replaced).");
+  } catch (e) { say(e.message, true); }
+});
+
+(async () => {
+  try {
+    const data = await api("/api/state");
+    S.audit = {summary: data.summary, notes: data.notes};
+    S.views = data.views;
+    S.cur = data.notes.length ? data.notes[0].note_id : null;
+    if (S.cur) render(); else $("main").textContent = "No notes in this audit file.";
+  } catch (e) { say("Could not load: " + e.message, true); }
+})();
+</script>
+</body>
+</html>
