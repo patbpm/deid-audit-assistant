@@ -27,13 +27,14 @@ class Detected:
     verdicts: dict
     detect_usage: dict = field(default_factory=dict)
     flags: dict = field(default_factory=dict)  # parse errors, truncation, cache use
+    failures: list = field(default_factory=list)  # why detection cannot be trusted; empty when fine
 
 
 @dataclass
 class Outcome:
     note_id: str
     detected: Detected
-    cleaned: str
+    cleaned: str | None  # None when the note was not cleaned (see detected.failures)
     changes: list
     final_spans: list
     added: list
@@ -51,7 +52,12 @@ def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, pr
             return out, True
         found = detect_note(client, note["text"], detect_cache)
         budget.add(found.usage)
-        uncertain = select_uncertain(note["text"], found.spans, low)
+        failures = []
+        if found.parse_error:
+            failures.append("the detection reply could not be read")
+        elif found.truncated:
+            failures.append("the detection reply was cut off at the output limit, so identifiers may be missing")
+        uncertain = [] if failures else select_uncertain(note["text"], found.spans, low)
         check = verify_spans(client, note["text"], uncertain, verify_cache)
         budget.add(check.usage)
         out.append(Detected(
@@ -60,7 +66,7 @@ def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, pr
              "detect_cached": found.cached, "verify_asked": check.asked,
              "verify_parse_error": check.parse_error, "verify_truncated": check.truncated,
              "verify_cached": check.cached,
-             "latency_s": found.latency_s + check.latency_s}))
+             "latency_s": found.latency_s + check.latency_s}, failures))
         if progress:
             progress("detect+verify", len(out), len(notes), budget)
     return out, False
@@ -73,6 +79,14 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
     for d in batch:
         if budget.exceeded:
             return outcomes, True, replacer
+        if d.failures:  # fail closed: nothing is written as "cleaned" for this note
+            audit = build_note_audit(d.note["note_id"], d.note["text"], [], [], client.model,
+                                     unmatched=d.unmatched, low=low, failures=d.failures)
+            outcomes.append(Outcome(d.note["note_id"], d, None, [], [], [], "not assessed", "not assessed", audit,
+                                    {"redteam_calls": 0, "redteam_parse_errors": 0}))
+            if progress:
+                progress("red-team", len(outcomes), len(batch), budget)
+            continue
         note = {"text": d.note["text"], "spans": d.spans,
                 "patient_key": d.note["patient_id"], "note_id": d.note["note_id"]}
         result = harden(replacer, note, client, redteam_cache, max_rounds)

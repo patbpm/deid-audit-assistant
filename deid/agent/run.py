@@ -28,7 +28,7 @@ from deid.audit.build import summarize
 from deid.audit.report import render
 from deid.audit.verify import LOW_CONFIDENCE
 from deid.baselines.common import read_notes, write_predictions
-from deid.detect.client import Budget, ChatClient, estimate_tokens
+from deid.detect.client import Budget, ChatClient, LargerLimitRetry, estimate_tokens
 from deid.detect.detector import Cache
 from deid.detect.prompt import PROMPT_VERSION as DETECT_VERSION
 from deid.detect.prompt import build_messages
@@ -60,6 +60,8 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
         "request_params": client.params, "split": args.split, "max_rounds": args.max_rounds,
         "low_confidence": args.low_confidence,
         "notes_requested": args.requested, "notes_detected": len(batch), "notes_finished": len(outcomes),
+        "notes_not_cleaned": sum(bool(o.detected.failures) for o in outcomes),
+        "retry_output_tokens": args.retry_output_tokens,
         "stopped_early": stopped,
         "parse_errors": {"detect": sum(d.flags["detect_parse_error"] for d in batch),
                          "verify": sum(d.flags["verify_parse_error"] for d in batch),
@@ -107,6 +109,8 @@ def main(argv=None):
     parser.add_argument("--live", action="store_true", help="make real API calls")
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--max-output-tokens", type=int, default=4096)
+    parser.add_argument("--retry-output-tokens", type=int, default=16384,
+                        help="a reply cut off at the limit is asked again once with this limit (0 = never)")
     parser.add_argument("--price-in", type=float, help="USD per million input tokens")
     parser.add_argument("--price-out", type=float, help="USD per million output tokens")
     parser.add_argument("--cache-dir", default="runs")
@@ -128,7 +132,7 @@ def main(argv=None):
         dry_run(notes, args.provider, args)
         return 0
 
-    client = ChatClient.from_env(args.provider, args.max_output_tokens)
+    client = LargerLimitRetry(ChatClient.from_env(args.provider, args.max_output_tokens), args.retry_output_tokens)
     budget = Budget(args.max_total_tokens, args.price_in, args.price_out)
     root = Path(args.cache_dir)
 
@@ -146,7 +150,11 @@ def main(argv=None):
     out_dir.mkdir(parents=True, exist_ok=True)
     results_dir.mkdir(parents=True, exist_ok=True)
     base = out_dir / args.name
-    write_jsonl(f"{base}.notes.jsonl", [{"note_id": o.note_id, "text": o.cleaned} for o in outcomes])
+    # A note that could not be cleaned is never written as cleaned: it is listed in <name>.failed.json instead.
+    write_jsonl(f"{base}.notes.jsonl", [{"note_id": o.note_id, "text": o.cleaned} for o in outcomes
+                                        if o.cleaned is not None])
+    failed = [{"note_id": o.note_id, "reasons": o.detected.failures} for o in outcomes if o.detected.failures]
+    Path(f"{base}.failed.json").write_text(json.dumps(failed, indent=2) + "\n", encoding="utf-8", newline="\n")
     write_predictions({o.note_id: spans_of(o.detected.spans) for o in outcomes}, f"{base}.detector.jsonl")
     write_predictions({o.note_id: spans_of(o.final_spans) for o in outcomes}, f"{base}.final.jsonl")
     Path(f"{base}.key.json").write_text(
@@ -169,6 +177,8 @@ def main(argv=None):
         print("unlabeled notes: nothing was scored (no ground truth)")
     else:
         print(f"scores: {results_dir}/{args.name}-detector-{args.split}.json and -final-{args.split}.json")
+    if failed:
+        print(f"NOT CLEANED: {len(failed)} note(s) were left out of {base}.notes.jsonl; see {base}.failed.json")
     print(f"-> {base}.* (audit, key and notes contain original identifiers or the key: do not share)")
     if stopped1 or stopped2:
         print("STOPPED EARLY: token cap reached. Raise --max-total-tokens only with Patrick's approval.")

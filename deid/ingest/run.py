@@ -10,8 +10,9 @@ cap (images) and an audio-seconds cap. A file that fails is recorded and skipped
 Cached results cost nothing. Only synthetic files belong here: both services are
 hosted.
 
-Writes runs/<name>.notes.jsonl (one note per file: note_id from the file name,
-patient_id from --truth if given, text, source, source_file) and
+Writes runs/<name>.notes.jsonl (one note per file: note_id "<file stem>-audio" or
+"<file stem>-scan", source_note_id (the stem), patient_id from --truth if given
+(so one patient's dates shift together), text, source, source_file) and
 runs/<name>.log.json. Then clean them with:
 
     python -m deid.agent.run --unlabeled --notes runs/<name>.notes.jsonl --live
@@ -22,7 +23,7 @@ import json
 import statistics
 from pathlib import Path
 
-from deid.detect.client import ApiError, Budget, ChatClient
+from deid.detect.client import ApiError, Budget, ChatClient, LargerLimitRetry
 from deid.detect.detector import Cache
 
 from . import vision
@@ -81,6 +82,7 @@ def main(argv=None):
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--max-audio-seconds", type=int, default=600)
     parser.add_argument("--max-output-tokens", type=int, default=4096)
+    parser.add_argument("--retry-output-tokens", type=int, default=16384)
     parser.add_argument("--audio-price-per-hour", type=float)
     parser.add_argument("--price-in", type=float)
     parser.add_argument("--price-out", type=float)
@@ -116,12 +118,13 @@ def main(argv=None):
                 log.append({"source": "audio", "file": p.name, "error": str(err)})
                 continue
             seconds_used += 0 if result.cached else result.seconds
-            notes.append({"note_id": p.stem, "patient_id": patients.get(p.stem, p.stem), "text": result.text,
+            notes.append({"note_id": f"{p.stem}-audio", "source_note_id": p.stem,
+                          "patient_id": patients.get(p.stem, p.stem), "text": result.text,
                           "source": "audio", "source_file": p.name})
             log.append({"source": "audio", "file": p.name, "seconds": result.seconds,
                         "latency_s": result.latency_s, "cached": result.cached})
     if images:
-        chat = ChatClient.from_env("meta", args.max_output_tokens)
+        chat = LargerLimitRetry(ChatClient.from_env("meta", args.max_output_tokens), args.retry_output_tokens)
         cache = Cache(root / "cache-scan", vision.PROMPT_VERSION)
         for p in images:
             if budget.exceeded:
@@ -133,7 +136,8 @@ def main(argv=None):
                 log.append({"source": "scan", "file": p.name, "error": str(err)})
                 continue
             budget.add(scan.usage)
-            notes.append({"note_id": p.stem, "patient_id": patients.get(p.stem, p.stem), "text": scan.text,
+            notes.append({"note_id": f"{p.stem}-scan", "source_note_id": p.stem,
+                          "patient_id": patients.get(p.stem, p.stem), "text": scan.text,
                           "source": "scan", "source_file": p.name})
             log.append({"source": "scan", "file": p.name, "latency_s": scan.latency_s, "cached": scan.cached,
                         "truncated": scan.truncated, "usage": scan.usage})

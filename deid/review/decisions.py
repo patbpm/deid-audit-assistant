@@ -120,6 +120,8 @@ def record(note, state, op, reviewer="reviewer", now=now_iso):
         item, key = note["review"][index], item_id(note["note_id"], index)
         if item["kind"] == "span":
             raise ValueError("decide a flagged replacement with accept or reject")
+        if item["kind"] == "failed":
+            raise ValueError("this note was not cleaned; it cannot be dismissed, only redacted by hand or rerun")
         decision = op.get("decision")
         if decision == "clear":
             new["items"].pop(key, None)
@@ -195,15 +197,19 @@ class Store:
         """Write the reviewed notes and the review log. Returns the summary."""
         base = Path(out_prefix) if out_prefix else self.base
         notes, log = [], []
+        withheld = []
         for note_id, note in self.notes.items():
             final = apply_decisions(note, self.note_state(note_id))
-            notes.append({"note_id": note_id, "text": final["text"]})
+            if note.get("failed"):  # never export a note as reviewed when the agent could not clean it
+                withheld.append(note_id)
+            else:
+                notes.append({"note_id": note_id, "text": final["text"]})
             log.append({"note_id": note_id, "counts": final["counts"], "decided": final["decided"],
                         "undecided": final["undecided"], "review_items": final["review_items"],
                         "decisions": self.note_state(note_id)})
         count = lambda part, name: sum(d["decision"] == name for r in log for d in r["decisions"][part].values())
         summary = {
-            "notes": len(notes),
+            "notes": len(self.notes), "notes_exported": len(notes), "notes_withheld_not_cleaned": withheld,
             "review_items": sum(r["review_items"] for r in log),
             "undecided": sum(r["undecided"] for r in log),
             "notes_fully_reviewed": sum(r["undecided"] == 0 for r in log),

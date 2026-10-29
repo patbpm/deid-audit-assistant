@@ -163,6 +163,8 @@ function render() {
   const n = note(), v = view(), st = v.state;
   const main = $("main");
   const parts = [
+    (n.failed || []).map((r) => h("div", {class: "banner", style: "background:#f3c4c4;color:#2a0f0f"},
+      h("b", {}, "NOT CLEANED: "), r, ". The original text is shown on both sides and this note will not be exported.")),
     h("h2", {}, n.note_id, " ", h("span", {class: "badge"}, "re-identification risk: " + (n.risk || "not assessed")),
       " ", h("span", {class: "badge"}, n.entries.length + " replacements, " + n.review.length + " to review")),
     h("div", {class: "small muted"}, "Select text in the original to redact something the agent missed."),

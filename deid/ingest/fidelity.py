@@ -70,6 +70,8 @@ def present(kind, written, text, any_token=False):
         tokens = [w for w in words(written) if len(w) >= 3 or w.isdigit()]
         return bool(tokens) and all(t in have for t in tokens)
     if kind == "DATE":
+        if alnum(written) in alnum(text):
+            return True
         try:
             p = dates.parse_date(written)
         except dates.DateError:
@@ -89,7 +91,7 @@ def check(truths, ingested, cleaned=None):
     by_id = {t["note_id"]: t for t in truths}
     acc = {}
     for note in ingested:
-        truth, source = by_id.get(note["note_id"]), note.get("source")
+        truth, source = by_id.get(note.get("source_note_id", note["note_id"])), note.get("source")
         if truth is None or source not in ("audio", "scan"):
             continue
         s = acc.setdefault(source, {"notes": 0, "word_edits": 0, "words": 0, "char_edits": 0, "chars": 0,

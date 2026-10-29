@@ -33,7 +33,7 @@ def apply_verdict(checks, verdict):
 
 
 def build_note_audit(note_id, text, spans, changes, detector, others=None, unmatched=(),
-                     assessment=None, low=LOW_CONFIDENCE, verdicts=None, added=()):
+                     assessment=None, low=LOW_CONFIDENCE, verdicts=None, added=(), failures=()):
     """spans: the detector's spans (start, end, type, confidence?); changes: from
     Replacer.apply; others: {detector name: spans} from detectors that also ran;
     assessment: {"risk", "clues"} from the red-team reviewer, or None;
@@ -72,6 +72,9 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
     for string in unmatched:
         review.append({"kind": "unmatched", "ref": None,
                        "reasons": [f"the model listed {string!r} but it was not found in the note"]})
+    if failures:
+        review.insert(0, {"kind": "failed", "ref": None,
+                          "reasons": ["NOT CLEANED: " + "; ".join(failures)]})
     risk = None
     if assessment:
         risk = assessment["risk"]
@@ -82,7 +85,7 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
         if risk in ("unknown",):
             review.append({"kind": "risk", "ref": None, "reasons": ["the red-team reply could not be read"]})
     return {"note_id": note_id, "text": text, "entries": entries, "review": review,
-            "risk": risk, "assessed": assessment is not None}
+            "risk": risk, "assessed": assessment is not None, "failed": list(failures)}
 
 
 def summarize(audits):
@@ -95,5 +98,6 @@ def summarize(audits):
         "changes_needing_review": sum(e["status"] == "review" for e in entries),
         "review_items": sum(len(a["review"]) for a in audits),
         "notes_with_review_items": sum(bool(a["review"]) for a in audits),
+        "notes_not_cleaned": sum(bool(a.get("failed")) for a in audits),
         "risk_levels": dict(sorted(Counter(a["risk"] or "not assessed" for a in audits).items())),
     }

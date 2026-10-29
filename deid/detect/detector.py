@@ -49,10 +49,12 @@ class Cache:
         if not self.directory or not (self.directory / f"{key}.json").exists():
             return None
         data = json.loads((self.directory / f"{key}.json").read_text(encoding="utf-8"))
+        if data.get("finish_reason") == "length":
+            return None  # cut off at the output limit: incomplete, so ask again
         return Completion(**data)
 
     def put(self, key, completion):
-        if self.directory:
+        if self.directory and completion.finish_reason != "length":
             self.directory.mkdir(parents=True, exist_ok=True)
             data = {k: getattr(completion, k) for k in ("content", "usage", "latency_s", "finish_reason")}
             (self.directory / f"{key}.json").write_text(json.dumps(data), encoding="utf-8", newline="\n")

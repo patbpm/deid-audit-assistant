@@ -83,8 +83,10 @@ def note_html(audit):
         for i in audit["review"])
     risk = audit["risk"] or "not assessed"
     clean = "" if audit["review"] else " clean"
+    failed = "".join(f'<div class="banner"><b>NOT CLEANED</b>: {escape(r)}. This note was not de-identified; '
+                     f'its original text is shown on both sides.</div>' for r in audit.get("failed", []))
     return (
-        f'<section class="note{clean}"><h2>{escape(audit["note_id"])} '
+        f'<section class="note{clean}">{failed}<h2>{escape(audit["note_id"])} '
         f'<span class="badge">re-identification risk: {escape(risk)}</span> '
         f'<span class="badge">{len(entries)} changes, {len(audit["review"])} to review</span></h2>'
         f'{"<ul>" + queue + "</ul>" if queue else ""}'

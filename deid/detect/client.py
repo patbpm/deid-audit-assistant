@@ -108,6 +108,34 @@ class ChatClient:
             )
 
 
+class LargerLimitRetry:
+    """Wraps a ChatClient: a reply cut off at the output limit is asked again once
+    with a larger limit (Muse Spark reasons, so a long note can use up a small
+    one). Cache keys use the wrapped client's normal limit, and the usage of both
+    attempts is counted."""
+
+    def __init__(self, inner, retry_limit):
+        self.inner, self.retry_limit = inner, retry_limit
+
+    model = property(lambda self: self.inner.model)
+    params = property(lambda self: self.inner.params)
+
+    def complete(self, messages):
+        first = self.inner.complete(messages)
+        if first.finish_reason != "length" or not self.retry_limit or self.retry_limit <= self.inner.max_output_tokens:
+            return first
+        normal = self.inner.max_output_tokens
+        self.inner.max_output_tokens = self.retry_limit
+        try:
+            second = self.inner.complete(messages)
+        finally:
+            self.inner.max_output_tokens = normal
+        usage = dict(second.usage)
+        for key in ("prompt_tokens", "completion_tokens"):
+            usage[key] = first.usage.get(key, 0) + second.usage.get(key, 0)
+        return Completion(second.content, usage, first.latency_s + second.latency_s, second.finish_reason)
+
+
 def estimate_tokens(text):
     """Rough guess (about 4 characters per token). Only for dry runs and as a
     fallback when a response carries no usage figures."""

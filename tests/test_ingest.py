@@ -243,9 +243,10 @@ class FidelityTests(unittest.TestCase):
         truth = [{"note_id": "N1", "script": "Patient Kim Reyes MRN 1 2 3 4 5 6 7", "text": "Patient: Kim Reyes MRN: 1234567",
                   "gold": [{"type": "NAME", "written": "Kim Reyes", "spoken": "Kim Reyes"},
                            {"type": "ID", "written": "1234567", "spoken": "1 2 3 4 5 6 7"}]}]
-        ingested = [{"note_id": "N1", "source": "audio", "text": "patient kim reyes mrn 1 2 3 4 5 6 7"},
-                    {"note_id": "N1", "source": "scan", "text": "Patient: Kim Reyes MRN: 1234500"}]
-        result = fidelity.check(truth, ingested, {"N1": "Patient: Ada Frost MRN: 1234567"})
+        ingested = [{"note_id": "N1-audio", "source_note_id": "N1", "source": "audio", "text": "patient kim reyes mrn 1 2 3 4 5 6 7"},
+                    {"note_id": "N1-scan", "source_note_id": "N1", "source": "scan", "text": "Patient: Kim Reyes MRN: 1234500"}]
+        result = fidelity.check(truth, ingested, {"N1-audio": "Patient: Ada Frost MRN: 1234567",
+                                                  "N1-scan": "Patient: Ada Frost MRN: 0000000"})
         self.assertEqual(result["audio"]["word_error_rate"], 0.0)
         self.assertEqual(result["audio"]["recovery_rate"], 1.0)
         self.assertEqual(result["audio"]["after_cleaning"]["still_present"], 1)       # the ID survived
@@ -326,11 +327,14 @@ class IngestRunTests(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()):
             ingest_run.main(self.argv("--live", "--truth", str(self.dir / "truth.jsonl")))
         notes = [json.loads(line) for line in (self.dir / "t.notes.jsonl").read_text(encoding="utf-8").splitlines()]
-        by = {(n["note_id"], n["source"]): n for n in notes}
-        self.assertEqual(by[("N0001", "audio")]["text"], "transcript of N0001")
-        self.assertEqual(by[("N0001", "scan")]["text"], "Patient: page text")
-        self.assertEqual(by[("N0001", "audio")]["patient_id"], "P0001")
-        self.assertEqual(by[("N0002", "audio")]["patient_id"], "N0002")      # no truth entry: its own patient
+        by = {n["note_id"]: n for n in notes}
+        self.assertEqual(len(by), len(notes))                                # ids are unique across sources
+        self.assertEqual(by["N0001-audio"]["text"], "transcript of N0001")
+        self.assertEqual(by["N0001-scan"]["text"], "Patient: page text")
+        self.assertEqual(by["N0001-audio"]["source_note_id"], "N0001")
+        self.assertEqual(by["N0001-audio"]["patient_id"], "P0001")
+        self.assertEqual(by["N0001-scan"]["patient_id"], "P0001")
+        self.assertEqual(by["N0002-audio"]["patient_id"], "N0002")           # no truth entry: its own patient
         log = json.loads((self.dir / "t.log.json").read_text(encoding="utf-8"))
         self.assertEqual([e["file"] for e in log["summary"]["errors"]], ["bad.wav"])
         self.assertEqual(log["summary"]["tokens_in"], 1500)
