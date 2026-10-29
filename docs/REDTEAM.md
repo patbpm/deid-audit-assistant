@@ -1,6 +1,6 @@
 # Re-identification red-team
 
-Status: Day 6, built and tested offline. **No model has been run on it yet, so there are no scores.** It is a risk signal for a human reviewer, not a guarantee that a note is safe, and not a compliance certification.
+Status: Day 6, built and tested offline, plus one live smoke test on 5 dev notes (below). It is a risk signal for a human reviewer, not a guarantee that a note is safe, and not a compliance certification.
 
 `deid/redteam/` adds a second model that reads a cleaned note the way an adversary would and reports what could still point to one person. It complements the detector: the detector looks for identifiers by type, the red-team looks at what is left.
 
@@ -39,6 +39,20 @@ The frozen dataset has almost no identifying prose, so the reviewer is tested on
 `score.py` reports each rate with a 95% Wilson interval. With 5 notes the intervals are very wide, so a small run shows the pipeline works, not how good the model is.
 
 Offline tests (`tests/test_redteam.py`) use a scripted reviewer. They check masking, offset mapping, clue cleaning, the risk rules, the cache, probe construction, scoring, the loop and the dry-run and test-split guards. They do not measure any model.
+
+## First live smoke test (Oct 29)
+
+Meta API `muse-spark-1.3`, prompt `rt1`, the first 5 dev notes, 15 probes (`results/dev/redteam-first5-dev.json`). 15 of 15 replies were readable, none truncated.
+
+| Variant | Result (5 notes each) |
+|---|---|
+| control | 0 of 5 flagged medium or high; 0 reported a leftover |
+| planted | 5 of 5 flagged and quoted the planted line |
+| leak | 10 of 10 withheld spans found (6 names, 2 phones, 1 date, 1 email); all 5 notes rated high |
+
+Cost and speed: 33,840 tokens (12,803 in, 21,037 out), median 4.7 s per call; dollar price per token still unknown. No feedback loop was run (`--feedback` off).
+
+What this does and does not show: the pipeline works end to end and the model handled blunt, invented clues without false alarms on 5 notes. It does not show the reviewer is good. The probes are easy, 5 notes give intervals of roughly 0.57-1.0 for 5 of 5, and the 5 planted lines happened to cover only the public-event and small-place categories (rare condition and occupation were not exercised). Treat it as a smoke test.
 
 ## Known limits
 
