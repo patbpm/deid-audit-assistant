@@ -101,7 +101,28 @@ The two causes of the 108 false positives were fixed in the code (nothing was ru
 
 **Stress test of the name check, no model** (`python -m deid.eval.stress`, `results/adversarial-b/stress/`): a scripted detector lists exactly the true identifiers (plus, in the common-word and eponym families, every capitalized word of a true name, as the real model did) and flags those names; the name check then gives one fixed answer. With "name" or "unsure" every time (never release): recall 609 of 609, 51 false positives (0.26 per note), all ordinary uses that stay replaced and go to review. With "ordinary_word" every time (always release, the worst case): 0 false positives but recall 96.6% (21 real bare surnames left in the text). So the design is bounded: a model that leans cautious costs false positives, and a model that leans careless costs recall, and set B can now measure which one Muse Spark does. On the original set B (no bare surnames) the worst case lost nothing, which is why it was corrected.
 
-**Still to do, needs a live run:** the agent on set B (about 200 notes, 4 workers, roughly 700,000 tokens, about 2.5 USD at list price) with the pre-registered question: do the false positives per note fall below Philter's 0.83 while recall stays at or near 100% (and in particular, are any of the 21 bare surnames released)? Then a re-run on the 200 dev notes (the v2 prompt has new cache keys) to check it did not regress, and the 400 test notes once. If the name check removes a real name occurrence, that will show up as lost recall on set B and is a result to report, not hide.
+## Muse Spark agent on set B, one run (Oct 29)
+
+The full agent (`muse-spark-1.3`, detection prompt `v2`, the name check, verifier, red-team, feedback) was run once on all 200 notes of set B (4 workers; 785,579 tokens, about 2.74 USD at list price). Nothing was changed between writing set B and this run. The test stated in advance: false positives per note below Philter's 0.83 with recall near 100%, and no real surname released. **It passed.** Files: `results/adversarial-b/agent-meta-advb-detector.json` and `-final.json`, error analysis `results/adversarial-b/agent-meta-advb-errors.json`, run summary `results/adversarial-b/runs/agent-meta-advb.json`.
+
+| | Recall (type-agnostic overlap) | False positives per note |
+|---|---|---|
+| **Agent, detection stage** | **100.0%** (609 of 609, including all 21 bare real surnames) | **0.005** (1 false positive) |
+| Agent, after red-team feedback (the run as made) | 100.0% | 0.035 (7) |
+| Agent, after the red-team convention fix (re-run from saved replies, no new calls) | 100.0% | 0.005 (1) |
+| Philter | 95.9% | 0.83 |
+| Presidio | 83.6% | 1.55 |
+| Regex | 14.0% | 0.00 |
+
+What the run shows, and what it does not:
+- **The name check did its job.** It was asked about 51 doubtful occurrences. It left 29 as written, every one an ordinary use ("Hall ambulation", "Kaposi sarcoma") and not a labeled name, and kept 22 replaced: all 21 bare real surnames and one ordinary "Hall". Nothing was unreadable or cut off. The stress test showed what a careless check would have cost (recall 96.6%); this one cost nothing here.
+- **The date rules were not needed on this run.** With the v2 prompt the model never listed a year-only or relative date, so the rule set aside 0 dates (it set aside 19 eponym occurrences). The prompt change did that work. The rule is a backstop.
+- **A problem the fix created, found by this run:** the red-team reviewer saw the year-only dates now left in the text, reported 6 of them as leftover dates, and the feedback loop re-added them (7 false positives in the final output against 1 from the detector). It also rated 3 notes high risk. The detection stage and the red-team stage disagreed about a convention. The red-team's leftovers now go through the same set-aside rule (they become review clues a person can redact), tested in `tests/test_redteam.py` and re-run from the saved replies for no new cost: final false positives 7 to 1, recall unchanged. Three notes still show high risk because the reviewer model itself rated them high; that rating was left as the model gave it.
+- **Set B has been read for that fix.** The detection-stage numbers are from the run as made, before any change. The red-team row "after the fix" is a mechanical consistency repair, but it was made after seeing this set, so treat that row as tuned.
+- **Limits.** A single run; 20 notes per family or fewer, so intervals are wide; set B was written by the project after set A's errors were known, with a corrected design (bare surnames) after the stress test; and these are short synthetic notes. This is not evidence of accuracy on real clinical text. Set A (108 false positives, prompt `v1`) and set B (1, prompt `v2`) are different sets, so the two numbers are not a like-for-like before and after.
+- **Review load:** 99 review items across 86 of the 200 notes in the run as made (60 replacements flagged). The review-burden curve for this run has not been run yet.
+
+**Still to do:** the 200 dev notes again with prompt `v2` (to check it did not regress), then the 400 test notes once, on the final system. Optionally the agent with prompt `v2` on set A, for a like-for-like before and after on one set (set A is a tuned set).
 
 ## Rules for using it
 
