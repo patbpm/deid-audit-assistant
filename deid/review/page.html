@@ -6,6 +6,7 @@
 <title>De-identification review</title>
 <meta name="base" content="__BASE__">
 <meta name="back" content="__BACK__">
+<meta name="follow" content="__FOLLOW__">
 <style>
 :root{--bg:#fff;--fg:#1c1f23;--muted:#5b6470;--line:#d8dce1;--card:#f6f7f9;--accept:#d7efe0;--review:#fde3b5;--clue:#e5d9f6;--restored:#f7c9c9;--manual:#cfe3fb;--active:#9fc5ff;--warn:#fff4d6;--btn:#fff;--primary:#1f5fbf;--primary-fg:#fff}
 @media (prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2d333a;--card:#1d2228;--accept:#1f4a33;--review:#6b4a12;--clue:#46316b;--restored:#6b2a2a;--manual:#1f3f66;--active:#2f5d9e;--warn:#3a3014;--btn:#232a31;--primary:#4f8fe8;--primary-fg:#0b1220}}
@@ -265,9 +266,25 @@ $("export").addEventListener("click", async () => {
     S.audit = {summary: data.summary, notes: data.notes};
     S.views = data.views;
     S.cur = data.notes.length ? data.notes[0].note_id : null;
+    S.sha = data.audit_sha;
     if (S.cur) render(); else $("main").textContent = "No notes in this audit file.";
   } catch (e) { say("Could not load: " + e.message, true); }
+  if (document.querySelector('meta[name="follow"]').content === "1") setInterval(follow, 4000);
 })();
+
+// With --follow the audit file is rewritten as notes arrive or change; reload when it is.
+async function follow() {
+  try {
+    const data = await api("/api/state");
+    if (data.audit_sha === S.sha) return;
+    S.sha = data.audit_sha;
+    S.audit = {summary: data.summary, notes: data.notes};
+    S.views = data.views;
+    if (!data.notes.some((n) => n.note_id === S.cur)) { S.cur = data.notes.length ? data.notes[0].note_id : null; S.item = 0; }
+    if (S.cur) render(); else $("main").textContent = "No notes in this audit file.";
+    say("The note list was updated.");
+  } catch (e) { /* try again next time */ }
+}
 </script>
 </body>
 </html>

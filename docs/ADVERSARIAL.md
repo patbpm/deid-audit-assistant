@@ -122,7 +122,9 @@ What the run shows, and what it does not:
 - **Limits.** A single run; 20 notes per family or fewer, so intervals are wide; set B was written by the project after set A's errors were known, with a corrected design (bare surnames) after the stress test; and these are short synthetic notes. This is not evidence of accuracy on real clinical text. Set A (108 false positives, prompt `v1`) and set B (1, prompt `v2`) are different sets, so the two numbers are not a like-for-like before and after.
 - **Review load:** 99 review items across 86 of the 200 notes in the run as made (60 replacements flagged). The review-burden curve for this run has not been run yet.
 
-**Still to do:** the 200 dev notes again with prompt `v2` (to check it did not regress), then the 400 test notes once, on the final system. Optionally the agent with prompt `v2` on set A, for a like-for-like before and after on one set (set A is a tuned set).
+**Dev re-run with prompt `v2` (Oct 29):** no regression. 3,023 of 3,023 labeled identifiers with exact boundaries, 0 false positives, nothing unreadable; the name check was asked about 6 occurrences and left none as written (`results/dev/agent-meta-dev-v2*.json`). Easy template text on the split the prompts were tuned on, so this shows no regression, not accuracy.
+
+**Still to do:** the 400 test notes once, on the final system. Optionally the agent with prompt `v2` on set A, for a like-for-like before and after on one set (set A is a tuned set).
 
 ## Rules for using it
 

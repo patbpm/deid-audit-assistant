@@ -27,15 +27,16 @@ HEADERS = {
 MAX_BODY = 1_000_000
 
 
-def page_bytes(base="", back=""):
+def page_bytes(base="", back="", follow=False):
     """The review page. base is the URL prefix of its API (empty when it is served alone); back,
     when given, is where the "back" link goes (the app's front page)."""
-    return PAGE.read_text(encoding="utf-8").replace("__BASE__", base).replace("__BACK__", back).encode()
+    text = PAGE.read_text(encoding="utf-8").replace("__BASE__", base).replace("__BACK__", back)
+    return text.replace("__FOLLOW__", "1" if follow else "").encode()
 
 
 def state_payload(store):
     return {"summary": store.audit["summary"], "notes": store.audit["notes"],
-            "views": {nid: store.view(nid) for nid in store.notes}, "reviewer": store.reviewer}
+            "views": {nid: store.view(nid) for nid in store.notes}, "reviewer": store.reviewer, "audit_sha": store.sha}
 
 
 def post_payload(store, path, body):
@@ -72,9 +73,11 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(403, {"error": "bad host"})
         store = self.server.store
         if self.path == "/":
-            return self.send(200, page_bytes(), "text/html")
+            return self.send(200, page_bytes(follow=self.server.follow), "text/html")
         if self.path == "/api/state":
             with self.server.lock:
+                if self.server.follow:
+                    store.refresh()
                 return self.send(200, state_payload(store))
         self.send(404, {"error": "not found"})
 
@@ -93,6 +96,8 @@ class Handler(BaseHTTPRequestHandler):
         store = self.server.store
         try:
             with self.server.lock:
+                if self.server.follow:
+                    store.refresh()
                 reply = post_payload(store, self.path, body)
             if reply is not None:
                 return self.send(200, reply)
@@ -101,9 +106,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send(404, {"error": "not found"})
 
 
-def make_server(store, port=0):
+def make_server(store, port=0, follow=False):
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    server.store, server.lock = store, threading.Lock()
+    server.store, server.lock, server.follow = store, threading.Lock(), follow
     return server
 
 
@@ -114,12 +119,14 @@ def main(argv=None):
     parser.add_argument("--reviewer", default="reviewer", help="name recorded with each decision")
     parser.add_argument("--open", action="store_true", help="open the page in the default browser")
     parser.add_argument("--export", action="store_true", help="write the reviewed notes and log, then exit")
+    parser.add_argument("--follow", action="store_true",
+                        help="the audit file is being rewritten by deid.watch: pick up new and changed notes while open")
     args = parser.parse_args(argv)
     store = Store(args.audit, args.reviewer)
     if args.export:
         print(json.dumps(store.export(), indent=2, sort_keys=True))
         return 0
-    server = make_server(store, args.port)
+    server = make_server(store, args.port, args.follow)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
     print(f"Review page: {url}  (this computer only; Ctrl+C to stop)\n"
           f"Decisions are saved to {store.path}. Contains original identifiers: synthetic data only.")

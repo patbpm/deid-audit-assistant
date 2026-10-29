@@ -174,6 +174,24 @@ class Store:
                 raise ValueError(f"{self.path.name} belongs to a different audit file; move or delete it")
             self.state = saved
 
+    def refresh(self):
+        """Pick up an audit file that deid.watch has rewritten. The watcher rewrites the decisions file
+        under the new hash, so if the two do not match yet (it is mid-write), keep what is loaded and look
+        again next time. Returns True when something new was loaded."""
+        try:
+            sha = audit_hash(self.audit_path)
+            if sha == self.sha:
+                return False
+            audit = json.loads(self.audit_path.read_text(encoding="utf-8"))
+            saved = json.loads(self.path.read_text(encoding="utf-8")) if self.path.exists() else None
+        except (OSError, ValueError):
+            return False
+        if saved is None or saved.get("audit_sha256") != sha:
+            return False
+        self.sha, self.audit, self.state = sha, audit, saved
+        self.notes = {n["note_id"]: n for n in audit["notes"]}
+        return True
+
     def note_state(self, note_id):
         return self.state["notes"].setdefault(note_id, empty_note())
 

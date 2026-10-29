@@ -108,6 +108,39 @@ class Replacer:
         for w in last:
             evidence.setdefault(w.lower(), set()).add("last")
 
+    def extend(self, notes):
+        """Learn from more notes without changing anything already decided: a name token keeps the kind and
+        the stand-in it already has, new tokens get theirs. For a feed where notes arrive over time (fit()
+        needs the whole batch up front). Returns the real name tokens that are already someone else's
+        stand-in; they cannot be taken back, so a person should know."""
+        evidence, real_tokens = {}, set()
+        for note in notes:
+            for s in clean_spans(note["text"], note["spans"]):
+                if s["type"] != "NAME":
+                    continue
+                text = note["text"][s["start"]:s["end"]]
+                words = name_words(text)
+                real_tokens.update(w.lower() for w in words if len(w) > 1)
+                self._collect_evidence(text, words, evidence)
+        for token, kinds in evidence.items():
+            self.kinds.setdefault(token, "last" if "last" in kinds else "first")
+        for token in real_tokens:
+            self.kinds.setdefault(token, "either")
+        return sorted(self.surrogates.forbid(real_tokens))
+
+    def state(self):
+        """Everything needed to carry on later with the same stand-ins. Sensitive: never share it."""
+        return {"seed": self.seed, "kinds": dict(self.kinds), "offsets": dict(self.offsets),
+                "surrogates": self.surrogates.state()}
+
+    @classmethod
+    def from_state(cls, state):
+        replacer = cls(state["seed"])
+        replacer.kinds = dict(state["kinds"])
+        replacer.offsets = {k: int(v) for k, v in state["offsets"].items()}
+        replacer.surrogates.load(state["surrogates"])
+        return replacer
+
     # --- dates ------------------------------------------------------------------
     def date_offset(self, patient_key):
         if patient_key not in self.offsets:

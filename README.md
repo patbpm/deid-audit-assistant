@@ -48,6 +48,7 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Table mode (CSV): column typing, per-column replacement with consistent mapping across tables, small-group screen | checked on invented tables only (`docs/TABLES.md`); rules alone by default; optional model help for unplaced columns and for free-text cells, each run once live |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
 | Two-model cross-check (Muse Spark next to Muse Spark Open; disagreements go to review) | built and tested offline with scripted models (`docs/CROSSCHECK.md`); no real second model run yet, needs a partner endpoint |
+| Watch mode: clean notes as they arrive in a folder or SQLite table, re-clean edited ones, delete output of removed ones, hold until reviewed, same stand-ins for a patient over time | built and tested offline with a scripted model; tried by hand on synthetic notes with the offline rules; not run with a hosted model (`docs/WATCH.md`) |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
 | Evaluation of the model-based system | dev split and adversarial set done once; test split (400 notes) not run |
 

@@ -46,6 +46,14 @@ class Registry:
         self.forbidden = {f.lower() for f in forbidden}
         self.table, self.used = {}, set()
 
+    def state(self):
+        return {"table": dict(self.table), "used": sorted(self.used), "forbidden": sorted(self.forbidden)}
+
+    def load(self, state):
+        self.table, self.used = dict(state["table"]), set(state["used"])
+        self.forbidden = set(state["forbidden"])
+        return self
+
     def get(self, original):
         key = original.lower()
         if key in self.table:
@@ -97,6 +105,30 @@ class Surrogates:
         self.town = Registry(seed, "town", pools.TOWNS, forbidden_names)
         self.ids = {}
         self.ids_used = set()
+
+    REGISTRIES = ("first", "last", "either", "street", "town")
+
+    def state(self):
+        """Everything decided so far, as plain data. Sensitive: it links originals to stand-ins."""
+        return {"registries": {name: getattr(self, name).state() for name in self.REGISTRIES},
+                "ids": dict(self.ids), "ids_used": sorted(self.ids_used)}
+
+    def load(self, state):
+        for name in self.REGISTRIES:
+            getattr(self, name).load(state["registries"][name])
+        self.ids, self.ids_used = dict(state["ids"]), set(state["ids_used"])
+        return self
+
+    def forbid(self, tokens):
+        """Never pick these (real names) for anyone from now on. Returns the ones already handed out as a
+        stand-in, which cannot be taken back."""
+        tokens = {t.lower() for t in tokens}
+        taken = set()
+        for name in ("first", "last", "either", "street", "town"):
+            registry = getattr(self, name)
+            registry.forbidden |= tokens
+            taken |= tokens & registry.used
+        return taken
 
     # --- names -------------------------------------------------------------
     def name_token(self, token, kind):

@@ -220,10 +220,12 @@ def replace_only(replacer, d, note, client, low):
                    "not assessed", "not assessed", audit, {"redteam_calls": 0, "redteam_parse_errors": 0})
 
 
-def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True):
+def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True,
+                     replacer=None):
     """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer). redteam=False replaces
-    once and leaves the risk "not assessed" (no reviewer model is available)."""
-    replacer = Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    once and leaves the risk "not assessed" (no reviewer model is available). replacer: one that already
+    knows these notes (for a feed, deid.watch); by default a new one is fitted on the batch."""
+    replacer = replacer or Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     outcomes = []
     for d in batch:
         if budget.exceeded:
