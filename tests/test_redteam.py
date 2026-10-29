@@ -100,6 +100,19 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(clues[1]["type"], "")
         self.assertEqual(clues[1]["ranges"], [])  # paraphrased: still a clue, no location
 
+    def test_a_year_or_relative_date_is_not_a_leftover_the_detector_left_it_on_purpose(self):
+        text = "Surgery in 2017, seen last Tuesday and on 4/5/25."
+        view = masked_view(text, [])
+        raw = [{"text": "2017", "category": "LEFTOVER", "type": "DATE", "why": "a date"},
+               {"text": "last Tuesday", "category": "LEFTOVER", "type": "DATE"},
+               {"text": "4/5/25", "category": "LEFTOVER", "type": "DATE"}]
+        clues, _ = clean_clues(raw, view)
+        self.assertEqual([(c["category"], c["type"]) for c in clues], [("OTHER", ""), ("OTHER", ""), ("LEFTOVER", "DATE")])
+        self.assertIn("not treated as an identifier", clues[0]["why"])
+        self.assertTrue(clues[0]["ranges"])                       # still located, so a person can redact it
+        self.assertEqual(final_risk("low", clues[:2]), "low")
+        self.assertEqual(final_risk("low", clues), "high")
+
     def test_final_risk_rules(self):
         located = [{"category": "LEFTOVER", "type": "NAME", "ranges": [(0, 3)]}]
         unlocated = [{"category": "LEFTOVER", "type": "NAME", "ranges": []}]

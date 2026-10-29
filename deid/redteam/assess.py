@@ -16,6 +16,7 @@ from deid.detect.client import estimate_tokens
 from deid.detect.detector import FENCE, Cache, ParseError
 from deid.eval import TYPES
 
+from deid.detect.context import set_aside_reason
 from .prompt import CATEGORIES, PROMPT_VERSION, RISK_LEVELS, build_messages
 
 TAG = re.compile(r"\[(?:NAME|DATE|ID|PHONE|EMAIL|ADDRESS)\]")
@@ -102,13 +103,16 @@ def clean_clues(raw, view):
         if TAG.fullmatch(phrase):
             dropped += 1  # a tag is not a leftover
             continue
+        why = str(item.get("why", ""))[:300]
+        reason = set_aside_reason(phrase, kind) if category == "LEFTOVER" and kind else None
+        if reason:  # the detector leaves these in place on purpose; the same convention applies here
+            category, kind, why = "OTHER", "", f"reported as a leftover, but {reason}. {why}".strip()
         ranges = []
         for a, b in locate(view.text, phrase):
             mapped = view.to_original(a, b)
             if mapped:
                 ranges.append(mapped)
-        clues.append({"text": phrase, "category": category, "type": kind,
-                      "why": str(item.get("why", ""))[:300], "ranges": ranges})
+        clues.append({"text": phrase, "category": category, "type": kind, "why": why, "ranges": ranges})
     return clues, dropped
 
 
