@@ -32,7 +32,7 @@ note ──► detect (Muse Spark) ──► verify uncertain spans ──► re
 | Detector with Muse Spark (Meta Model API) | live smoke test on 5 dev notes only |
 | Replacement engine | checked on the dev split with true spans; not yet on a detector's full output |
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
-| Verifier, feedback loop, agent pipeline | built, tested offline with a scripted model; **not run live** |
+| Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
 | Audit report, review page | built, tested offline and tried by hand |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
@@ -61,6 +61,8 @@ All numbers are on synthetic notes and come from files in `results/`, reproducib
 **Smoke tests with `muse-spark-1.3`** (5 dev notes each, easy synthetic text):
 - Detector: all 83 identifiers found, no false positives, no unreadable replies (`results/dev/meta-first5-dev.json`). This shows the pipeline works, not how accurate the model is.
 - Red-team, on 15 probe notes built from those 5 notes (`results/dev/redteam-first5-dev.json`): 0 of 5 control notes flagged, 5 of 5 planted clues flagged and quoted, 10 of 10 withheld identifiers found. The probes are blunt and invented by us, and 5 notes give very wide intervals.
+
+**Agent run with `muse-spark-1.3`** (5 dev notes, `docs/AGENT.md`): all stages ran, no unreadable replies; the verifier confirmed the 2 low-confidence spans, the red-team rated all 5 notes low risk with no leftovers, and 83 of 83 identifiers were found. Detection reused cached replies from the smoke test. The red-team had nothing to catch, so this does not test the feedback loop.
 
 **Replacement check** (dev split, true spans, 200 notes): no original names, IDs, phones, emails or addresses left, one date shift per patient, no inconsistent or colliding name surrogates (`results/dev/replace-dev.json`). Because true spans were given, this shows the replacement step is sound, not that the pipeline is. Known weak spot: 3 of 46 year-less dates came out a day off across a leap day.
 

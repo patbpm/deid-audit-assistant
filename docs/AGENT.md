@@ -1,6 +1,6 @@
 # Agent loop
 
-Status: Day 6, built and tested offline with a scripted model. **It has not been run live, so there are no scores for the loop.** It is an assistant for human review, not a compliance certification.
+Status: Day 6, built and tested offline with a scripted model, plus one live run on 5 dev notes (below). The feedback loop has not been exercised live. It is an assistant for human review, not a compliance certification.
 
 ```powershell
 python -m deid.agent.run                         # dry run: stages and sizes, calls nothing
@@ -33,9 +33,21 @@ Per note: at most 1 detection call, 1 verification call and 1 + `--max-rounds` r
 
 `tests/test_agent.py` uses a scripted model that withholds one phone or ID from detection, gives the first date a low confidence, and confirms or doubts verification candidates. It checks call counts, that the withheld string is found, removed and labelled, that the verifier clears or escalates correctly, that nothing but note text and the masked view is sent, the token cap, and the CLI's dry run and test-split guard. This checks the plumbing, not any model.
 
+## First live run (Oct 29)
+
+`python -m deid.agent.run --live --limit 5`, Meta API `muse-spark-1.3`, prompts detect `v1`, verify `vf1`, red-team `rt1`, the first 5 dev notes, token cap 100,000 (`results/dev/agent-first5-dev.json`, scores in `agent-first5-dev-detector-dev.json` and `-final-dev.json`).
+
+- **Detection came from the response cache**: the same model, prompt and notes were run on Oct 28, so those replies were reused and cost no new tokens. This run's fresh calls were 1 verification call and 5 red-team calls: 12,481 tokens (4,798 in, 7,683 out). No unreadable or truncated replies.
+- **Verifier**: asked about the 2 spans the detector gave confidence below 0.8 (0.70 and 0.60); it confirmed both as identifiers, which cleared their low-confidence flags.
+- **Red-team**: rated all 5 notes low risk, with no clues and no leftover identifiers, so nothing was fed back (0 spans added, 5 red-team calls rather than up to 15).
+- **Audit queue**: 4 review items remain, all rule-based (3 month-first dates, 1 year-less date). Before the verifier it was 6.
+- **Accuracy**: detector and final spans both found 83 of 83 true identifiers with no false positives (the same numbers as the Oct 28 smoke test, as expected from the cached replies).
+
+What this shows: the stages run end to end on a real model and the verifier clears confirmed low-confidence spans. What it does not show: how the verifier behaves when it should doubt a span, or how the feedback loop behaves when the detector misses something. Those paths need harder notes (for example the adversarial set, run once at the end) or a weaker detector setting. These 5 notes are easy synthetic text; no accuracy claim follows.
+
 ## Known limits
 
-- The verifier prompt (`vf1`) and the feedback loop have never met a real model. Expect to tune them on dev only.
+- The verifier prompt (`vf1`) has met a real model only on 2 spans, both confirmed, and the feedback loop has never had anything to correct on a real model. Expect to tune them on dev only.
 - The red-team sees tags, not surrogate text, and has so far only been smoke-tested on blunt probe notes.
 - A span the detector misses and the reviewer also overlooks is not caught anywhere. The loop reduces leaks; it does not prove there are none.
 - Dollar cost is unknown until per-token prices are supplied.
