@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-29",
+  "detector": {
+    "false_positives": 1,
+    "false_positives_per_note": 0.005,
+    "recall": "609 of 609 (all 21 bare real surnames kept)"
+  },
+  "est_cost_usd_list": 2.73650275,
+  "final": {
+    "false_positives": 7,
+    "false_positives_per_note": 0.035
+  },
+  "finding": "The 6 spans the red-team feedback added were all year-only dates (2003, 2009, 2017, 2018 in 3 notes) that the detection stage now correctly leaves in place; the reviewer reported them as leftover dates, which also set 3 notes to high risk. The two stages disagreed about the convention. One name-use release was wrong in the other direction: 'Hall' in note B0015 stayed replaced (1 detector false positive).",
+  "model": "muse-spark-1.3",
+  "name": "agent-meta-advb-errors",
+  "name_use_check": {
+    "left_as_written": 29,
+    "occurrences_asked": 51
+  },
+  "red_team": {
+    "risk_after": {
+      "low": 190,
+      "medium": 10
+    },
+    "risk_before": {
+      "high": 3,
+      "low": 187,
+      "medium": 10
+    },
+    "spans_added_by_feedback": 6
+  },
+  "set_aside_by_rule": {
+    "dates": 0,
+    "name_occurrences": 19
+  },
+  "tokens_in": 200736,
+  "tokens_out": 584843,
+  "what": "error analysis of the full agent run (prompt v2 with the name check) on adversarial set B; pre-registered test: false positives per note below Philter's 0.83 with recall near 100%. Passed at the detector stage and at the final stage."
+}
