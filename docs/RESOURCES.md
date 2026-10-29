@@ -35,3 +35,4 @@ Partner credits are not guaranteed and are distributed at each partner's discret
 - Primary: Meta Model API (Muse Spark). Open weights: Muse Spark Open (816B parameters, hosted only) on Baseten, Fireworks, Modal, or another host; model id on Baseten: meta-models/muse-spark-open-1026.
 - Muse Glimmer 30B is the only open model small enough to self-host (about 24 GB GPU memory); Patrick chose not to run models on his computer, so it is optional.
 - If partner credits do not arrive, Patrick will pay for Muse Spark Open inference. The budget cap is $100. Use short synthetic notes and count tokens.
+- List prices and the Baseten endpoint details (retrieved Oct 29, 2026) are in docs/PRICES.md.

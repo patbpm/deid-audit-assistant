@@ -21,7 +21,7 @@ Every number and statement in the README, demo and submission must trace to a ru
 - No claim of beating any named product. The regex baseline's score is described as reflecting the synthetic formats.
 - "Not measured yet" lists what has no number, so nothing is implied.
 - "Self-hostable" and "runs locally" are not claimed; the code has not been tested that way.
-- No cost, latency or per-token price is quoted: the price is unknown. Token counts exist in the result files but are not claimed as cost.
+- No cost is quoted in the README yet. List prices and list-price estimates are in `docs/PRICES.md` (retrieved Oct 29, 2026); quote one only as "estimated at list price" with its date, after approval.
 
 ## Open items before publishing
 

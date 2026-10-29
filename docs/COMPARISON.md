@@ -1,6 +1,6 @@
 # Comparing systems (Meta Model API and Muse Spark Open)
 
-Status: Day 6, the comparison script is built and tested offline. **No open-weights run exists**: there is no partner endpoint or key yet, and no per-token price for any provider. This is an assistant for human review, not a compliance certification.
+Status: Day 6, the comparison script is built and tested offline. **No open-weights run exists**: there is no partner endpoint or key yet. List prices for both models are recorded in `docs/PRICES.md`. This is an assistant for human review, not a compliance certification.
 
 ```powershell
 # 1. run each system on the same notes (dev first; the test split only for the final run)

@@ -50,7 +50,7 @@ Meta API `muse-spark-1.3`, prompt `rt1`, the first 5 dev notes, 15 probes (`resu
 | planted | 5 of 5 flagged and quoted the planted line |
 | leak | 10 of 10 withheld spans found (6 names, 2 phones, 1 date, 1 email); all 5 notes rated high |
 
-Cost and speed: 33,840 tokens (12,803 in, 21,037 out), median 4.7 s per call; dollar price per token still unknown. No feedback loop was run (`--feedback` off).
+Cost and speed: 33,840 tokens (12,803 in, 21,037 out), median 4.7 s per call; about $0.11 at list price (`docs/PRICES.md`). No feedback loop was run (`--feedback` off).
 
 What this does and does not show: the pipeline works end to end and the model handled blunt, invented clues without false alarms on 5 notes. It does not show the reviewer is good. The probes are easy, 5 notes give intervals of roughly 0.57-1.0 for 5 of 5, and the 5 planted lines happened to cover only the public-event and small-place categories (rare condition and occupation were not exercised). Treat it as a smoke test.
 

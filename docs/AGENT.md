@@ -50,4 +50,4 @@ What this shows: the stages run end to end on a real model and the verifier clea
 - The verifier prompt (`vf1`) has met a real model only on 2 spans, both confirmed, and the feedback loop has never had anything to correct on a real model. Expect to tune them on dev only.
 - The red-team sees tags, not surrogate text, and has so far only been smoke-tested on blunt probe notes.
 - A span the detector misses and the reviewer also overlooks is not caught anywhere. The loop reduces leaks; it does not prove there are none.
-- Dollar cost is unknown until per-token prices are supplied.
+- Dollar cost is only an estimate: pass `--price-in 1.25 --price-out 4.25` (list prices, `docs/PRICES.md`) to have a run print it.
