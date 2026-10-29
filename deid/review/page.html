@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>De-identification review</title>
+<meta name="base" content="__BASE__">
+<meta name="back" content="__BACK__">
 <style>
 :root{--bg:#fff;--fg:#1c1f23;--muted:#5b6470;--line:#d8dce1;--card:#f6f7f9;--accept:#d7efe0;--review:#fde3b5;--clue:#e5d9f6;--restored:#f7c9c9;--manual:#cfe3fb;--active:#9fc5ff;--warn:#fff4d6;--btn:#fff;--primary:#1f5fbf;--primary-fg:#fff}
 @media (prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2d333a;--card:#1d2228;--accept:#1f4a33;--review:#6b4a12;--clue:#46316b;--restored:#6b2a2a;--manual:#1f3f66;--active:#2f5d9e;--warn:#3a3014;--btn:#232a31;--primary:#4f8fe8;--primary-fg:#0b1220}}
@@ -40,6 +42,7 @@ table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--li
 </head>
 <body>
 <header>
+  <a id="back" hidden>&larr; Results and downloads</a>
   <h1>De-identification review</h1>
   <span id="progress" class="badge"></span>
   <button id="export" class="primary">Export reviewed notes</button>
@@ -69,8 +72,12 @@ function h(tag, attrs, ...kids) {
   return el;
 }
 
+const BASE = document.querySelector('meta[name="base"]').content;
+const BACK = document.querySelector('meta[name="back"]').content;
+if (BACK) { $("back").href = BACK; $("back").hidden = false; }
+
 async function api(path, body) {
-  const res = await fetch(path, body === undefined ? {} : {
+  const res = await fetch(BASE + path, body === undefined ? {} : {
     method: "POST", headers: {"Content-Type": "application/json", "X-Review": "1"}, body: JSON.stringify(body)});
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || res.statusText);

@@ -27,6 +27,26 @@ HEADERS = {
 MAX_BODY = 1_000_000
 
 
+def page_bytes(base="", back=""):
+    """The review page. base is the URL prefix of its API (empty when it is served alone); back,
+    when given, is where the "back" link goes (the app's front page)."""
+    return PAGE.read_text(encoding="utf-8").replace("__BASE__", base).replace("__BACK__", back).encode()
+
+
+def state_payload(store):
+    return {"summary": store.audit["summary"], "notes": store.audit["notes"],
+            "views": {nid: store.view(nid) for nid in store.notes}, "reviewer": store.reviewer}
+
+
+def post_payload(store, path, body):
+    """Apply one reviewer action. Returns the JSON reply, or None for an unknown path. Raises ValueError."""
+    if path == "/api/op" and isinstance(body, dict) and isinstance(body.get("op"), dict):
+        return store.apply(body.get("note_id"), body["op"])
+    if path == "/api/export":
+        return store.export()
+    return None
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "deid-review"
 
@@ -52,12 +72,10 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(403, {"error": "bad host"})
         store = self.server.store
         if self.path == "/":
-            return self.send(200, PAGE.read_bytes(), "text/html")
+            return self.send(200, page_bytes(), "text/html")
         if self.path == "/api/state":
             with self.server.lock:
-                return self.send(200, {
-                    "summary": store.audit["summary"], "notes": store.audit["notes"],
-                    "views": {nid: store.view(nid) for nid in store.notes}, "reviewer": store.reviewer})
+                return self.send(200, state_payload(store))
         self.send(404, {"error": "not found"})
 
     def do_POST(self):
@@ -75,10 +93,9 @@ class Handler(BaseHTTPRequestHandler):
         store = self.server.store
         try:
             with self.server.lock:
-                if self.path == "/api/op" and isinstance(body, dict) and isinstance(body.get("op"), dict):
-                    return self.send(200, store.apply(body.get("note_id"), body["op"]))
-                if self.path == "/api/export":
-                    return self.send(200, store.export())
+                reply = post_payload(store, self.path, body)
+            if reply is not None:
+                return self.send(200, reply)
         except ValueError as error:
             return self.send(400, {"error": str(error)})
         self.send(404, {"error": "not found"})

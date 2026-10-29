@@ -266,6 +266,21 @@ class RunTests(unittest.TestCase):
             else:
                 self.assertNotIn("Kim Reyes", text)
 
+    def test_the_free_text_option_of_the_command_runs_end_to_end(self):
+        class Model:
+            model, params, max_output_tokens = "m", {"max_tokens": 1}, 100
+
+            def complete(self, messages):
+                return Completion(json.dumps({"identifiers": [{"text": "Kim Reyes", "type": "NAME", "confidence": 0.9}]}),
+                                  {"prompt_tokens": 5, "completion_tokens": 5}, 0.1, "stop")
+
+        with mock.patch("deid.detect.client.ChatClient.from_env", return_value=Model()):
+            code, _ = self.run_cli("--freetext-live", "--cache-dir", str(self.dir / "cache"))
+        self.assertEqual(code, 0)
+        text = (self.dir / "out" / "patients.csv").read_text(encoding="utf-8")
+        self.assertNotIn("Kim Reyes", text)
+        self.assertNotIn(FREETEXT_MASK, text)
+
 
 from deid.tables import risk  # noqa: E402
 

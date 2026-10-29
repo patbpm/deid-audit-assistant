@@ -22,6 +22,14 @@ note ──► detect (Muse Spark) ──► verify uncertain spans ──► re
 - **Audit report**: every change links to its character offsets, detector, confidence, the verifier's verdict and the rule that rewrote it. One self-contained HTML page.
 - **Review page**: a local page where a person accepts or rejects each flag, redacts clues, and selects text to redact what the agent missed. Anything left undecided stays replaced.
 
+## Using it
+
+```powershell
+python -m deid.app --open          # a local page: drop files or paste text, watch it run, review, download
+```
+
+Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictation (WAV) or scanned pages. The page says what each input was taken to be, shows progress, lets you check and edit the column plan for tables, opens the review page for notes, and offers the downloads, each labeled with what it holds (`docs/APP.md`). By default it uses an **offline rules engine with no AI model**, which is much weaker (it misses names that have no cue) and is there so the page can be used without a model; `--live` uses the hosted models and sends the content to the provider, so synthetic data only.
+
 ## Status of each part
 
 | Part | State |
@@ -34,6 +42,7 @@ note ──► detect (Muse Spark) ──► verify uncertain spans ──► re
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
 | Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
 | Audit report, review page | built, tested offline and tried by hand |
+| Front page (`deid.app`): drop or paste input, auto-detect type, progress, table plan, review, downloads | built; tested offline with scripted models and by hand in a browser with the offline engine; the hosted path has not been run from the page (`docs/APP.md`) |
 | Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | live run on 5 synthetic dictated and 5 synthetic scanned notes (`docs/INGEST.md`); clean synthetic inputs only |
 | Table mode (CSV): column typing, per-column replacement with consistent mapping across tables, small-group screen | checked on invented tables only (`docs/TABLES.md`); rules alone by default; optional model help for unplaced columns and for free-text cells, each run once live |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
@@ -111,13 +120,14 @@ Every model-calling command is a dry run unless `--live` is passed, uses the dev
 python -m deid.agent.run                        # describes the stages and sizes a run, calls nothing
 python -m deid.agent.run --live --limit 5       # real calls; set MODEL_API_KEY first (see .env.example)
 python -m deid.review.server --audit runs/<name>.audit.json --open   # review page, this computer only
+python -m deid.app --open                       # front page; offline rules unless --live (hosted, billed)
 ```
 
 Keys live in environment variables; never commit them. API calls can be billed, so confirm credits are applied first.
 
 ## Docs
 
-`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/TABLES.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
+`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/TABLES.md` · `docs/APP.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
 
 ## What was built during the hackathon
 

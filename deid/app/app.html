@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De-identification assistant</title>
+<style>
+:root{--bg:#fff;--fg:#1c1f23;--muted:#5b6470;--line:#d8dce1;--card:#f6f7f9;--warn:#fff4d6;--bad:#f3c4c4;--badfg:#2a0f0f;--ok:#d7efe0;--primary:#1f5fbf;--primary-fg:#fff;--btn:#fff;--drop:#eef4fd}
+@media (prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2d333a;--card:#1d2228;--warn:#3a3014;--bad:#5b2323;--badfg:#ffdede;--ok:#1f4a33;--primary:#4f8fe8;--primary-fg:#0b1220;--btn:#232a31;--drop:#1b2736}}
+*{box-sizing:border-box}
+body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0}
+header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:1.2rem;margin:0}h2{font-size:1.1rem;margin:1.2rem 0 .4rem}h3{font-size:1rem;margin:.9rem 0 .3rem}
+.banner{background:var(--warn);border-bottom:1px solid var(--line);padding:6px 16px;font-size:.85rem}
+.banner.hosted{background:var(--bad);color:var(--badfg)}
+main{max-width:1060px;margin:0 auto;padding:12px 16px 40px}
+button,select,input[type=number]{font:inherit;border:1px solid var(--line);background:var(--btn);color:var(--fg);border-radius:6px;padding:3px 10px}
+button{cursor:pointer}button.primary{background:var(--primary);color:var(--primary-fg);border-color:var(--primary);padding:6px 16px}
+button:disabled{opacity:.5;cursor:default}
+a.button{display:inline-block;font:inherit;border:1px solid var(--line);background:var(--btn);color:var(--fg);border-radius:6px;padding:3px 10px;text-decoration:none}
+a.button.primary{background:var(--primary);color:var(--primary-fg);border-color:var(--primary);padding:6px 16px}
+.muted{color:var(--muted)}.small{font-size:.85rem}
+.badge{display:inline-block;border-radius:10px;padding:0 8px;font-size:.8rem;background:var(--card);border:1px solid var(--line)}
+.badge.bad{background:var(--bad);color:var(--badfg)}.badge.ok{background:var(--ok)}
+#drop{border:2px dashed var(--line);border-radius:12px;padding:28px 16px;text-align:center;background:var(--card)}
+#drop.over{background:var(--drop);border-color:var(--primary)}
+textarea{width:100%;min-height:110px;font:13px/1.5 ui-monospace,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:8px}
+.card{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;background:var(--card)}
+.card.bad{background:var(--bad);color:var(--badfg)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grow{flex:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--card)}.stat b{font-size:1.5rem;display:block}
+.stat.bad{background:var(--bad);color:var(--badfg)}
+table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid var(--line);padding:3px 6px;text-align:left;font-size:.85rem;vertical-align:top}
+.scroll{overflow:auto;max-width:100%}
+ol.steps{list-style:none;padding:0;margin:8px 0}
+ol.steps li{padding:6px 10px;border:1px solid var(--line);border-radius:8px;margin:4px 0;background:var(--card);display:flex;gap:10px;align-items:baseline}
+ol.steps .dot{width:1.2em;text-align:center}
+#msg{font-size:.9rem}.err{color:#c33}
+label.opt{display:block;margin:6px 0}
+.changed{background:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <h1>De-identification assistant</h1>
+  <span id="engine" class="badge"></span>
+  <span class="grow"></span>
+  <button id="newjob">New job</button>
+</header>
+<div id="banner" class="banner"></div>
+<main>
+  <div id="msg"></div>
+  <section id="view"></section>
+  <section id="recent"></section>
+</main>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const S = {info: null, job: null, jobs: [], timer: null, edits: {}, refused: []};
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") el.className = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "value") el.value = v;
+    else if (v === true) el.setAttribute(k, "");
+    else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return el;
+}
+
+async function api(path, body, raw) {
+  const opts = body === undefined ? {} : {method: "POST", headers: {"X-Review": "1", ...(raw ? {} : {"Content-Type": "application/json"})}, body: raw ? body : JSON.stringify(body)};
+  const res = await fetch(path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+function say(text, bad) { const m = $("msg"); m.textContent = text || ""; m.className = bad ? "err" : "muted"; }
+const fmtSize = (n) => n > 1e6 ? (n / 1e6).toFixed(1) + " MB" : n > 1e3 ? Math.round(n / 1e3) + " kB" : n + " B";
+const KINDS = {note: "notes", audio: "notes", scan: "notes", table: "tables"};
+
+// ---- loading and polling -------------------------------------------------------------
+async function loadJob(id) {
+  S.job = await api("/api/jobs/" + id);
+  location.hash = id;
+  render();
+  clearTimeout(S.timer);
+  if (S.job.state === "running") S.timer = setTimeout(() => loadJob(id).catch(fail), 700);
+  else loadRecent().catch(() => {});
+}
+function fail(e) { say(e.message, true); }
+async function loadRecent() { S.jobs = await api("/api/jobs"); renderRecent(); }
+
+async function ensureDraft() {
+  if (S.job && S.job.state === "draft") return S.job.id;
+  S.edits = {};
+  const job = await api("/api/jobs", {});
+  S.job = job;
+  location.hash = job.id;
+  return job.id;
+}
+
+// ---- adding input --------------------------------------------------------------------
+async function addFiles(files) {
+  try {
+    const id = await ensureDraft();
+    for (const f of files) {
+      const entry = await api("/api/jobs/" + id + "/file?name=" + encodeURIComponent(f.name), f, true);
+      if (!entry.kind) S.refused.push(entry);
+    }
+    await loadJob(id);
+    say(S.refused.length ? "Some files were not added: see below." : "");
+  } catch (e) { fail(e); }
+}
+async function addText() {
+  const text = $("paste").value;
+  if (!text.trim()) return say("Paste some text first.", true);
+  try {
+    const id = await ensureDraft();
+    const entry = await api("/api/jobs/" + id + "/text", {text});
+    if (entry.kind) $("paste").value = ""; else S.refused.push({...entry, name: "pasted text"});
+    await loadJob(id);
+    if (!entry.kind) say("Not added: " + entry.reason, true);
+  } catch (e) { fail(e); }
+}
+async function addSample(which) {
+  try {
+    S.refused = [];
+    if (S.job && S.job.state === "draft") await api("/api/jobs/" + S.job.id + "/delete", {});
+    const job = await api("/api/jobs/sample", {which});
+    await loadJob(job.id);
+    say("Sample loaded. It is invented data from the project's generators.");
+  } catch (e) { fail(e); }
+}
+async function setKind(index, kind) {
+  try { await api("/api/jobs/" + S.job.id + "/kind", {index, kind}); await loadJob(S.job.id); say(""); } catch (e) { fail(e); await loadJob(S.job.id); }
+}
+async function startOver() {
+  if (S.job && S.job.state !== "running") await api("/api/jobs/" + S.job.id + "/delete", {}).catch(() => {});
+  S.job = null; S.edits = {}; S.refused = []; history.replaceState(null, "", location.pathname);
+  say(""); render(); loadRecent();
+}
+
+// ---- options and start ---------------------------------------------------------------
+function readOptions() {
+  const v = (id) => $(id) ? $(id).value : undefined, c = (id) => $(id) ? $(id).checked : false;
+  const opts = {same_patient: c("o-same"), model_typing: c("o-typing"), confirm_synthetic: c("o-confirm")};
+  if ($("o-header")) { opts.header = v("o-header"); opts.unknown = v("o-unknown"); opts.freetext = v("o-freetext"); }
+  if ($("o-cap")) opts.token_cap = parseInt(v("o-cap"), 10);
+  return opts;
+}
+async function start() {
+  try {
+    await api("/api/jobs/" + S.job.id + "/start", {options: readOptions()});
+    say("");
+    await loadJob(S.job.id);
+  } catch (e) { fail(e); }
+}
+
+function optionsPanel(job) {
+  const family = job.files.length ? KINDS[job.files[0].kind] : null;
+  const hosted = S.info.backend.hosted;
+  const parts = [];
+  if (family === "notes") parts.push(h("label", {class: "opt"}, h("input", {type: "checkbox", id: "o-same"}),
+    " These notes are all about the same patient (dates shift together and each name gets one stand-in). Leave unticked to treat each note as a different patient, unless a JSON line gives a patient_id."));
+  if (family === "tables") {
+    parts.push(h("label", {class: "opt"}, "First row is a header: ", h("select", {id: "o-header"},
+      h("option", {value: "auto"}, "detect it"), h("option", {value: "yes"}, "yes"), h("option", {value: "no"}, "no"))));
+    parts.push(h("label", {class: "opt"}, "Columns the tool cannot place: ", h("select", {id: "o-unknown"},
+      h("option", {value: "withhold"}, "leave them out (safest)"), h("option", {value: "mask"}, "keep the column, hide its values"))));
+    parts.push(h("label", {class: "opt"}, "Free-text columns: ", h("select", {id: "o-freetext"},
+      h("option", {value: "mask"}, "hide the whole cell (safest)"),
+      h("option", {value: "detector"}, "find identifiers inside the text (" + S.info.backend.label + ")"))));
+    if (S.info.backend.model_help) parts.push(h("label", {class: "opt"}, h("input", {type: "checkbox", id: "o-typing"}),
+      " Let the model suggest types for columns the rules cannot place (a few sample values per column are sent; the rules must confirm each answer)."));
+  }
+  if (hosted) parts.push(
+    h("label", {class: "opt"}, h("input", {type: "checkbox", id: "o-confirm"}),
+      " I confirm this content is synthetic or public. It will be sent to a hosted service."),
+    h("label", {class: "opt"}, "Most tokens this job may use: ", h("input", {type: "number", id: "o-cap", min: 1, max: S.info.max_job_tokens, value: S.info.max_job_tokens, style: "width:9em"})));
+  return h("div", {class: "card"}, h("b", {}, "Options"), parts.length ? parts : h("div", {class: "muted small"}, "No options for this input."));
+}
+
+// ---- views ---------------------------------------------------------------------------
+function startView() {
+  const job = S.job, files = job ? job.files : [];
+  const drop = h("div", {id: "drop"},
+    h("div", {}, h("b", {}, "Drop files here"), " or ", h("button", {onclick: () => $("pick").click()}, "choose files")),
+    h("div", {class: "muted small"}, "Notes (.txt, or .jsonl with one note per line), CSV tables" + (S.info.backend.kinds.includes("audio") ? ", dictation (.wav)" : "") +
+      (S.info.backend.kinds.includes("scan") ? ", scanned pages (.png, .jpg)" : "")),
+    h("input", {type: "file", id: "pick", multiple: true, hidden: true, onchange: (e) => { addFiles([...e.target.files]); e.target.value = ""; }}));
+  for (const ev of ["dragenter", "dragover"]) drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); });
+  for (const ev of ["dragleave", "drop"]) drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); });
+  drop.addEventListener("drop", (e) => addFiles([...e.dataTransfer.files]));
+  const list = files.map((f, i) => h("div", {class: "card"}, h("div", {class: "row"},
+    h("b", {}, f.name), h("span", {class: "muted small"}, fmtSize(f.size)), h("span", {class: "badge ok"}, f.label),
+    ["note", "table"].includes(f.kind) ? h("select", {onchange: (e) => setKind(i, e.target.value)},
+      ...["note", "table"].map((k) => h("option", {value: k, selected: k === f.kind}, "treat as " + (k === "note" ? "a note" : "a table")))) : null),
+    f.reason ? h("div", {class: "muted small"}, f.reason) : null));
+  return [
+    h("h2", {}, "1. Add your input"), drop,
+    h("h3", {}, "or paste text"),
+    h("textarea", {id: "paste", placeholder: "Paste a clinical note, or CSV rows with a header line"}),
+    h("div", {class: "row"}, h("button", {onclick: addText}, "Add pasted text"), h("span", {class: "muted small"}, "or try a sample:"),
+      ...S.info.samples.map((s) => h("button", {onclick: () => addSample(s)}, "sample " + s))),
+    S.refused.map((f) => h("div", {class: "card bad"}, h("b", {}, "Not added: " + f.name), h("div", {class: "small"}, f.reason))),
+    files.length ? [h("h2", {}, "2. Check what was found"), list, optionsPanel(job),
+      h("div", {class: "row", style: "margin-top:10px"}, h("button", {class: "primary", onclick: start},
+        KINDS[files[0].kind] === "tables" ? "Read the tables and propose a plan" : "Clean " + (files.length === 1 ? "this" : "these") + " now"),
+        h("button", {onclick: startOver}, "Clear"))] : null];
+}
+
+const MARK = {pending: "○", running: "◔", done: "✓", failed: "✗", skipped: "–"};
+function stepsView(job) {
+  const t = job.tokens;
+  return [h("ol", {class: "steps"}, job.steps.map((s) => h("li", {}, h("span", {class: "dot"}, MARK[s.state] || "○"), h("b", {}, s.label),
+    h("span", {class: "muted small"}, s.detail || (s.state === "pending" ? "waiting" : ""))))),
+    t.cap ? h("div", {class: "muted small"}, "Tokens used: " + t.used.toLocaleString() + " of " + t.cap.toLocaleString() + " allowed for this job") : null];
+}
+
+function planView(job) {
+  const types = Object.keys(S.info.type_help);
+  const blocks = Object.entries(job.plan).map(([name, p]) => {
+    const edit = (S.edits[name] = S.edits[name] || {types: {}, key_column: p.key_column});
+    const rows = p.columns.map((c) => {
+      const cur = edit.types[c.column] || c.type, changed = cur !== c.type;
+      return h("tr", {class: changed || c.type === "UNKNOWN" ? "changed" : ""},
+        h("td", {}, c.column),
+        h("td", {}, h("select", {onchange: (e) => { edit.types[c.column] = e.target.value; render(); }},
+          ...types.map((t) => h("option", {value: t, selected: t === cur, title: S.info.type_help[t]}, t)))),
+        h("td", {class: "small"}, S.info.type_help[cur]),
+        h("td", {class: "small muted"}, c.reason + " (" + c.decided_by + ")"),
+        h("td", {class: "small muted"}, c.sample.join(" · ")));
+    });
+    return [h("h3", {}, name, " ", h("span", {class: "muted small"}, p.rows + " rows")),
+      h("label", {class: "small"}, "Key column (links a row to the same person in other tables): ",
+        h("select", {onchange: (e) => { edit.key_column = e.target.value || null; }},
+          h("option", {value: ""}, "none"), ...p.columns.map((c) => h("option", {value: c.column, selected: c.column === edit.key_column}, c.column))),
+        " ", h("span", {class: "muted"}, p.key_reason)),
+      h("div", {class: "scroll"}, h("table", {}, h("tr", {}, ["Column", "Treated as", "What happens", "Why", "First values (original)"].map((t) => h("th", {}, t))), rows))];
+  });
+  return [h("h2", {}, "3. Check the plan"),
+    h("div", {class: "card"}, "Nothing has been changed yet. Highlighted rows are columns you changed or the tool could not place (they are left out unless you give them a type). Change any column, then clean."),
+    blocks, h("div", {class: "row", style: "margin-top:10px"}, h("button", {class: "primary", onclick: confirmPlan}, "Clean the tables"),
+      h("button", {onclick: startOver}, "Cancel"))];
+}
+async function confirmPlan() {
+  const edits = {};
+  for (const [name, e] of Object.entries(S.edits)) edits[name] = {types: e.types, key_column: e.key_column};
+  try { await api("/api/jobs/" + S.job.id + "/plan", {edits}); await loadJob(S.job.id); } catch (e) { fail(e); }
+}
+
+function downloadsView(job) {
+  if (!job.downloads.length) return null;
+  const base = "/job/" + job.id + "/";
+  return [h("h3", {}, "Downloads"),
+    job.downloads.map((d) => h("div", {class: "row"}, h("a", {class: "button", href: base + "download/" + encodeURIComponent(d.name)}, d.name),
+      d.warning ? h("span", {class: "badge bad"}, d.warning) : null, h("span", {class: "muted small"}, d.note),
+      d.name === "audit-report.html" ? h("a", {href: base + "audit-report", target: "_blank"}, "view") : null))];
+}
+const stat = (n, label, bad) => h("div", {class: "stat" + (bad ? " bad" : "")}, h("b", {}, n), label);
+
+function notesResult(job) {
+  const r = job.result;
+  return [h("h2", {}, "Done"),
+    h("div", {class: "stats"}, stat(r.notes, "notes processed"), stat(r.replacements, "replacements"),
+      stat(r.review_items, "items for a person to review"), stat(r.not_cleaned, "notes NOT cleaned", r.not_cleaned > 0)),
+    h("div", {class: "small muted"}, "Engine: " + r.engine + ". Replacements by type: " + (Object.entries(r.by_type).map(([k, v]) => k + " " + v).join(", ") || "none") +
+      ". Re-identification risk: " + (r.assessed ? Object.entries(r.risk_levels).map(([k, v]) => k + " " + v).join(", ") : "not assessed with this engine") + "."),
+    r.assessed ? null : h("div", {class: "card"}, h("b", {}, "Read the cleaned text yourself. "),
+      "This engine has no second reader and no verifier, and it only finds names that follow a cue such as Dr. or Patient:. Having few or no items to review does not mean the notes are clean. In the review, select any text it missed to redact it by hand."),
+    r.not_cleaned ? h("div", {class: "card bad"}, h("b", {}, "NOT CLEANED: "), r.not_cleaned + " note(s) could not be cleaned and are left out of the downloads. They are listed in the review.") : null,
+    r.stopped_early ? h("div", {class: "card bad"}, "The token cap was reached, so not every note was processed.") : null,
+    r.skipped.length ? [h("h3", {}, "Skipped"), r.skipped.map((s) => h("div", {class: "card"}, h("b", {}, s.file), ": ", s.reason))] : null,
+    h("div", {class: "row", style: "margin:10px 0"}, h("a", {class: "button primary", href: "/job/" + job.id + "/review"}, "Open the review (accept / reject each change)"),
+      h("span", {class: "muted small"}, "Anything you leave undecided stays replaced.")),
+    downloadsView(job)];
+}
+
+function tablesResult(job) {
+  const r = job.result;
+  const blocks = Object.entries(r.tables).map(([name, t]) => [
+    h("h3", {}, name, " ", h("span", {class: "muted small"}, t.rows + " rows, " + t.columns_out + " of " + t.columns_in + " columns kept, " + t.cells_changed + " cells changed" + (t.cells_flagged ? ", " + t.cells_flagged + " flagged" : ""))),
+    t.withheld.length ? h("div", {class: "small"}, h("span", {class: "badge bad"}, "left out"), " " + t.withheld.join(", ")) : null,
+    h("div", {class: "scroll"}, h("table", {}, h("tr", {}, t.preview.header.map((c) => h("th", {}, c))),
+      t.preview.rows.map((row) => h("tr", {}, row.map((c) => h("td", {}, c))))))]);
+  return [h("h2", {}, "Done"),
+    h("div", {class: "stats"}, stat(Object.keys(r.tables).length, "tables"), stat(r.cells_replaced, "cells replaced"), stat(r.cells_flagged, "cells flagged", r.cells_flagged > 0)),
+    h("div", {class: "small muted"}, "Engine: " + r.engine + (r.freetext ? ". Free-text cells cleaned: " + r.freetext.cells + " (" + r.freetext.flagged + " flagged)." : ".")),
+    h("div", {class: "card"}, h("b", {}, "Small groups: "), r.risk_summary,
+      h("div", {class: "small muted"}, "Rows that share their age band, ZIP, diagnosis and similar columns with fewer than " + r.risk.k + " others could still point to one person. The list is in risk-rows.csv. Linking the tables can make this worse; check that too.")),
+    h("h3", {}, "Cleaned tables (first rows)"), blocks, downloadsView(job)];
+}
+
+function view() {
+  const job = S.job;
+  if (!job || job.state === "draft") return startView();
+  const head = h("div", {class: "row"}, h("span", {class: "badge"}, job.kind === "tables" ? "tables" : "notes"),
+    h("span", {class: "muted small"}, job.files.map((f) => f.name).join(", ")), h("span", {class: "grow"}),
+    job.state !== "running" ? h("button", {onclick: startOver}, "Delete this job and start over") : null);
+  const out = [head];
+  if (job.state === "failed") out.push(h("div", {class: "card bad"}, h("b", {}, "This job failed: "), job.error || "unknown error"), stepsView(job));
+  else if (job.state === "awaiting_plan") out.push(stepsView(job), planView(job));
+  else if (job.state === "done") out.push(stepsView(job), job.result.kind === "notes" ? notesResult(job) : tablesResult(job));
+  else out.push(h("h2", {}, "Working"), stepsView(job));
+  return out;
+}
+
+function render() {
+  $("view").replaceChildren(...[view()].flat(Infinity).filter(Boolean));
+}
+function renderRecent() {
+  const open = S.jobs.filter((j) => !S.job || j.id !== S.job.id);
+  $("recent").replaceChildren(...(open.length ? [h("h3", {}, "Earlier jobs on this computer"), ...open.map((j) =>
+    h("div", {class: "row"}, h("a", {href: "#" + j.id, onclick: (e) => { e.preventDefault(); loadJob(j.id).catch(fail); }}, j.created.replace("T", " ")),
+      h("span", {class: "badge"}, j.state), h("span", {class: "muted small"}, (j.kind || "not started") + ", " + j.files + " file(s) " + (j.title || ""))))] : []));
+}
+
+$("newjob").addEventListener("click", startOver);
+(async () => {
+  try {
+    S.info = await api("/api/info");
+    const b = S.info.backend;
+    $("engine").textContent = b.label;
+    $("banner").className = "banner" + (b.hosted ? " hosted" : "");
+    $("banner").replaceChildren(h("b", {}, "An assistant for human review, not a compliance certification. "),
+      b.hosted ? "Your content is sent to a hosted service: use synthetic or public data only. " : "Nothing is sent anywhere. ",
+      "Jobs are kept on this computer and hold original text: synthetic data only. ", b.notes.join(" "));
+    await loadRecent();
+    const id = location.hash.slice(1);
+    if (id) await loadJob(id).catch(() => { S.job = null; render(); }); else render();
+  } catch (e) { fail(e); }
+})();
+</script>
+</body>
+</html>

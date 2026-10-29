@@ -26,6 +26,7 @@ Every number and statement in the README, demo and submission must trace to a ru
 - Smoke-test results are labeled as such (5 notes, easy text) and are not presented as accuracy.
 - No claim of beating any named product. The regex baseline's score is described as reflecting the synthetic formats.
 - "Not measured yet" lists what has no number, so nothing is implied.
+- The offline rules engine of the front page has no accuracy claim (not scored on the held-out set); its README line says it is weak and misses names without a cue.
 - "Self-hostable" and "runs locally" are not claimed; the code has not been tested that way.
 - No cost is quoted in the README yet. List prices and list-price estimates are in `docs/PRICES.md` (retrieved Oct 29, 2026); quote one only as "estimated at list price" with its date, after approval.
 

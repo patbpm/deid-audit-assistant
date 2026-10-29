@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from deid.audit.build import build_note_audit
 from deid.detect.detector import detect_note
 from deid.redteam.loop import harden
-from deid.replace.engine import Replacer
+from deid.replace.engine import Replacer, clean_spans
 
 from .verifier import select_uncertain, verify_spans
 
@@ -44,8 +44,9 @@ class Outcome:
     calls: dict = field(default_factory=dict)
 
 
-def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, progress=None):
-    """Stage 1. Returns (list of Detected, stopped_early)."""
+def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, progress=None, verify=True):
+    """Stage 1. Returns (list of Detected, stopped_early). verify=False skips the verifier (the
+    offline detector has no second opinion to give); uncertain spans still go to a person."""
     out = []
     for note in notes:
         if budget.exceeded:
@@ -57,7 +58,7 @@ def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, pr
             failures.append("the detection reply could not be read")
         elif found.truncated:
             failures.append("the detection reply was cut off at the output limit, so identifiers may be missing")
-        uncertain = [] if failures else select_uncertain(note["text"], found.spans, low)
+        uncertain = [] if failures or not verify else select_uncertain(note["text"], found.spans, low)
         check = verify_spans(client, note["text"], uncertain, verify_cache)
         budget.add(check.usage)
         out.append(Detected(
@@ -72,8 +73,18 @@ def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, pr
     return out, False
 
 
-def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None):
-    """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer)."""
+def replace_only(replacer, d, note, client, low):
+    """One replacement pass with no red-team review; the audit says the risk was not assessed."""
+    text, changes = replacer.apply({**note, "spans": clean_spans(note["text"], note["spans"])})
+    audit = build_note_audit(d.note["note_id"], d.note["text"], d.spans, changes, client.model,
+                             unmatched=d.unmatched, low=low, verdicts=d.verdicts)
+    return Outcome(d.note["note_id"], d, text, changes, clean_spans(note["text"], note["spans"]), [],
+                   "not assessed", "not assessed", audit, {"redteam_calls": 0, "redteam_parse_errors": 0})
+
+
+def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True):
+    """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer). redteam=False replaces
+    once and leaves the risk "not assessed" (no reviewer model is available)."""
     replacer = Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     outcomes = []
     for d in batch:
@@ -89,6 +100,11 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
             continue
         note = {"text": d.note["text"], "spans": d.spans,
                 "patient_key": d.note["patient_id"], "note_id": d.note["note_id"]}
+        if not redteam:
+            outcomes.append(replace_only(replacer, d, note, client, low))
+            if progress:
+                progress("replace", len(outcomes), len(batch), budget)
+            continue
         result = harden(replacer, note, client, redteam_cache, max_rounds)
         for a in result.assessments:
             budget.add(a.usage)

@@ -107,11 +107,12 @@ def column_typer(client, cache_dir, budget):
     return typer
 
 
-def freetext_cleaner(args, td_box):
-    """A cleaning function that sends each free-text cell through the note detector."""
+def freetext_cleaner(args, td_box, client=None):
+    """A cleaning function that sends each free-text cell through the note detector.
+    client: any chat client (default: the Meta API client from the environment)."""
     from deid.detect.client import Budget, ChatClient, LargerLimitRetry
     from deid.detect.detector import Cache, detect_note
-    client = LargerLimitRetry(ChatClient.from_env("meta", 4096), 16384)
+    client = client or LargerLimitRetry(ChatClient.from_env("meta", 4096), 16384)
     budget, cache = Budget(args.max_total_tokens), Cache(Path(args.cache_dir) / "cache")
 
     def clean(value, key):
@@ -166,7 +167,7 @@ def main(argv=None):
         typer = column_typer(LargerLimitRetry(ChatClient.from_env("meta", 4096), 16384), args.cache_dir,
                              Budget(args.max_total_tokens))
     clean = freetext_cleaner(args, box) if args.freetext_live and not args.plan_only else None
-    outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, plans, clean, None, typer)
+    outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, plans, None, None, typer)
     if clean:
         box[0] = td
         outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, report["plans"], clean)
