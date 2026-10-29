@@ -37,17 +37,17 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Synthetic note generator (600 notes, 9,015 labeled spans), frozen dev/test split | built, tested |
 | Evaluation harness; regex, Presidio and Philter baselines | built, scored on the 400-note test split |
 | Adversarial set (180 hard notes, nine families), baselines scored on it | built, scored |
-| Detector with Muse Spark (Meta Model API) | run on 166 of the 200 dev notes (a full run was stopped early for time): all 2,516 labeled identifiers found with exact boundaries and no false positives. Easy template text on the split the prompt was tuned on; not a held-out result. Test split and adversarial set not run yet |
+| Detector with Muse Spark (Meta Model API) | run on all 200 dev notes: all 3,023 labeled identifiers found with exact boundaries, no false positives, no unreadable or cut-off replies. Easy template text on the split the prompt was tuned on; not a held-out result. Test split and adversarial set not run yet |
 | Replacement engine | checked on the dev split with true spans; not yet on a detector's full output |
-| Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
-| Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
+| Red-team reviewer | live smoke test on 5 dev notes (15 probes); also run on all 200 dev notes, where it rated every note low and found nothing to send back |
+| Verifier, feedback loop, agent pipeline | built; live run on all 200 dev notes completed in two sessions (verifier asked about 6 spans and confirmed them; red-team found no leftovers, so the feedback loop did nothing); the loop has only been tested with a scripted model. `--workers` runs notes in parallel with identical results |
 | Audit report, review page | built, tested offline and tried by hand |
 | Front page (`deid.app`): drop or paste input, auto-detect type, progress, table plan, review, downloads | built; tested offline with scripted models and by hand in a browser; run once with the hosted model on its two samples (`docs/APP.md`); dictation and scans not yet run from the page |
 | Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | live run on 5 synthetic dictated and 5 synthetic scanned notes (`docs/INGEST.md`); clean synthetic inputs only |
 | Table mode (CSV): column typing, per-column replacement with consistent mapping across tables, small-group screen | checked on invented tables only (`docs/TABLES.md`); rules alone by default; optional model help for unplaced columns and for free-text cells, each run once live |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
-| Full dev and test evaluation of the model-based system | not run |
+| Evaluation of the model-based system | dev split done (detection and cleaning); test split and adversarial set not run |
 
 ## Results so far
 
@@ -69,6 +69,8 @@ All numbers are on synthetic notes and come from files in `results/`, reproducib
 | Presidio | 86.5 | 1.16 |
 | Regex | 14.4 | 0.00 |
 
+**Full agent run with `muse-spark-1.3` on the 200 dev notes** (`results/dev/agent-meta-dev*.json`; easy synthetic text, the split the prompt was tuned on, so not a held-out result): all 3,023 labeled identifiers found with exact boundaries and the right type, no false positives (names 1,312, dates 850, phones 361, ids 319, addresses 150, emails 31). No reply was unreadable or cut off, and all 200 notes were cleaned. None of the 3,023 identifiers appears word for word in the cleaned notes. The verifier was asked about 6 spans and confirmed them. The red-team rated all 200 cleaned notes low risk and found no leftovers. 199 changes were flagged for a person, all of them dates whose day/month order or year had to be guessed. The review-burden curve is trivial here (6 candidates under 0.8 confidence, all true). About 1.07 million tokens in two sessions, roughly 3.6 USD at list price (an estimate; reasoning-token billing is not stated). Run in parallel (4 workers) the second session took about 4 minutes.
+
 **Smoke tests with `muse-spark-1.3`** (5 dev notes each, easy synthetic text):
 - Detector: all 83 identifiers found, no false positives, no unreadable replies (`results/dev/meta-first5-dev.json`). This shows the pipeline works, not how accurate the model is.
 - Red-team, on 15 probe notes built from those 5 notes (`results/dev/redteam-first5-dev.json`): 0 of 5 control notes flagged, 5 of 5 planted clues flagged and quoted, 10 of 10 withheld identifiers found. The probes are blunt and invented by us, and 5 notes give very wide intervals.
@@ -83,7 +85,7 @@ All numbers are on synthetic notes and come from files in `results/`, reproducib
 
 **Replacement check** (dev split, true spans, 200 notes): no original names, IDs, phones, emails or addresses left, one date shift per patient, no inconsistent or colliding name surrogates (`results/dev/replace-dev.json`). Because true spans were given, this shows the replacement step is sound, not that the pipeline is. Known weak spot: 3 of 46 year-less dates came out a day off across a leap day.
 
-**Not measured yet:** the model-based system on the full dev or test split, the adversarial set, end-to-end leakage after replacement, the open-weights comparison, cost, and the effect of the feedback loop.
+**Not measured yet:** the model-based system on the test split and the adversarial set, the open-weights comparison, and the effect of the feedback loop (it had nothing to fix on dev). Cost so far is only an estimate at list price.
 
 ## Limits
 
