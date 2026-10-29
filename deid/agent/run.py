@@ -97,6 +97,9 @@ def main(argv=None):
     parser.add_argument("--notes", default="data/generated/notes.jsonl")
     parser.add_argument("--split", choices=("dev", "test"), default="dev")
     parser.add_argument("--allow-test", action="store_true", help="needed for --split test")
+    parser.add_argument("--unlabeled", action="store_true",
+                        help="notes without ground truth (for example from deid.ingest.run): every note in the "
+                             "file is used, nothing is scored")
     parser.add_argument("--limit", type=int, default=5, help="notes to process (0 = all)")
     parser.add_argument("--max-rounds", type=int, default=2, help="extra feedback rounds per note")
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
@@ -114,7 +117,11 @@ def main(argv=None):
     if args.split == "test" and not args.allow_test:
         parser.error("the test split is for the final reporting run; tune on dev, or pass --allow-test")
 
-    notes = [n for n in read_notes(args.notes) if split_of(n["patient_id"]) == args.split]
+    notes = read_notes(args.notes)
+    if args.unlabeled:
+        notes = [{**n, "patient_id": n.get("patient_id") or n["note_id"]} for n in notes]
+    else:
+        notes = [n for n in notes if split_of(n["patient_id"]) == args.split]
     notes = notes[: args.limit] if args.limit else notes
     args.requested = len(notes)
     if not args.live:
@@ -153,11 +160,15 @@ def main(argv=None):
     summary = aggregate(args, client, budget, batch, outcomes, stopped1 or stopped2)
     (results_dir / f"{args.name}.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
-    for stage in ("detector", "final"):
-        run_eval(args.notes, f"{base}.{stage}.jsonl", f"{args.name}-{stage}", args.split, results_dir,
-                 only_predicted=True)
+    if not args.unlabeled:
+        for stage in ("detector", "final"):
+            run_eval(args.notes, f"{base}.{stage}.jsonl", f"{args.name}-{stage}", args.split, results_dir,
+                     only_predicted=True)
     print(json.dumps(summary, indent=2, sort_keys=True))
-    print(f"scores: {results_dir}/{args.name}-detector-{args.split}.json and -final-{args.split}.json")
+    if args.unlabeled:
+        print("unlabeled notes: nothing was scored (no ground truth)")
+    else:
+        print(f"scores: {results_dir}/{args.name}-detector-{args.split}.json and -final-{args.split}.json")
     print(f"-> {base}.* (audit, key and notes contain original identifiers or the key: do not share)")
     if stopped1 or stopped2:
         print("STOPPED EARLY: token cap reached. Raise --max-total-tokens only with Patrick's approval.")

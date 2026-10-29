@@ -33,4 +33,4 @@ The table gives the number of spans reviewed to reach 50%, 90% and 100% of the a
 
 ## Other stretch items
 
-- **Muse Voice Transcribe (dictated notes)** and a **vision model for scanned notes** are not started. Both need API access and documentation that is not in the repository, and neither is needed for the core demo. No claim is made for either, and the README does not mention them.
+- Dictated notes (Muse Voice Transcribe) and scanned notes (a vision model) are built and tested offline; see `docs/INGEST.md`. Neither has been run live.

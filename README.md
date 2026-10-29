@@ -34,6 +34,7 @@ note ──► detect (Muse Spark) ──► verify uncertain spans ──► re
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes) only |
 | Verifier, feedback loop, agent pipeline | built; live run on 5 dev notes completed (verifier confirmed 2 spans, nothing for the loop to fix); the loop has only been tested with a scripted model |
 | Audit report, review page | built, tested offline and tried by hand |
+| Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | built and tested offline with mocked services; synthetic test audio and page images can be generated; **no live run** (`docs/INGEST.md`) |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
 | Full dev and test evaluation of the model-based system | not run |
@@ -109,7 +110,7 @@ Keys live in environment variables; never commit them. API calls can be billed, 
 
 ## Docs
 
-`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
+`docs/DATASET.md` (data and labeling rules) · `docs/RESULTS.md` (baselines) · `docs/ADVERSARIAL.md` · `docs/COMPARISON.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/REPLACEMENT.md` · `docs/REDTEAM.md` · `docs/AGENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/PLAN.md` (build plan and progress log).
 
 ## What was built during the hackathon
 

@@ -5,3 +5,5 @@ spacy==3.8.18
 philter-ucsf==1.0.3
 nltk==3.10.4
 chardet==7.7.0
+# Test data only (renders synthetic notes as page images for the scan tests); the pipeline itself needs no extra packages.
+pillow==13.0.0
