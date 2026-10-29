@@ -77,8 +77,11 @@ class ChatClient:
         return cls(need(*cfg["base_url"]), need(*cfg["model"]), key, cfg["token_param"],
                    max_output_tokens)
 
-    def complete(self, messages):
-        body = json.dumps({"model": self.model, "messages": messages, **self.params}).encode()
+    def complete(self, messages, max_output_tokens=None):
+        """max_output_tokens overrides the client's limit for this call only. Nothing shared is changed,
+        so calls from several threads cannot disturb each other or the cache keys."""
+        params = {self.token_param: max_output_tokens or self.max_output_tokens}
+        body = json.dumps({"model": self.model, "messages": messages, **params}).encode()
         request = urllib.request.Request(
             f"{self.base_url}/chat/completions", data=body,
             headers={"Content-Type": "application/json",
@@ -124,12 +127,7 @@ class LargerLimitRetry:
         first = self.inner.complete(messages)
         if first.finish_reason != "length" or not self.retry_limit or self.retry_limit <= self.inner.max_output_tokens:
             return first
-        normal = self.inner.max_output_tokens
-        self.inner.max_output_tokens = self.retry_limit
-        try:
-            second = self.inner.complete(messages)
-        finally:
-            self.inner.max_output_tokens = normal
+        second = self.inner.complete(messages, max_output_tokens=self.retry_limit)
         usage = dict(second.usage)
         for key in ("prompt_tokens", "completion_tokens"):
             usage[key] = first.usage.get(key, 0) + second.usage.get(key, 0)

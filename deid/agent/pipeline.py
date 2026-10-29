@@ -13,9 +13,11 @@ from dataclasses import dataclass, field
 
 from deid.audit.build import build_note_audit
 from deid.detect.detector import detect_note
+from deid.redteam.assess import assess_note, masked_view
 from deid.redteam.loop import harden
 from deid.replace.engine import Replacer, clean_spans
 
+from .parallel import run_ordered
 from .verifier import select_uncertain, verify_spans
 
 
@@ -44,33 +46,70 @@ class Outcome:
     calls: dict = field(default_factory=dict)
 
 
-def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, progress=None, verify=True):
+def detect_one(note, client, detect_cache, verify_cache, low, verify):
+    """Detect one note and verify its uncertain spans. Touches no shared state, so notes can run in parallel.
+    Returns (Detected, the verifier's usage)."""
+    found = detect_note(client, note["text"], detect_cache)
+    failures = []
+    if found.parse_error:
+        failures.append("the detection reply could not be read")
+    elif found.truncated:
+        failures.append("the detection reply was cut off at the output limit, so identifiers may be missing")
+    uncertain = [] if failures or not verify else select_uncertain(note["text"], found.spans, low)
+    check = verify_spans(client, note["text"], uncertain, verify_cache)
+    return Detected(
+        note, found.spans, found.unmatched, check.verdicts, found.usage,
+        {"detect_parse_error": found.parse_error, "detect_truncated": found.truncated,
+         "detect_cached": found.cached, "verify_asked": check.asked,
+         "verify_parse_error": check.parse_error, "verify_truncated": check.truncated,
+         "verify_cached": check.cached,
+         "latency_s": found.latency_s + check.latency_s}, failures), check.usage
+
+
+def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, progress=None, verify=True, workers=1):
     """Stage 1. Returns (list of Detected, stopped_early). verify=False skips the verifier (the
-    offline detector has no second opinion to give); uncertain spans still go to a person."""
+    offline detector has no second opinion to give); uncertain spans still go to a person.
+    workers > 1 runs several notes at once; the result and its order do not change."""
     out = []
-    for note in notes:
-        if budget.exceeded:
-            return out, True
-        found = detect_note(client, note["text"], detect_cache)
-        budget.add(found.usage)
-        failures = []
-        if found.parse_error:
-            failures.append("the detection reply could not be read")
-        elif found.truncated:
-            failures.append("the detection reply was cut off at the output limit, so identifiers may be missing")
-        uncertain = [] if failures or not verify else select_uncertain(note["text"], found.spans, low)
-        check = verify_spans(client, note["text"], uncertain, verify_cache)
-        budget.add(check.usage)
-        out.append(Detected(
-            note, found.spans, found.unmatched, check.verdicts, found.usage,
-            {"detect_parse_error": found.parse_error, "detect_truncated": found.truncated,
-             "detect_cached": found.cached, "verify_asked": check.asked,
-             "verify_parse_error": check.parse_error, "verify_truncated": check.truncated,
-             "verify_cached": check.cached,
-             "latency_s": found.latency_s + check.latency_s}, failures))
+
+    def consume(result):
+        detected, verify_usage = result
+        budget.add(detected.detect_usage)
+        budget.add(verify_usage)
+        out.append(detected)
         if progress:
             progress("detect+verify", len(out), len(notes), budget)
-    return out, False
+
+    stopped = run_ordered(lambda n: detect_one(n, client, detect_cache, verify_cache, low, verify),
+                          notes, workers, lambda: budget.exceeded, consume)
+    return out, stopped
+
+
+def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None):
+    """Ask the red-team reviewer about every note's first masked view, several at once, so that the
+    note-by-note stage that follows finds those replies in the cache. The masked view shows each
+    change as its type tag, so it does not depend on which stand-in values are chosen; a throwaway
+    Replacer fitted the same way gives the same views, and the real run's own Replacer is not touched.
+    Later feedback rounds (rare) are still asked one note at a time. Returns True if the cap stopped it."""
+    replacer = Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    views = []
+    for d in batch:
+        if d.failures:
+            continue
+        spans = clean_spans(d.note["text"], d.spans)
+        _, changes = replacer.apply({"text": d.note["text"], "spans": spans, "patient_key": d.note["patient_id"],
+                                     "note_id": d.note["note_id"]})
+        views.append(masked_view(d.note["text"], changes))
+    done = []
+
+    def consume(assessment):
+        budget.add(assessment.usage)
+        done.append(assessment)
+        if progress:
+            progress("red-team (first look)", len(done), len(views), budget)
+
+    return run_ordered(lambda v: assess_note(client, v, redteam_cache), views, workers,
+                       lambda: budget.exceeded, consume)
 
 
 def replace_only(replacer, d, note, client, low):

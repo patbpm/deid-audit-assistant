@@ -32,8 +32,8 @@ class Inner:
     def params(self):
         return {"max_tokens": self.max_output_tokens}
 
-    def complete(self, messages):
-        self.limits.append(self.max_output_tokens)
+    def complete(self, messages, max_output_tokens=None):
+        self.limits.append(max_output_tokens or self.max_output_tokens)
         return self.replies.pop(0)
 
 

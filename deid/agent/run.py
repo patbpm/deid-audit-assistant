@@ -5,7 +5,8 @@
 
 Safety defaults: dry run unless --live; dev split only (--allow-test is for the
 final reporting run); at most --limit notes (default 5, 0 = all); a token cap
-checked between notes (a note in progress can overshoot it by a few calls).
+checked between notes (a note in progress can overshoot it by a few calls; with --workers
+N, by the notes already in flight, at most 2 x N).
 Per note there are at most 1 detection call, 1 verification call (only if some
 span is uncertain) and 1 + --max-rounds red-team calls. Only note text and the
 masked cleaned view are sent, never the answers.
@@ -36,7 +37,7 @@ from deid.eval.run import run as run_eval
 from deid.eval.run import split_of
 from deid.redteam.prompt import PROMPT_VERSION as REDTEAM_VERSION
 
-from .pipeline import detect_and_verify, review_and_clean
+from .pipeline import detect_and_verify, prefetch_redteam, review_and_clean
 from .verifier import PROMPT_VERSION as VERIFY_VERSION
 
 
@@ -61,7 +62,7 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
         "low_confidence": args.low_confidence,
         "notes_requested": args.requested, "notes_detected": len(batch), "notes_finished": len(outcomes),
         "notes_not_cleaned": sum(bool(o.detected.failures) for o in outcomes),
-        "retry_output_tokens": args.retry_output_tokens,
+        "retry_output_tokens": args.retry_output_tokens, "workers": args.workers,
         "stopped_early": stopped,
         "parse_errors": {"detect": sum(d.flags["detect_parse_error"] for d in batch),
                          "verify": sum(d.flags["verify_parse_error"] for d in batch),
@@ -107,6 +108,10 @@ def main(argv=None):
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--live", action="store_true", help="make real API calls")
+    parser.add_argument("--workers", type=int, default=1,
+                        help="notes sent to the model at once (default 1). The results, their order and the "
+                             "stand-in values are the same as with 1; only the waiting is shared. Keep it small "
+                             "(4 to 8) in case the provider limits requests per second")
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--max-output-tokens", type=int, default=4096)
     parser.add_argument("--retry-output-tokens", type=int, default=16384,
@@ -141,10 +146,12 @@ def main(argv=None):
 
     batch, stopped1 = detect_and_verify(
         notes, client, Cache(root / "cache"), Cache(root / "cache-verify", VERIFY_VERSION), budget,
-        args.low_confidence, progress)
+        args.low_confidence, progress, workers=args.workers)
+    redteam_cache = Cache(root / "cache-redteam", REDTEAM_VERSION)
+    if args.workers > 1:  # the first look at every note in parallel; the loop below then reads them from the cache
+        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress) or stopped1
     outcomes, stopped2, replacer = review_and_clean(
-        batch, client, Cache(root / "cache-redteam", REDTEAM_VERSION), budget, args.seed,
-        args.low_confidence, args.max_rounds, progress)
+        batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress)
 
     out_dir, results_dir = Path(args.out_dir), Path(args.results_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
