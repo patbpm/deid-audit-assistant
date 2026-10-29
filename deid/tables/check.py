@@ -44,12 +44,19 @@ def days(iso):
     return date(y, m, d).toordinal()
 
 
-def evaluate_style(style, patients, seed):
+def evaluate_style(style, patients, seed, typer=None, freetext=None):
+    """typer: a model-assisted column typer (deid.tables.run.column_typer); freetext: a function
+    taking a one-item list (the deidentifier) and returning a free-text cleaner. Both are live
+    model paths; by default neither is used."""
     with tempfile.TemporaryDirectory() as tmp:
         patient_rows, encounter_rows, cells = synth.make_tables(seed, patients)
         truth = synth.write_style(tmp, style, patient_rows, encounter_rows)
         tables = {t: read_table(Path(tmp) / meta["file"], "auto") for t, meta in truth.items()}
-    outputs, changes, report, td = deidentify_tables(tables, seed=seed)
+    outputs, changes, report, td = deidentify_tables(tables, seed=seed, typer=typer)
+    if freetext:
+        box = [td]
+        outputs, changes, report, td = deidentify_tables(tables, seed=seed, plans=report["plans"],
+                                                         clean_text=freetext(box))
     result = {"style": style}
 
     # --- typing
@@ -99,6 +106,7 @@ def evaluate_style(style, patients, seed):
     ek = report["plans"]["encounters"]["key_column"]
     pm = next((c["column"] for c in report["plans"]["patients"]["columns"] if c["index"] == 1), None)
     em = next((c["column"] for c in report["plans"]["encounters"]["columns"] if c["index"] == 2), None)
+    pn_col = next((c["column"] for c in report["plans"]["patients"]["columns"] if c["index"] == 2), None)
     broken = 0
     mrn_of = {r[out_pi[pk]]: r[out_pi[pm]] for r in p_rows} if pk in out_pi and pm in out_pi else {}
     for r in e_rows:
@@ -169,6 +177,37 @@ def evaluate_style(style, patients, seed):
             expected = "90+" if int(o["age"]) >= 90 else o["age"]
             age_ok += r[out_pi[age_col]] == expected
             age_bad += r[out_pi[age_col]] != expected
+    comment_col = next((c for c in report["plans"]["encounters"]["columns"] if c["type"] == "FREETEXT"), None)
+    if comment_col is not None and comment_col["column"] in out_ei:
+        texts = [r[out_ei[comment_col["column"]]] for r in e_rows]
+        inside = [c for c in cells if c.get("inside_text")]
+        still, by_kind = 0, defaultdict(lambda: [0, 0])
+        for c in inside:
+            text = texts[c["row"]]
+            kind = PRESENT_KIND.get(c["type"]) or "ID"
+            found = present(kind, c["value"], text, any_token=True) if kind != "ID" else \
+                bool(re.search(r"(?<![A-Za-z0-9])" + re.escape(c["value"]) + r"(?![A-Za-z0-9])", text))
+            still += found
+            by_kind[c["type"]][0] += 1
+            by_kind[c["type"]][1] += found
+        masked = sum(t == "[FREE TEXT NOT CLEANED]" for t in texts)
+        consistent = total = 0
+        for c in inside:  # the patient's own name in a comment should become the same surname as in the patient table
+            if c["type"] != "NAME" or " " not in c["value"] or c["column"] != "comment":
+                continue
+            enc = encounter_rows[c["row"]]
+            if c["value"] != next((f"{p['full_name'].split(', ')[1].split()[0]} {p['full_name'].split(',')[0]}"
+                                   for p in patient_rows if p["patient_id"] == enc["patient_id"]), None):
+                continue
+            idx = next(i for i, p in enumerate(patient_rows) if p["patient_id"] == enc["patient_id"])
+            surname = p_rows[idx][out_pi[pn_col]].split(",")[0] if pn_col in out_pi else None
+            total += 1
+            consistent += bool(surname) and surname in texts[c["row"]]
+        result["free_text"] = {
+            "comment_cells": len(texts), "distinct_comments": len(set(r["comment"] for r in encounter_rows)),
+            "masked_not_cleaned": masked, "identifiers_inside_text": len(inside), "still_present": still,
+            "by_type": {k: {"inside": v[0], "still_present": v[1]} for k, v in sorted(by_kind.items())},
+            "own_name_comments": total, "own_name_surname_matches_patient_table": consistent}
     small = analyse(tables_from_outputs(outputs, report["plans"]))
     result["small_groups"] = [
         {"view": v["view"], "quasi_identifiers": v["quasi_identifiers"], "rows": v["rows_total"],
@@ -186,9 +225,38 @@ def main(argv=None):
     parser.add_argument("--seed", type=int, default=synth.DEFAULT_SEED)
     parser.add_argument("--patients", type=int, default=synth.DEFAULT_PATIENTS)
     parser.add_argument("--out", default="results/dev/tables.json")
+    parser.add_argument("--styles", nargs="+", choices=synth.STYLES, default=list(synth.STYLES))
+    parser.add_argument("--live-free-text", action="store_true",
+                        help="clean the comment column with the hosted detector (synthetic data; billed)")
+    parser.add_argument("--live-typing", action="store_true",
+                        help="let the hosted model type columns the rules cannot place, confirmed by the rules (billed)")
+    parser.add_argument("--max-total-tokens", type=int, default=250_000)
+    parser.add_argument("--cache-dir", default="runs")
     args = parser.parse_args(argv)
-    results = {"seed": args.seed, "patients": args.patients,
-               "styles": {s: evaluate_style(s, args.patients, args.seed) for s in synth.STYLES}}
+    typer = freetext = budget = None
+    if args.live_typing or args.live_free_text:
+        from types import SimpleNamespace
+
+        from deid.detect.client import Budget, ChatClient, LargerLimitRetry
+
+        from .run import column_typer, freetext_cleaner
+        budget = Budget(args.max_total_tokens)
+        if args.live_typing:
+            typer = column_typer(LargerLimitRetry(ChatClient.from_env("meta", 4096), 16384), args.cache_dir, budget)
+        if args.live_free_text:
+            ns = SimpleNamespace(max_total_tokens=args.max_total_tokens, cache_dir=args.cache_dir)
+            cleaners = []
+
+            def freetext(box):
+                cleaners.append(freetext_cleaner(ns, box))
+                return cleaners[-1]
+    results = {"seed": args.seed, "patients": args.patients, "live": {"typing": args.live_typing,
+                                                                     "free_text": args.live_free_text},
+               "styles": {s: evaluate_style(s, args.patients, args.seed, typer, freetext) for s in args.styles}}
+    if budget is not None:
+        used = budget.total + sum(c.budget.total for c in locals().get("cleaners", []))
+        results["tokens"] = {"typing": budget.total,
+                             "free_text": sum(c.budget.total for c in locals().get("cleaners", [])), "total": used}
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(results, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")

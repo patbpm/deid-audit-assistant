@@ -26,7 +26,8 @@ import re
 from pathlib import Path
 
 from .apply import TableDeidentifier
-from .columns import CHECKS, ACTIONS, build_plan
+from .columns import CHECKS, ACTIONS, build_plan, pick_key
+from . import model_typing
 from .risk import DEFAULT_K, analyse, summary_line, tables_from_outputs, write_report
 
 
@@ -58,11 +59,15 @@ def write_table(path, header, rows):
         writer.writerows(rows)
 
 
-def deidentify_tables(tables, seed=0, unknown="withhold", plans=None, clean_text=None, overrides=None):
+def deidentify_tables(tables, seed=0, unknown="withhold", plans=None, clean_text=None, overrides=None, typer=None):
     """tables: {name: (header or None, rows)}. -> (outputs {name: (header, rows)}, changes, report, deidentifier)."""
     plans = plans or {}
     built = {name: plans.get(name) or build_plan(name, header, rows, (overrides or {}).get(name))
              for name, (header, rows) in tables.items()}
+    if typer:
+        for name, plan in built.items():
+            if name not in plans:
+                typer(name, plan, tables[name][1])
     td = TableDeidentifier(seed, unknown, clean_text)
     names = []
     for name, plan in built.items():
@@ -78,6 +83,28 @@ def deidentify_tables(tables, seed=0, unknown="withhold", plans=None, clean_text
         changes += ch
         report["tables"][name] = summary
     return outputs, changes, report, td
+
+
+def column_typer(client, cache_dir, budget):
+    """A function that asks the model about a plan's unplaced columns and keeps the answers
+    the rules confirm. -> typer(name, plan, rows) -> number of columns placed."""
+    from deid.detect.detector import Cache
+    cache = Cache(Path(cache_dir) / "cache-coltypes", model_typing.PROMPT_VERSION)
+
+    def typer(name, plan, rows):
+        unknown = model_typing.unknown_columns(plan, rows)
+        if not unknown or budget.exceeded:
+            return 0
+        try:
+            suggestions, usage = model_typing.suggest(client, unknown, cache)
+        except model_typing.ParseError:
+            return 0
+        budget.add(usage)
+        placed = model_typing.apply_suggestions(plan, rows, suggestions)
+        plan["key_column"], plan["key_reason"] = pick_key(plan["columns"], rows)
+        return placed
+
+    return typer
 
 
 def freetext_cleaner(args, td_box):
@@ -113,6 +140,9 @@ def main(argv=None):
     parser.add_argument("--k", type=int, default=DEFAULT_K, help="groups of fewer rows than this are reported as a risk")
     parser.add_argument("--no-risk", action="store_true", help="skip the small-group (quasi-identifier) check")
     parser.add_argument("--freetext-live", action="store_true", help="clean free-text cells with the hosted detector")
+    parser.add_argument("--model-typing", action="store_true",
+                        help="ask the hosted model about columns the rules cannot place (it sends a few sample values; "
+                             "synthetic tables only); the rules must confirm each answer")
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--cache-dir", default="runs")
     args = parser.parse_args(argv)
@@ -130,9 +160,13 @@ def main(argv=None):
                     parser.error(f"{name}.{c['column']}: unknown type {c['type']!r}")
                 c["action"] = ACTIONS[c["type"]]
             plans[name] = plan
-    box = [None]
+    box, typer = [None], None
+    if args.model_typing and not args.plan:
+        from deid.detect.client import Budget, ChatClient, LargerLimitRetry
+        typer = column_typer(LargerLimitRetry(ChatClient.from_env("meta", 4096), 16384), args.cache_dir,
+                             Budget(args.max_total_tokens))
     clean = freetext_cleaner(args, box) if args.freetext_live and not args.plan_only else None
-    outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, plans, clean)
+    outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, plans, clean, None, typer)
     if clean:
         box[0] = td
         outputs, changes, report, td = deidentify_tables(tables, args.seed, args.unknown, report["plans"], clean)
