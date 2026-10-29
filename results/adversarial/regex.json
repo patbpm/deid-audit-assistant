@@ -1,0 +1,351 @@
+{
+  "bootstrap_resamples": 1000,
+  "by_subtype": {
+    "abbreviated_names/all_caps": {
+      "gold": 8,
+      "hit": 0
+    },
+    "abbreviated_names/all_lower": {
+      "gold": 8,
+      "hit": 0
+    },
+    "abbreviated_names/initial_last": {
+      "gold": 11,
+      "hit": 0
+    },
+    "abbreviated_names/last_initial": {
+      "gold": 6,
+      "hit": 0
+    },
+    "abbreviated_names/last_two_initials": {
+      "gold": 9,
+      "hit": 0
+    },
+    "abbreviated_names/no_period_initials": {
+      "gold": 10,
+      "hit": 0
+    },
+    "abbreviated_names/two_initials_last": {
+      "gold": 8,
+      "hit": 0
+    },
+    "address_variants/no_commas": {
+      "gold": 11,
+      "hit": 0
+    },
+    "address_variants/po_box": {
+      "gold": 12,
+      "hit": 0
+    },
+    "address_variants/state_spelled_out": {
+      "gold": 12,
+      "hit": 0
+    },
+    "address_variants/town": {
+      "gold": 14,
+      "hit": 0
+    },
+    "address_variants/unit_first": {
+      "gold": 11,
+      "hit": 11
+    },
+    "common_word_names/patient_full": {
+      "gold": 20,
+      "hit": 0
+    },
+    "common_word_names/patient_surname": {
+      "gold": 20,
+      "hit": 0
+    },
+    "eponym_names/clinician_eponym": {
+      "gold": 20,
+      "hit": 0
+    },
+    "eponym_names/patient_eponym": {
+      "gold": 20,
+      "hit": 0
+    },
+    "identifier_variants/acct_no": {
+      "gold": 10,
+      "hit": 0
+    },
+    "identifier_variants/dashed_policy": {
+      "gold": 4,
+      "hit": 0
+    },
+    "identifier_variants/dots_extension": {
+      "gold": 7,
+      "hit": 7
+    },
+    "identifier_variants/fax_dash": {
+      "gold": 5,
+      "hit": 5
+    },
+    "identifier_variants/intl_paren": {
+      "gold": 7,
+      "hit": 7
+    },
+    "identifier_variants/leading_one": {
+      "gold": 6,
+      "hit": 6
+    },
+    "identifier_variants/mr_hash": {
+      "gold": 6,
+      "hit": 0
+    },
+    "identifier_variants/mrn_hash_no_space": {
+      "gold": 5,
+      "hit": 0
+    },
+    "identifier_variants/plus_mixed_case": {
+      "gold": 7,
+      "hit": 7
+    },
+    "identifier_variants/spaces": {
+      "gold": 8,
+      "hit": 0
+    },
+    "identifier_variants/ssn_dashed": {
+      "gold": 6,
+      "hit": 6
+    },
+    "identifier_variants/ssn_no_dashes": {
+      "gold": 3,
+      "hit": 0
+    },
+    "identifier_variants/underscore_subdomain": {
+      "gold": 6,
+      "hit": 6
+    },
+    "lookalikes/paren": {
+      "gold": 20,
+      "hit": 20
+    },
+    "lookalikes/patient_full": {
+      "gold": 20,
+      "hit": 0
+    },
+    "non_english_names/clinician": {
+      "gold": 20,
+      "hit": 0
+    },
+    "non_english_names/patient_full": {
+      "gold": 20,
+      "hit": 0
+    },
+    "non_english_names/relative": {
+      "gold": 20,
+      "hit": 0
+    },
+    "odd_date_formats/abbrev_period": {
+      "gold": 2,
+      "hit": 0
+    },
+    "odd_date_formats/dash_md": {
+      "gold": 8,
+      "hit": 0
+    },
+    "odd_date_formats/dash_mon_yy": {
+      "gold": 4,
+      "hit": 0
+    },
+    "odd_date_formats/dotted_dmy": {
+      "gold": 9,
+      "hit": 0
+    },
+    "odd_date_formats/dotted_ymd": {
+      "gold": 5,
+      "hit": 0
+    },
+    "odd_date_formats/mon_ordinal_no_year": {
+      "gold": 6,
+      "hit": 0
+    },
+    "odd_date_formats/month_ordinal": {
+      "gold": 7,
+      "hit": 0
+    },
+    "odd_date_formats/ordinal_no_year": {
+      "gold": 5,
+      "hit": 0
+    },
+    "odd_date_formats/ordinal_of_month": {
+      "gold": 1,
+      "hit": 0
+    },
+    "odd_date_formats/run_together": {
+      "gold": 3,
+      "hit": 0
+    },
+    "odd_date_formats/unpadded_iso": {
+      "gold": 10,
+      "hit": 2
+    },
+    "typos_and_noise/double_slash": {
+      "gold": 20,
+      "hit": 0
+    },
+    "typos_and_noise/misspelled": {
+      "gold": 20,
+      "hit": 0
+    },
+    "typos_and_noise/no_area_code": {
+      "gold": 20,
+      "hit": 0
+    },
+    "typos_and_noise/ocr_letter": {
+      "gold": 20,
+      "hit": 0
+    },
+    "typos_and_noise/unpadded_iso": {
+      "gold": 20,
+      "hit": 1
+    }
+  },
+  "families": {
+    "abbreviated_names": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 60,
+      "leaked_char_rate": 1.0,
+      "notes": 20,
+      "precision": null,
+      "pred": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "address_variants": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 60,
+      "leaked_char_rate": 0.8068506184586108,
+      "notes": 20,
+      "precision": 1.0,
+      "pred": 11,
+      "recall": 0.18333333333333332,
+      "recall_ci95": [
+        0.1,
+        0.25
+      ]
+    },
+    "common_word_names": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 40,
+      "leaked_char_rate": 1.0,
+      "notes": 20,
+      "precision": null,
+      "pred": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "eponym_names": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 40,
+      "leaked_char_rate": 1.0,
+      "notes": 20,
+      "precision": null,
+      "pred": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "identifier_variants": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 80,
+      "leaked_char_rate": 0.34044368600682595,
+      "notes": 20,
+      "precision": 1.0,
+      "pred": 44,
+      "recall": 0.55,
+      "recall_ci95": [
+        0.4375,
+        0.65
+      ]
+    },
+    "lookalikes": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 40,
+      "leaked_char_rate": 0.453125,
+      "notes": 20,
+      "precision": 1.0,
+      "pred": 20,
+      "recall": 0.5,
+      "recall_ci95": [
+        0.5,
+        0.5
+      ]
+    },
+    "non_english_names": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 60,
+      "leaked_char_rate": 1.0,
+      "notes": 20,
+      "precision": null,
+      "pred": 0,
+      "recall": 0.0,
+      "recall_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "odd_date_formats": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 60,
+      "leaked_char_rate": 0.966832504145937,
+      "notes": 20,
+      "precision": 1.0,
+      "pred": 2,
+      "recall": 0.03333333333333333,
+      "recall_ci95": [
+        0.0,
+        0.08333333333333333
+      ]
+    },
+    "typos_and_noise": {
+      "false_positives": 0,
+      "false_positives_per_note": 0.0,
+      "gold": 100,
+      "leaked_char_rate": 0.9885844748858448,
+      "notes": 20,
+      "precision": 1.0,
+      "pred": 1,
+      "recall": 0.01,
+      "recall_ci95": [
+        0.0,
+        0.03
+      ]
+    }
+  },
+  "name": "regex",
+  "notes_sha256": "80ae6a613d851b60fd9b5c45bbc82cd79198d0dfd318624d71f2f66c636f2498",
+  "overall": {
+    "false_positives": 0,
+    "false_positives_per_note": 0.0,
+    "gold": 540,
+    "leaked_char_rate": 0.8015460482473677,
+    "notes": 180,
+    "precision": 1.0,
+    "pred": 78,
+    "recall": 0.14444444444444443,
+    "recall_ci95": [
+      0.10720887245841035,
+      0.18264014466546113
+    ]
+  },
+  "pred_file_sha256": "f8c7745dd5ab6fabc1c0bc5b8e2e94ed3f4cadbfc7e8a668dc28b0b418ba6299",
+  "type_agnostic": true
+}

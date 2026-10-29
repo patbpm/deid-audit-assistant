@@ -1,0 +1,29 @@
+{
+  "adversarial_version": "0.1",
+  "generator_version": "0.1",
+  "notes": 180,
+  "notes_sha256": "80ae6a613d851b60fd9b5c45bbc82cd79198d0dfd318624d71f2f66c636f2498",
+  "per_family": 20,
+  "python_version": "3.14.7",
+  "seed": 20261029,
+  "spans": 540,
+  "spans_by_family": {
+    "abbreviated_names": 60,
+    "address_variants": 60,
+    "common_word_names": 40,
+    "eponym_names": 40,
+    "identifier_variants": 80,
+    "lookalikes": 40,
+    "non_english_names": 60,
+    "odd_date_formats": 60,
+    "typos_and_noise": 100
+  },
+  "spans_by_type": {
+    "ADDRESS": 60,
+    "DATE": 100,
+    "EMAIL": 13,
+    "ID": 54,
+    "NAME": 240,
+    "PHONE": 73
+  }
+}
