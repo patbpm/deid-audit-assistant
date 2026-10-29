@@ -127,3 +127,78 @@ class ScoringTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+FROZEN_B = json.loads(Path("data/adversarial_b.json").read_text(encoding="utf-8"))
+
+
+class SetBTests(unittest.TestCase):
+    """The second set, written after the first one's errors were read, to judge the fixes made because of them."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.notes = adversarial.generate_notes(FROZEN_B["seed"], FROZEN_B["per_family"], "b")
+        cls.manifest = adversarial.write_notes(cls.notes, cls.tmp.name, FROZEN_B["seed"], FROZEN_B["per_family"], "b")
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.tmp.cleanup()
+
+    def test_generator_still_produces_the_recorded_set(self):
+        diff = {k: (FROZEN_B[k], self.manifest[k]) for k in FROZEN_B if FROZEN_B[k] != self.manifest[k]}
+        self.assertEqual(diff, {}, "set B differs from data/adversarial_b.json")
+
+    def test_it_has_its_own_ids_a_new_seed_and_one_more_family(self):
+        self.assertNotEqual(FROZEN_B["seed"], FROZEN["seed"])
+        self.assertEqual({n["family"] for n in self.notes}, set(adversarial.FAMILIES_B))
+        self.assertEqual(len(adversarial.FAMILIES_B), len(adversarial.FAMILIES) + 1)
+        self.assertTrue(all(n["note_id"].startswith("B") and n["patient_id"].startswith("P8") for n in self.notes))
+        for note in self.notes:
+            for s in note["spans"]:
+                self.assertEqual(note["text"][s["start"]:s["end"]], s["text"])
+
+    def test_the_default_set_is_unchanged_by_the_second_vocabulary(self):
+        self.assertEqual(adversarial.FAMILIES, adversarial.FAMILIES_B[:9])
+        self.assertEqual(adversarial.generate_notes(FROZEN["seed"], FROZEN["per_family"])[0]["note_id"], "A0001")
+
+    def test_its_words_are_disjoint_from_set_a_and_from_the_examples_in_the_prompts(self):
+        from deid.agent import nameuse
+        from deid.detect import prompt
+        a, b = adversarial.VOCAB_A, adversarial.VOCAB_B
+        for key in ("first_words", "last_words", "eponyms"):
+            self.assertEqual(set(a[key]) & set(b[key]), set(), key)
+        self.assertEqual(set(a["international"]) & set(b["international"]), set())
+        self.assertEqual(set(a["lookalikes"]) & set(b["lookalikes"]), set())
+        self.assertEqual(set(a["firsts"]) & set(b["firsts"]), set())
+        self.assertEqual(set(a["lasts"]) & set(b["lasts"]), set())
+        prompt_words = set(("Hunter", "Marsh", "Cook"))
+        for example in prompt_words:
+            self.assertIn(example, prompt.SYSTEM + nameuse.SYSTEM)
+        used = set(b["first_words"]) | set(b["last_words"]) | set(b["eponyms"]) | set(b["firsts"]) | set(b["lasts"])
+        self.assertEqual(used & prompt_words, set())
+        for word in a["last_words"]:      # the common-word surnames the fixes were written after seeing
+            self.assertNotIn(word, prompt.SYSTEM + nameuse.SYSTEM)
+        # (Wilson and Foley were already in the first prompt, written before set A existed; set B uses neither.)
+        for word in ("Wilson", "Foley"):
+            self.assertNotIn(word, set(b["eponyms"]) | set(b["lasts"]) | set(b["last_words"]))
+
+    def test_relative_dates_notes_label_two_dates_and_a_name_only(self):
+        for note in self.notes:
+            if note["family"] == "relative_dates":
+                self.assertEqual(sorted(s["type"] for s in note["spans"]), ["DATE", "DATE", "NAME"])
+
+    def test_eponym_conditions_and_common_words_stay_unlabeled(self):
+        for note in self.notes:
+            if note["family"] == "eponym_names":
+                for s in note["spans"]:
+                    after = note["text"][s["end"]:s["end"] + 1]
+                    self.assertNotIn(after, ("-",))
+                self.assertEqual(sum(s["type"] == "NAME" for s in note["spans"]), 2)
+
+    def test_replacement_runs_on_every_hard_note(self):
+        from deid.replace.engine import Replacer
+        replacer = Replacer(0).fit([{"text": n["text"], "spans": n["spans"]} for n in self.notes])
+        for n in self.notes:
+            _, changes = replacer.apply({"text": n["text"], "spans": n["spans"], "patient_key": n["patient_id"]})
+            self.assertEqual(len(changes), len(n["spans"]))

@@ -1,6 +1,6 @@
 # Adversarial test set
 
-Status: Day 6. A separate set of hard synthetic cases, built and scored with the three baselines. **No model has been run on it yet.** It is not part of the frozen dataset (`data/frozen.json` and its hashes are untouched). This is an assistant for human review, not a compliance certification.
+Status: Day 6. A separate set of hard synthetic cases, built and scored with the three baselines, and run once with the Muse Spark agent (below). A second set (B) now exists for judging the fixes made after that run; **no model has been run on set B yet.** It is not part of the frozen dataset (`data/frozen.json` and its hashes are untouched). This is an assistant for human review, not a compliance certification.
 
 ```powershell
 python -m deid.synth.adversarial                                   # writes data/generated/adversarial/ (git-ignored)
@@ -75,6 +75,29 @@ What the run shows, and what it does not:
 - **Review-burden curve** (`results/adversarial/burden-agent-meta-adv.json`): 56 candidates under 0.8 confidence, 5 of them true. Reading them in confidence order reached 90% of the gain after 6, near the best possible 5, against 52 in random order. A perfect reviewer is assumed, and the gain is under 1 point of recall.
 - **Cost.** About 685,000 tokens, 2.42 USD at list price.
 - **Now a tuned set.** These errors have been read, so this set can no longer judge a fix. Any change to the prompts or matching made because of them must be judged on a new adversarial set from a different seed, and on the 400 test notes.
+
+## Fixes made after that run, and the second set (Oct 29)
+
+The two causes of the 108 false positives were fixed in the code (nothing was run live afterwards):
+
+1. **Relative and year-only dates.** The detection prompt (now `v2`) says a year on its own and relative expressions are not DATE, and `deid/detect/context.py` sets such a listed string aside with the reason recorded. HIPAA's Safe Harbor list leaves a bare year alone; relative dates carry no calendar day.
+2. **Every occurrence of a listed name replaced.** A listed name directly followed by an eponym noun and without a title or label before it ("Wilson disease") is set aside by rule. For a name the detector flags as also an ordinary word, each occurrence without a title or label gets its own model check (`deid/agent/nameuse.py`). Only a clear "ordinary word" leaves it as written; it is then recorded in the audit and sent to review, where "Replace it after all" is one click. Any other answer keeps it replaced.
+
+**Replay of the saved set-A replies through the new rules** (`python -m deid.eval.replay`, no model call; `results/adversarial/rules-replay-a.json`): recall stays 540 of 540 and false positives fall from 108 to 18 (0.10 per note), all 18 in the common-word-names family, which needs the model check that a replay cannot run. The rules were written after reading these errors, so this shows what the rules do, **not** how well they generalize. The same replay over the 200 dev notes' saved replies changes nothing (3,023 of 3,023 found, no false positives, nothing set aside).
+
+**Set B** (`python -m deid.synth.adversarial --vocab b`, seed 20261030, `data/adversarial_b.json`): 200 notes, 600 labeled identifiers, the nine families again with different common words (Hall, Rice, Wood, Frost, Sharp...), eponyms (Marfan, Barrett, Glasgow, Apgar...), names, lookalike sentences and date phrasings, a second layout for the eponym notes, and a tenth family of notes dense in relative and year-only dates. Some eponym nouns (esophagus, sarcoma, thyroiditis, coma scale) and some relative phrasings ("a few weeks back", "in the spring", "the week before admission") are deliberately outside the rule lists, so the prompt and the model check have to do that part. Set B was written after set A's errors were known, so it is a test of the fixes, not an independent discovery set; its words are disjoint from set A's and from the examples in the prompts (tested). Baselines on set B (not tuned, run on Oct 29):
+
+| Family | Gold | Philter: recall % / FP per note | Presidio | Regex |
+|---|---|---|---|---|
+| ALL | 600 | 96.3 / 0.83 | 84.7 / 1.50 | 12.5 / 0.00 |
+| relative_dates | 60 | 100.0 / 0.20 | 86.7 / 5.00 | 0.0 / 0.00 |
+| common_word_names | 40 | 100.0 / 1.85 | 80.0 / 0.35 | 0.0 / 0.00 |
+| eponym_names | 40 | 100.0 / 1.65 | 100.0 / 1.45 | 0.0 / 0.00 |
+| odd_date_formats | 60 | 100.0 / 0.45 | 73.3 / 3.90 | 3.3 / 0.00 |
+
+(all families: `python -m deid.eval.adversarial --out results/adversarial-b --table`.)
+
+**Still to do, needs a live run:** the agent on set B (about 200 notes, 4 workers, roughly 700,000 tokens, about 2.5 USD at list price) with the pre-registered question: do the false positives per note fall below Philter's 0.83 while recall stays at or near 100%? Then a re-run on the 200 dev notes (the v2 prompt has new cache keys) to check it did not regress, and the 400 test notes once. If the name check removes a real name occurrence, that will show up as lost recall on set B and is a result to report, not hide.
 
 ## Rules for using it
 

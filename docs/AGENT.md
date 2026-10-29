@@ -9,17 +9,19 @@ python -m deid.agent.run --live --limit 5        # real calls on dev notes (need
 
 ## Stages
 
-1. **Detect** (`deid/detect`, prompt `v1`): one model call per note; strings are located in the text and every occurrence is marked.
-2. **Verify** (`deid/agent/verifier.py`, prompt `vf1`): one call per note, only if some span is uncertain: confidence below 0.8, no confidence, or a shape the rule checks dislike (a phone with too few digits, an ID with no digit). Each uncertain span goes with about 90 characters of context. The verifier answers `identifier`, `not_identifier` or `unsure`.
-3. **Replace** (`deid/replace`): detection and verification run over the whole batch first, because the engine reads the names in the batch to tell first names from surnames. Replacement then runs note by note.
-4. **Red-team** (`deid/redteam`, prompt `rt1`): a model reads the masked cleaned note and reports leftovers and risk clues.
-5. **Feed back**: located leftover identifiers are added to the spans and the note is cleaned again, up to `--max-rounds` (default 2) extra rounds, stopping when a round finds nothing new.
-6. **Audit** (`deid/audit`): every change is linked to its offsets, detector, confidence, verifier verdict, rule and checks, and everything a person should look at goes to a review queue.
+1. **Detect** (`deid/detect`, prompt `v2`): one model call per note; strings are located in the text and every occurrence is marked, with three set-asides that are recorded, never silent (`deid/detect/context.py`): a year on its own or a relative date ("last Tuesday") is not an identifier; a listed name directly followed by an eponym noun ("Wilson disease", "Foley catheter") with no title or label before it is a condition, not a person; and an occurrence of a name the model flagged `also_a_word`, with no title or label before it, is doubtful and goes to step 2.
+2. **Check doubtful name occurrences** (`deid/agent/nameuse.py`, prompt `nu1`): one call per note, only if step 1 left a doubtful occurrence. Each is shown with its surroundings and the model answers `name`, `ordinary_word` or `unsure`. Only a clear `ordinary_word` leaves the occurrence as written; that is recorded in the audit (`ignored`) and put in the review queue as `not-replaced`, where a person can choose "Replace it after all". Any other answer, a missing answer, a cut-off reply or an unreadable one keeps it replaced. Without a second model (offline engine) the occurrence stays replaced and is flagged.
+3. **Verify** (`deid/agent/verifier.py`, prompt `vf1`): one call per note, only if some span is uncertain: confidence below 0.8, no confidence, or a shape the rule checks dislike (a phone with too few digits, an ID with no digit). Each uncertain span goes with about 90 characters of context. The verifier answers `identifier`, `not_identifier` or `unsure`.
+4. **Replace** (`deid/replace`): detection and verification run over the whole batch first, because the engine reads the names in the batch to tell first names from surnames. Replacement then runs note by note.
+5. **Red-team** (`deid/redteam`, prompt `rt1`): a model reads the masked cleaned note and reports leftovers and risk clues.
+6. **Feed back**: located leftover identifiers are added to the spans and the note is cleaned again, up to `--max-rounds` (default 2) extra rounds, stopping when a round finds nothing new.
+7. **Audit** (`deid/audit`): every change is linked to its offsets, detector, confidence, verifier verdict, rule and checks, and everything a person should look at goes to a review queue.
 
-Per note: at most 1 detection call, 1 verification call and 1 + `--max-rounds` red-team calls.
+Per note: at most 1 detection call, 1 name-check call, 1 verification call and 1 + `--max-rounds` red-team calls.
 
 ## Decisions the code makes
 
+- **The name check is the one model step that can leave text as written**, and only for a word the detector itself marked as also an ordinary word, only on occurrences with no title or label before them, and only on a clear `ordinary_word`. Everything it leaves is listed in the audit and the review queue. The red-team reviewer still reads the cleaned note afterwards and can send a missed occurrence back. Whether this is safe enough is a measurement still to be made (`docs/ADVERSARIAL.md`).
 - **The verifier never removes a span.** A missed identifier costs more than an extra replacement. `identifier` clears only the low-confidence objection; `not_identifier` and `unsure` keep the span replaced and send it to a person with the verifier's reason. A span the verifier skips, or an unreadable reply, counts as `unsure`: silence is never a confirmation.
 - **Spans found only by the red-team reviewer** are labelled `red-team feedback` and always sent to review, so a person sees what the detector missed.
 - **Clues that are not leftover identifiers** (rare condition, occupation, small place) are never edited automatically; they appear in the review queue.

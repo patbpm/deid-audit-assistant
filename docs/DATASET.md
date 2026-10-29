@@ -34,7 +34,7 @@ Each span has `start`/`end` (character offsets into `text`, end exclusive), `typ
 
 - Label the value only. "Dr. Kim" labels `Kim`; "MRN: 1234567" labels `1234567`; credentials such as ", MD" are not labeled.
 - "Last, First M" and "First M Last" are each one `NAME` span.
-- Dates are labeled in every format, including forms with no year (`Apr 21`, `4/21`).
+- Dates are labeled in every format, including forms with no year (`Apr 21`, `4/21`). A year on its own (`2019`) and relative expressions (`last Tuesday`, `tomorrow`, `two weeks ago`) are not labeled; HIPAA's Safe Harbor list also leaves a bare year alone. This is a labeling choice, stated so the detector's prompt and rules can follow it.
 - A bare town ("Lindenfield, IA") is an `ADDRESS` span with subtype `TOWN`.
 - Unlabeled on purpose, to test false positives: blood pressures (`BP 132/84`), dose ratios (`5/325 mg`), pain scores (`7/10`), lab values, ICD-10-style codes, room numbers, eponyms (`Wilson disease`, `Bell`...) and ages under 90.
 

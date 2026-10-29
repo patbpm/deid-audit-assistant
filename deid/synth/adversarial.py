@@ -12,6 +12,13 @@ example.com and example.org.
 
 This set is not part of data/frozen.json and does not change it. Treat it as a
 test set: do not tune prompts or rules on it. See docs/ADVERSARIAL.md.
+
+Two vocabularies. Set A (the default) was scored once on Oct 29 and its errors were read,
+so it can no longer judge a fix. Set B (`--vocab b`, seed 20261030) uses different common
+words, eponyms, lookalike sentences, names and date phrasings, plus a tenth family of notes
+full of relative and year-only dates. B was written after A's errors were known, to judge the
+fixes made because of them; its words are disjoint from A's and from the examples written
+into the prompts (a test checks that).
 """
 
 import argparse
@@ -27,14 +34,17 @@ from . import GENERATOR_VERSION, formats, pools
 from .builder import validate_spans
 
 DEFAULT_SEED = 20261029
+DEFAULT_SEED_B = 20261030
 DEFAULT_PER_FAMILY = 20
 VERSION = "0.1"
+VERSION_B = "0.2"
 NOTES_FILE = "notes.jsonl"
 MANIFEST_FILE = "manifest.json"
 
 FAMILIES = ("common_word_names", "odd_date_formats", "abbreviated_names", "typos_and_noise",
             "non_english_names", "lookalikes", "identifier_variants", "address_variants",
             "eponym_names")
+FAMILIES_B = FAMILIES + ("relative_dates",)
 
 
 def L(text, kind, subtype=""):
@@ -77,11 +87,11 @@ LAST_WORDS = {
 }
 
 
-def make_common_word_names(rng, i):
-    first, last = rng.choice(sorted(FIRST_WORDS)), rng.choice(sorted(LAST_WORDS))
+def make_common_word_names(rng, i, v):
+    first, last = rng.choice(sorted(v["first_words"])), rng.choice(sorted(v["last_words"]))
     return [
         "Patient: ", L(f"{first} {last}", "NAME", "patient_full"), "\n",
-        LAST_WORDS[last], " ", FIRST_WORDS[first], "\n",
+        v["last_words"][last], " ", v["first_words"][first], "\n",
         "Spoke with Mr. " if rng.random() < 0.5 else "Spoke with Ms. ", L(last, "NAME", "patient_surname"),
         " by phone. Follow up in clinic.\n",
     ]
@@ -110,13 +120,14 @@ DATE_FORMATS = (
 )
 
 
-def make_odd_date_formats(rng, i):
+def make_odd_date_formats(rng, i, v):
     base = date(2024, 1, 1) + timedelta(days=rng.randrange(0, 700))
     parts = ["Visit note.\n"]
     for k, (name, fn) in enumerate(rng.sample(DATE_FORMATS, 3)):
         when = base + timedelta(days=rng.randrange(0, 40))
         parts += [["Admitted on ", "Seen again on ", "Follow-up scheduled for "][k], L(fn(when), "DATE", name), ". "]
-    parts += ["\nPain 7/10, BP 118/76. Symptoms began last Tuesday and she has felt better since 2019.\n"]
+    tail = v["date_tails"]
+    parts += [rng.choice(tail) if tail else "\nPain 7/10, BP 118/76. Symptoms began last Tuesday and she has felt better since 2019.\n"]
     return parts
 
 
@@ -134,10 +145,10 @@ ABBREV_FORMS = (
 )
 
 
-def make_abbreviated_names(rng, i):
+def make_abbreviated_names(rng, i, v):
     parts = ["Chart review.\n"]
     for k, (name, fn) in enumerate(rng.sample(ABBREV_FORMS, 3)):
-        f, l, m = rng.choice(FIRSTS), rng.choice(LASTS), rng.choice("ABCDEFGHJKLMNPRST")
+        f, l, m = rng.choice(v["firsts"]), rng.choice(v["lasts"]), rng.choice("ABCDEFGHJKLMNPRST")
         parts += [["Patient: ", "Referred by Dr. ", "Seen with nurse "][k], L(fn(f, l, m), "NAME", name), ". "]
     parts += ["\nPlan reviewed with the family.\n"]
     return parts
@@ -156,8 +167,8 @@ def drop(word, rng):
     return word[:k] + word[k + 1:]
 
 
-def make_typos_and_noise(rng, i):
-    f, l = rng.choice(FIRSTS), rng.choice(LASTS)
+def make_typos_and_noise(rng, i, v):
+    f, l = rng.choice(v["firsts"]), rng.choice(v["lasts"])
     typo = f"{swap(f, rng)} {drop(l, rng)}"
     mrn = digits(rng, 7)
     mrn_ocr = mrn[:3] + rng.choice("OlI") + mrn[4:]
@@ -179,8 +190,8 @@ INTERNATIONAL = [
 ]
 
 
-def make_non_english_names(rng, i):
-    patient, relative, clinician = rng.sample(INTERNATIONAL, 3)
+def make_non_english_names(rng, i, v):
+    patient, relative, clinician = rng.sample(v["international"], 3)
     return ["Patient: ", L(patient, "NAME", "patient_full"), "\n",
             "Interpreter used for the visit. Daughter ", L(relative, "NAME", "relative"),
             " was present.\n", "Seen by Dr. ", L(clinician, "NAME", "clinician"), ".\n"]
@@ -197,9 +208,9 @@ LOOKALIKES = [
 ]
 
 
-def make_lookalikes(rng, i):
-    f, l = rng.choice(FIRSTS), rng.choice(LASTS)
-    chosen = rng.sample(LOOKALIKES, 4)
+def make_lookalikes(rng, i, v):
+    f, l = rng.choice(v["firsts"]), rng.choice(v["lasts"])
+    chosen = rng.sample(v["lookalikes"], 4)
     return ["Patient: ", L(f"{f} {l}", "NAME", "patient_full"), "\n", "\n".join(chosen), "\nCall ",
             L(f"({rng.randint(200, 989)}) 555-01{rng.randrange(0, 100):02d}", "PHONE", "paren"), " with questions.\n"]
 
@@ -209,7 +220,7 @@ def digits(rng, n):
     return "".join(rng.choice("0123456789") for _ in range(n))
 
 
-def make_identifier_variants(rng, i):
+def make_identifier_variants(rng, i, v):
     area = lambda: rng.randint(200, 989)
     line = lambda: f"01{rng.randrange(0, 100):02d}"
     options = [
@@ -238,7 +249,7 @@ STATE_NAMES = {"IA": "Iowa", "WI": "Wisconsin", "MN": "Minnesota", "IL": "Illino
                "NE": "Nebraska", "SD": "South Dakota", "KS": "Kansas"}
 
 
-def make_address_variants(rng, i):
+def make_address_variants(rng, i, v):
     town, state = rng.choice(pools.TOWNS)
     street = rng.choice(pools.STREET_NAMES)
     zipcode = f"{rng.randint(10000, 99999)}"
@@ -265,47 +276,133 @@ EPONYMS = {
 }
 
 
-def make_eponym_names(rng, i):
-    doctor, other = rng.sample(sorted(EPONYMS), 2)
-    first = rng.choice(FIRSTS)
+def make_eponym_names(rng, i, v):
+    eponyms = v["eponyms"]
+    doctor, other = rng.sample(sorted(eponyms), 2)
+    first = rng.choice(v["firsts"])
+    if v["eponym_layouts"] > 1 and rng.random() < 0.5:   # set B: a second layout, the patient first
+        return ["Patient: ", L(f"{first} {other}", "NAME", "patient_eponym"), "\n",
+                "Discussed the ", eponyms[doctor], " with the family. Referred by Dr. ",
+                L(doctor, "NAME", "clinician_eponym"), ".\n",
+                "Past history includes ", eponyms[other], ".\n"]
     return ["Seen by Dr. ", L(doctor, "NAME", "clinician_eponym"), " today.\n",
-            "History of ", EPONYMS[other], ". ",
-            "The ", EPONYMS[doctor], " was discussed in the plan.\n",
+            "History of ", eponyms[other], ". ",
+            "The ", eponyms[doctor], " was discussed in the plan.\n",
             "Patient: ", L(f"{other}, {first}", "NAME", "patient_eponym"), "\n"]
 
+
+# --- set B only: notes dense in relative and year-only dates ------------------------------------------
+def make_relative_dates(rng, i, v):
+    first, second = rng.sample(DATE_FORMATS, 2)
+    base = date(2024, 1, 1) + timedelta(days=rng.randrange(0, 700))
+    other = base + timedelta(days=rng.randrange(5, 60))
+    f, l = rng.choice(v["firsts"]), rng.choice(v["lasts"])
+    rel = rng.sample(v["relative_phrases"], 3)
+    years = rng.sample(v["year_phrases"], 2)
+    return ["Patient: ", L(f"{f} {l}", "NAME", "patient_full"), "\n",
+            "Visit on ", L(first[1](base), "DATE", first[0]), ". Cough began ", rel[0], ". A similar episode was reported ", rel[1],
+            ". Smoked ", years[0], "; quit ", years[1], ". Recheck ", rel[2], ", booked for ",
+            L(second[1](other), "DATE", second[0]), ".\n"]
+
+
+VOCAB_A = {
+    "first_words": FIRST_WORDS, "last_words": LAST_WORDS, "firsts": FIRSTS, "lasts": LASTS,
+    "international": INTERNATIONAL, "lookalikes": LOOKALIKES, "eponyms": EPONYMS,
+    "date_tails": None, "eponym_layouts": 1,
+}
+
+VOCAB_B = {
+    "first_words": {
+        "Pearl": "Pearl-white plaques were seen on the tongue.", "Ivy": "Ivy exposure was reported after gardening.",
+        "Sage": "Sage tea was used as a home remedy.", "Lance": "Lance the abscess if it does not drain.",
+        "Grant": "Grant of leave from work was discussed with the employer.",
+        "Chase": "Chase the pending lab result before discharge.", "Drew": "Drew blood from the left arm without difficulty.",
+        "Art": "Art therapy was offered twice weekly.", "Pat": "Pat dry the incision after showering.",
+        "Summer": "Summer heat worsened the symptoms.",
+    },
+    "last_words": {
+        "Hall": "Hall ambulation twice daily was encouraged.", "Rice": "Rice and bananas were advised for the diarrhea.",
+        "Wood": "Wood chip exposure at work was denied.", "Cross": "Cross-sectional imaging showed no mass.",
+        "Bond": "Bond with the newborn appears strong.", "Frost": "Frost damage to the fingertips was noted.",
+        "Swift": "Swift improvement followed the antibiotics.", "Sharp": "Sharp pain in the left flank since morning.",
+        "Fair": "Fair skin with multiple freckles.", "Little": "Little change in the rash since the last visit.",
+        "Chambers": "Chambers of the heart were normal on echo.", "Gray": "Gray matter lesions were seen on MRI.",
+    },
+    "firsts": ["Helen", "Peter", "Nora", "Victor", "Alice", "Edgar", "Tina", "Oscar"],
+    "lasts": ["Nakamura", "Patel", "Kowalski", "Romero", "Hughes", "Barnes", "Fleming", "Owens"],
+    "international": [
+        "Chidi Okafor", "Aiko Matsumoto", "Bogdan Popescu", "Leila Haddad", "Thiago Barbosa Lima",
+        "Ngoc Anh Tran", "Sven Johansson", "Ximena Torres-Vega", "Emeka Nwosu", "Katarzyna Zielińska",
+        "Rashid Al-Mansoori", "Mariam Diallo", "Jae-won Seo", "Çağla Yıldız", "Henrik Nygård",
+        "Anahit Grigoryan", "Tomás Ibáñez", "Wanjiru Kamau", "Dariusz Kaczmarek", "Sakura Ito",
+    ],
+    "lookalikes": [
+        "Hgb 13.2 g/dL, platelets 245, INR 1.0.", "Codes J45.909 and I10 were billed; CPT 99214.",
+        "Disc bulge at L3/4 and narrowing at L5-S1.", "Takes 10/325 mg tablets every 4 hours as needed.",
+        "Strength 5/5 bilaterally; pain 3/10.", "BP 124/78, HR 64, RR 14, SpO2 98%.",
+        "Firmware 4.1.2 was installed on the monitor.", "Seen at 14:45; bed 12/3 assigned.",
+        "Reference 135-145 mmol/L; eGFR 82.", "Dilution 1:500; ratio 2/3.",
+        "Symptoms for 3 weeks; seen two weeks ago; follow-up next Friday.",
+        "Surgery in 2017 with no complications since 2018.",
+    ],
+    "eponyms": {
+        "Marfan": "Marfan syndrome", "Huntington": "Huntington disease", "Paget": "Paget disease",
+        "Barrett": "Barrett esophagus", "Kaposi": "Kaposi sarcoma", "Hashimoto": "Hashimoto thyroiditis",
+        "Meniere": "Meniere disease", "Tourette": "Tourette syndrome", "Achilles": "Achilles tendon",
+        "Apgar": "Apgar score", "Glasgow": "Glasgow coma scale", "Babinski": "Babinski sign",
+    },
+    "date_tails": [
+        "\nPain 4/10, BP 122/80. Symptoms began two weeks ago and have eased since last month. Prior surgery in 2017.\n",
+        "\nPain 6/10, BP 130/84. She felt well in 2018 and again until yesterday. Review next Monday.\n",
+        "\nPain 2/10, BP 116/72. Onset a few weeks back; worse this morning; similar episode in 2021.\n",
+        "\nPain 5/10, BP 126/82. Started in the spring, with a milder bout five years back.\n",
+    ],
+    "eponym_layouts": 2,
+    "relative_phrases": ["two weeks ago", "yesterday", "last month", "next Friday", "in three days", "this morning",
+                         "a few weeks back", "over the weekend", "at the start of the year", "in the spring",
+                         "the week before admission", "earlier this year"],
+    "year_phrases": ["in 2009", "until 2014", "since 2016", "in 1998", "from 2003", "in 2021"],
+}
+VOCABS = {"a": VOCAB_A, "b": VOCAB_B}
 
 BUILDERS = {
     "common_word_names": make_common_word_names, "odd_date_formats": make_odd_date_formats,
     "abbreviated_names": make_abbreviated_names, "typos_and_noise": make_typos_and_noise,
     "non_english_names": make_non_english_names, "lookalikes": make_lookalikes,
     "identifier_variants": make_identifier_variants, "address_variants": make_address_variants,
-    "eponym_names": make_eponym_names,
+    "eponym_names": make_eponym_names, "relative_dates": make_relative_dates,
 }
 
 
-def generate_notes(seed=DEFAULT_SEED, per_family=DEFAULT_PER_FAMILY):
+def generate_notes(seed=DEFAULT_SEED, per_family=DEFAULT_PER_FAMILY, vocab="a"):
     rng = random.Random(seed)
+    families = FAMILIES if vocab == "a" else FAMILIES_B
+    prefix = "A" if vocab == "a" else "B"
+    patient_base = 9000 if vocab == "a" else 8000
     notes = []
-    for family in FAMILIES:
+    for family in families:
         for i in range(per_family):
-            text, spans = assemble(BUILDERS[family](rng, i))
+            text, spans = assemble(BUILDERS[family](rng, i, VOCABS[vocab]))
             validate_spans(text, spans)
             number = len(notes) + 1
             for span in spans:
-                span["entity"] = f"A{number:04d}"
-            notes.append({"note_id": f"A{number:04d}", "patient_id": f"P9{number:03d}", "family": family,
-                          "note_type": "adversarial", "note_date": "2026-01-01", "text": text, "spans": spans})
+                span["entity"] = f"{prefix}{number:04d}"
+            notes.append({"note_id": f"{prefix}{number:04d}", "patient_id": f"P{patient_base + number}",
+                          "family": family, "note_type": "adversarial", "note_date": "2026-01-01",
+                          "text": text, "spans": spans})
     return notes
 
 
-def build_manifest(notes, notes_path, seed, per_family):
+def build_manifest(notes, notes_path, seed, per_family, vocab="a"):
     by_family, by_type = Counter(), Counter()
     for note in notes:
         by_family[note["family"]] += len(note["spans"])
         for span in note["spans"]:
             by_type[span["type"]] += 1
+    extra = {} if vocab == "a" else {"vocab": vocab}
     return {
-        "adversarial_version": VERSION, "generator_version": GENERATOR_VERSION,
+        **extra,
+        "adversarial_version": VERSION if vocab == "a" else VERSION_B, "generator_version": GENERATOR_VERSION,
         "python_version": platform.python_version(), "seed": seed, "per_family": per_family,
         "notes": len(notes), "spans": sum(by_type.values()),
         "spans_by_family": dict(sorted(by_family.items())), "spans_by_type": dict(sorted(by_type.items())),
@@ -313,14 +410,14 @@ def build_manifest(notes, notes_path, seed, per_family):
     }
 
 
-def write_notes(notes, out_dir, seed, per_family):
+def write_notes(notes, out_dir, seed, per_family, vocab="a"):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     notes_path = out_dir / NOTES_FILE
     with open(notes_path, "w", encoding="utf-8", newline="\n") as handle:
         for note in notes:
             handle.write(json.dumps(note, sort_keys=True, ensure_ascii=False) + "\n")
-    manifest = build_manifest(notes, notes_path, seed, per_family)
+    manifest = build_manifest(notes, notes_path, seed, per_family, vocab)
     with open(out_dir / MANIFEST_FILE, "w", encoding="utf-8", newline="\n") as handle:
         json.dump(manifest, handle, indent=2, sort_keys=True)
         handle.write("\n")
@@ -329,11 +426,15 @@ def write_notes(notes, out_dir, seed, per_family):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--vocab", choices=("a", "b"), default="a",
+                        help="a: the first set (scored once, now a tuned set); b: the second set, for judging fixes")
+    parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--per-family", type=int, default=DEFAULT_PER_FAMILY)
-    parser.add_argument("--out", default="data/generated/adversarial")
+    parser.add_argument("--out", default=None)
     args = parser.parse_args(argv)
-    manifest = write_notes(generate_notes(args.seed, args.per_family), args.out, args.seed, args.per_family)
+    seed = args.seed if args.seed is not None else (DEFAULT_SEED if args.vocab == "a" else DEFAULT_SEED_B)
+    out = args.out or ("data/generated/adversarial" if args.vocab == "a" else "data/generated/adversarial-b")
+    manifest = write_notes(generate_notes(seed, args.per_family, args.vocab), out, seed, args.per_family, args.vocab)
     print(json.dumps(manifest, indent=2, sort_keys=True))
 
 

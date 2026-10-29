@@ -37,6 +37,7 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Synthetic note generator (600 notes, 9,015 labeled spans), frozen dev/test split | built, tested |
 | Evaluation harness; regex, Presidio and Philter baselines | built, scored on the 400-note test split |
 | Adversarial set (180 hard notes, nine families), baselines scored on it | built, scored |
+| Fixes for the two causes of the adversarial false positives (relative and year-only dates; name occurrences that are ordinary words), and a second adversarial set (200 notes, new seed and vocabulary) to judge them | built and tested offline; replaying the saved set-A replies through the rules takes false positives from 108 to 18 with recall unchanged (a tuned set, so not evidence); **not yet run with the model on the new set** (`docs/ADVERSARIAL.md`) |
 | Detector with Muse Spark (Meta Model API) | run on all 200 dev notes (3,023 of 3,023 found, no false positives; easy text, tuned split) and once on the 180-note adversarial set (540 of 540 covered, 108 false positives, see below). Test split not run yet |
 | Replacement engine | checked on the dev split with true spans; not yet on a detector's full output |
 | Red-team reviewer | live smoke test on 5 dev notes (15 probes); also run on all 200 dev notes, where it rated every note low and found nothing to send back |
