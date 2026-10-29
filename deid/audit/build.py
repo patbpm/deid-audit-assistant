@@ -9,6 +9,8 @@ that were not found in the note, and the red-team reviewer's clues.
 
 from collections import Counter
 
+from deid.agent.crosscheck import reason as crosscheck_reason
+
 from .verify import LOW_CONFIDENCE, verify_span
 
 
@@ -32,15 +34,22 @@ def apply_verdict(checks, verdict):
     return {"decision": "review" if reasons else "accept", "reasons": reasons}
 
 
+def cross_reason(cross, change, primary_name, second_name):
+    span = (cross or {}).get((change["start"], change["end"]))
+    return crosscheck_reason(span, primary_name, second_name) if span else None
+
+
 def build_note_audit(note_id, text, spans, changes, detector, others=None, unmatched=(),
-                     assessment=None, low=LOW_CONFIDENCE, verdicts=None, added=(), failures=(), ignored=()):
+                     assessment=None, low=LOW_CONFIDENCE, verdicts=None, added=(), failures=(), ignored=(), cross=None, second_name="", notices=()):
     """spans: the detector's spans (start, end, type, confidence?); changes: from
     Replacer.apply; others: {detector name: spans} from detectors that also ran;
     assessment: {"risk", "clues"} from the red-team reviewer, or None;
     verdicts: {(start, end): {"decision", "why"}} from the verifier;
     added: spans the red-team reviewer's feedback added after detection;
     ignored: strings or occurrences the detector listed that were left as written, each with its
-    source ("rule" is informational; "name-use check" is a model's call and goes to the review queue)."""
+    source ("rule" is informational; "name-use check" is a model's call and goes to the review queue);
+    cross: {(start, end): span} for spans a second model was asked about, with the other model's name in
+    second_name (spans the two disagree on go to review); notices: sentences for the review queue."""
     confidence = {(s["start"], s["end"]): s.get("confidence") for s in spans}
     added_keys = {(s["start"], s["end"]) for s in added}
     verdicts = verdicts or {}
@@ -53,6 +62,9 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
         verdict = verdicts.get((c["start"], c["end"]))
         if verdict:
             checks = apply_verdict(checks, verdict)
+        split = cross_reason(cross, c, detector, second_name)
+        if split:
+            checks = {"decision": "review", "reasons": checks["reasons"] + [split]}
         from_feedback = (c["start"], c["end"]) in added_keys
         if from_feedback:
             checks = {"decision": "review", "reasons": checks["reasons"] + [
@@ -74,6 +86,8 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
     for string in unmatched:
         review.append({"kind": "unmatched", "ref": None,
                        "reasons": [f"the model listed {string!r} but it was not found in the note"]})
+    for n in notices:
+        review.append({"kind": "notice", "ref": None, "reasons": [n]})
     for g in ignored:
         if g.get("source") == "name-use check":  # a model decided to leave a listed name as written: a person checks
             review.append({"kind": "not-replaced", "ref": None, "category": "NAME", "text": g["text"],

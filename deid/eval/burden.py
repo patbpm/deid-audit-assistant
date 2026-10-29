@@ -18,6 +18,11 @@ The gap between "ranked" and "random" is what the confidence scores are worth.
 Identifiers that no candidate overlaps stay missed whatever the burden; they are
 reported as the ceiling and can only be caught by reading the note.
 Type labels are ignored. Use dev notes while developing.
+
+--cross measures the two-model cross-check (deid.agent.crosscheck) on predictions that carry a "cross"
+mark: a span the two models disagree about, however confident either was, is treated as needing a look
+(its confidence is capped at 0.5). Run the same file with and without --cross to compare what the
+models' confidence numbers are worth against what their disagreement is worth.
 """
 
 import argparse
@@ -33,6 +38,21 @@ FRACTIONS = (0.5, 0.9, 1.0)
 
 def overlaps(a, b):
     return a["start"] < b["end"] and b["start"] < a["end"]
+
+
+DISAGREEMENT_CONFIDENCE = 0.5
+
+
+def with_disagreement_flagged(predictions):
+    """Copy of the predictions in which every span the two models disagree about has its confidence capped."""
+    out = {}
+    for note_id, spans in predictions.items():
+        out[note_id] = []
+        for p in spans:
+            if p.get("cross") in ("only primary", "only second") or p.get("second_type"):
+                p = {**p, "confidence": min(1.0 if p.get("confidence") is None else p["confidence"], DISAGREEMENT_CONFIDENCE)}
+            out[note_id].append(p)
+    return out
 
 
 def build(notes, predictions, hi):
@@ -165,6 +185,9 @@ def main(argv=None):
     parser.add_argument("--allow-test", action="store_true")
     parser.add_argument("--hi", type=float, default=0.8, help="confidence at or above which spans are redacted unreviewed")
     parser.add_argument("--shuffles", type=int, default=200)
+    parser.add_argument("--cross", action="store_true",
+                        help="treat spans the two models disagree about as needing review (predictions from a "
+                             "run with --second-provider)")
     parser.add_argument("--only-predicted", action="store_true", help="score only notes the system was run on")
     parser.add_argument("--out", default=str(OUT_DIR))
     args = parser.parse_args(argv)
@@ -175,8 +198,10 @@ def main(argv=None):
     notes = [n for n in gold if args.split == "all" or split_of(n["patient_id"]) == args.split]
     if args.only_predicted:
         notes = [n for n in notes if n["note_id"] in predictions]
+    if args.cross:
+        predictions = with_disagreement_flagged(predictions)
     result = analyse(notes, predictions, args.hi, args.shuffles)
-    result.update({"name": args.name, "split": args.split, "only_predicted": args.only_predicted,
+    result.update({"cross": args.cross, "name": args.name, "split": args.split, "only_predicted": args.only_predicted,
                    "pred_file": str(args.pred)})
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)

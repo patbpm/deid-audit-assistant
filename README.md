@@ -47,6 +47,7 @@ Drop or paste notes (text or JSON lines), CSV tables, and, with `--live`, dictat
 | Dictated notes (Muse Voice Transcribe) and scanned notes (vision model) as inputs | live run on 5 synthetic dictated and 5 synthetic scanned notes (`docs/INGEST.md`); clean synthetic inputs only |
 | Table mode (CSV): column typing, per-column replacement with consistent mapping across tables, small-group screen | checked on invented tables only (`docs/TABLES.md`); rules alone by default; optional model help for unplaced columns and for free-text cells, each run once live |
 | Review-burden curve (recall against spans reviewed) | built and tested offline (`docs/BURDEN.md`); not yet run on a full model output |
+| Two-model cross-check (Muse Spark next to Muse Spark Open; disagreements go to review) | built and tested offline with scripted models (`docs/CROSSCHECK.md`); no real second model run yet, needs a partner endpoint |
 | Muse Spark Open on partner inference (comparison) | comparison script built and tested offline (`docs/COMPARISON.md`); no run yet, needs a partner endpoint |
 | Evaluation of the model-based system | dev split and adversarial set done once; test split (400 notes) not run |
 

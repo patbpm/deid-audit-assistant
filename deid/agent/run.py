@@ -52,6 +52,21 @@ def spans_of(spans):
     return [{k: v for k, v in s.items() if v is not None} for s in spans]
 
 
+def cross_summary(batch):
+    """Counts for the run summary when a second model took part; nothing otherwise."""
+    if not any(d.second_name for d in batch):
+        return {}
+    spans = [s for d in batch for s in d.spans]
+    return {"cross_check": {
+        "second_model": next(d.second_name for d in batch if d.second_name),
+        "spans_agree": sum(s.get("cross") == "agree" for s in spans),
+        "only_primary": sum(s.get("cross") == "only primary" for s in spans),
+        "only_second": sum(s.get("cross") == "only second" for s in spans),
+        "type_disagreements": sum(bool(s.get("second_type")) for s in spans),
+        "notes_checked_by_one_model_only": sum(bool(d.notices) for d in batch),
+        "second_parse_errors": sum(d.flags.get("second_parse_error", False) for d in batch)}}
+
+
 def aggregate(args, client, budget, batch, outcomes, stopped):
     verdicts = Counter(v["decision"] for d in batch for v in d.verdicts.values())
     live = [d for d in batch if not d.flags["detect_cached"]]
@@ -73,6 +88,7 @@ def aggregate(args, client, budget, batch, outcomes, stopped):
         "truncated": sum(d.flags["detect_truncated"] or d.flags["verify_truncated"] for d in batch),
         "unmatched_strings": sum(len(d.unmatched) for d in batch),
         "verifier": {"spans_asked": sum(d.flags["verify_asked"] for d in batch), "verdicts": dict(verdicts)},
+        **cross_summary(batch),
         "name_use_check": {"occurrences_asked": sum(d.flags["nameuse_asked"] for d in batch),
                            "left_as_written": sum(g["source"] == "name-use check" for d in batch for g in d.ignored)},
         "set_aside_by_rule": {
@@ -118,6 +134,11 @@ def main(argv=None):
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--live", action="store_true", help="make real API calls")
+    parser.add_argument("--second-provider", choices=("meta", "custom"), default=None,
+                        help="a second detector that reads every note alone (for example --provider meta "
+                             "--second-provider custom, with DETECT_BASE_URL, DETECT_MODEL and DETECT_API_KEY set "
+                             "for Muse Spark Open on partner inference). Spans the two disagree on go to review; "
+                             "see docs/CROSSCHECK.md")
     parser.add_argument("--workers", type=int, default=1,
                         help="notes sent to the model at once (default 1). The results, their order and the "
                              "stand-in values are the same as with 1; only the waiting is shared. Keep it small "
@@ -133,6 +154,8 @@ def main(argv=None):
     parser.add_argument("--results-dir", default="results/dev")
     args = parser.parse_args(argv)
     args.name = args.name or f"agent-{args.provider}-{args.split}"
+    if args.second_provider and args.second_provider == args.provider:
+        parser.error("--second-provider must differ from --provider")
     if args.split == "test" and not args.allow_test:
         parser.error("the test split is for the final reporting run; tune on dev, or pass --allow-test")
 
@@ -148,6 +171,10 @@ def main(argv=None):
         return 0
 
     client = LargerLimitRetry(ChatClient.from_env(args.provider, args.max_output_tokens), args.retry_output_tokens)
+    second = None
+    if args.second_provider:
+        second = (LargerLimitRetry(ChatClient.from_env(args.second_provider, args.max_output_tokens),
+                                   args.retry_output_tokens), Cache(Path(args.cache_dir) / "cache-second"))
     budget = Budget(args.max_total_tokens, args.price_in, args.price_out)
     root = Path(args.cache_dir)
 
@@ -156,7 +183,7 @@ def main(argv=None):
 
     batch, stopped1 = detect_and_verify(
         notes, client, Cache(root / "cache"), Cache(root / "cache-verify", VERIFY_VERSION), budget,
-        args.low_confidence, progress, workers=args.workers)
+        args.low_confidence, progress, workers=args.workers, second=second)
     redteam_cache = Cache(root / "cache-redteam", REDTEAM_VERSION)
     if args.workers > 1:  # the first look at every note in parallel; the loop below then reads them from the cache
         stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress) or stopped1
@@ -174,6 +201,8 @@ def main(argv=None):
     Path(f"{base}.failed.json").write_text(json.dumps(failed, indent=2) + "\n", encoding="utf-8", newline="\n")
     write_predictions({o.note_id: spans_of(o.detected.spans) for o in outcomes}, f"{base}.detector.jsonl")
     write_predictions({o.note_id: spans_of(o.final_spans) for o in outcomes}, f"{base}.final.jsonl")
+    if second:  # what the second model found by itself, for scoring it on its own
+        write_predictions({o.note_id: spans_of(o.detected.second_spans) for o in outcomes}, f"{base}.second.jsonl")
     Path(f"{base}.key.json").write_text(
         json.dumps(replacer.key_tables(), indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     audits = [o.audit for o in outcomes]
