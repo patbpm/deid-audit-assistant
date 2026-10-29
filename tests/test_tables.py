@@ -245,7 +245,7 @@ class RunTests(unittest.TestCase):
             def __init__(self, reply):
                 self.reply = reply
 
-            def complete(self, messages):
+            def complete(self, messages, max_output_tokens=None):
                 return self.reply
 
         good = Completion(json.dumps({"identifiers": [{"text": "Kim Reyes", "type": "NAME", "confidence": 0.9}]}),
