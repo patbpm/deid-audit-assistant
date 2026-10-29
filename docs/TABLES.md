@@ -40,6 +40,25 @@ Two linked tables in four header styles: `clean` and `messy` headers written whi
 - **The unseen headers are no longer fully unseen.** They found a real bug (an amount such as `27701.51` was read as a phone number and replaced), which I fixed in the rules. The numbers above are after that fix, so treat `unseen` as a mildly tuned set. The `clean` and `messy` results mostly show that the rules know the vocabulary they were written for.
 - **A free-text column is masked, not cleaned**, in all of these runs, since no model was used; the leak check covers it because the masked text contains no identifiers.
 
+## Live checks with the hosted model (Oct 29)
+
+Two optional model paths, each run once on the invented tables (`deid.tables.check --live-typing` and `--live-free-text`). Both send synthetic values to Meta's hosted `muse-spark-1.3`.
+
+**Model-assisted column typing** (`--model-typing`, `deid/tables/model_typing.py`). For the columns the rules could not place, one call per table sends the headers and up to 8 distinct sample values and asks for a type. The answer is accepted only if the rules' own check for that type agrees. A claim that a column is safe to keep faces a stricter test: its values must be plain numbers or a few short categories, with nothing that looks like an email, phone, SSN, date, name or id, so a model cannot wave an identifier column through. Anything the rules refuse stays unplaced and is withheld. Result (`results/dev/tables-model-typing.json`, 5,255 tokens in 4 calls):
+
+| Header style | Columns typed right, rules alone | with model help, rules confirming | Unplaced |
+|---|---|---|---|
+| differently worded headers | 18 of 24 | 22 of 24 | 4 to 0 |
+| no headers | 15 of 24 | 21 of 24 | 6 to 0 |
+
+The columns it placed were towns, ages, lengths of stay, diagnosis codes and amounts, so the output kept data that had been withheld (all 60 ages came out right). The remaining wrong types are the same harmless ones as before (a patient id read as a generic id; a ZIP read as an id). Nothing leaked and no identifier column was kept as is. This is one run on an easy generator; it does not show how the model does on real, messy headers, and every placement is still listed in `plan.json` with `decided_by: model, confirmed by the rules` for a person to check.
+
+**Free-text cleaning** (`--freetext-live`). Each distinct comment cell goes through the note detector and replacement engine, so names and numbers inside sentences get the same fake values as elsewhere in the run. On the invented encounters (121 comment cells, 78 distinct, 163 identifiers written inside the sentences: names, phones, emails, insurance ids), result in `results/dev/tables-freetext-live.json`:
+- none of the 163 identifiers remained in the cleaned comments, and no cell was left masked;
+- the patient's own name in a comment became the same fake surname as in the patient table in 30 of 30 cases;
+- 81,289 tokens for the run (about $0.35 at most at list price; the input and output split was not recorded).
+Before and after, from the run: "Patient Harriet Garcia asked for records to be sent to hgarcia@example.org." became "Patient Henrietta Selwyn asked for records to be sent to cyrus.treadwell52@example.org." The comments are short, templated sentences; real free text is longer and stranger, and the clinical content (a rare condition, a small town) is not assessed here.
+
 ## Small-group check (`deid/tables/risk.py`)
 
 Cleaning removes names and ids, but ordinary columns can still single someone out together: age, ZIP code, town, sex, a diagnosis code. `deid.tables.run` therefore also runs a check on the cleaned tables (skip with `--no-risk`; `--k` sets the group size, default 5) and writes `risk.json` and `risk-rows.csv`; `python -m deid.tables.risk --in cleaned.csv ... --plan plan.json` does the same on files already cleaned.

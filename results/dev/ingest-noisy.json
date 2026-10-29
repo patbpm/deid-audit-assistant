@@ -1,0 +1,119 @@
+{
+  "name": "noisy",
+  "sources": {
+    "audio": {
+      "after_cleaning": {
+        "by_type": {
+          "ID": {
+            "checked": 7,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 28,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 10,
+            "still_present": 0
+          }
+        },
+        "checked_identifiers": 45,
+        "leak_rate": 0.0,
+        "still_present": 0
+      },
+      "char_error_rate": 0.11241950321987121,
+      "identifiers": 83,
+      "notes": 5,
+      "recovered": 66,
+      "recovered_by_type": {
+        "ADDRESS": {
+          "found": 0,
+          "of": 4
+        },
+        "DATE": {
+          "found": 21,
+          "of": 21
+        },
+        "EMAIL": {
+          "found": 0,
+          "of": 2
+        },
+        "ID": {
+          "found": 7,
+          "of": 9
+        },
+        "NAME": {
+          "found": 28,
+          "of": 37
+        },
+        "PHONE": {
+          "found": 10,
+          "of": 10
+        }
+      },
+      "recovery_rate": 0.7951807228915663,
+      "word_error_rate": 0.3071090047393365
+    },
+    "scan": {
+      "after_cleaning": {
+        "by_type": {
+          "ADDRESS": {
+            "checked": 4,
+            "still_present": 0
+          },
+          "EMAIL": {
+            "checked": 2,
+            "still_present": 0
+          },
+          "ID": {
+            "checked": 8,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 37,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 10,
+            "still_present": 0
+          }
+        },
+        "checked_identifiers": 61,
+        "leak_rate": 0.0,
+        "still_present": 0
+      },
+      "char_error_rate": 0.00019171779141104295,
+      "identifiers": 83,
+      "notes": 5,
+      "recovered": 82,
+      "recovered_by_type": {
+        "ADDRESS": {
+          "found": 4,
+          "of": 4
+        },
+        "DATE": {
+          "found": 21,
+          "of": 21
+        },
+        "EMAIL": {
+          "found": 2,
+          "of": 2
+        },
+        "ID": {
+          "found": 8,
+          "of": 9
+        },
+        "NAME": {
+          "found": 37,
+          "of": 37
+        },
+        "PHONE": {
+          "found": 10,
+          "of": 10
+        }
+      },
+      "recovery_rate": 0.9879518072289156,
+      "word_error_rate": 0.0011098779134295228
+    }
+  }
+}

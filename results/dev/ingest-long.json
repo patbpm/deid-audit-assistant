@@ -1,0 +1,58 @@
+{
+  "name": "long",
+  "sources": {
+    "audio": {
+      "after_cleaning": {
+        "by_type": {
+          "ID": {
+            "checked": 6,
+            "still_present": 0
+          },
+          "NAME": {
+            "checked": 24,
+            "still_present": 0
+          },
+          "PHONE": {
+            "checked": 8,
+            "still_present": 0
+          }
+        },
+        "checked_identifiers": 38,
+        "leak_rate": 0.0,
+        "still_present": 0
+      },
+      "char_error_rate": 0.11497808713585976,
+      "identifiers": 64,
+      "notes": 1,
+      "recovered": 55,
+      "recovered_by_type": {
+        "ADDRESS": {
+          "found": 0,
+          "of": 3
+        },
+        "DATE": {
+          "found": 17,
+          "of": 17
+        },
+        "EMAIL": {
+          "found": 0,
+          "of": 2
+        },
+        "ID": {
+          "found": 6,
+          "of": 6
+        },
+        "NAME": {
+          "found": 24,
+          "of": 28
+        },
+        "PHONE": {
+          "found": 8,
+          "of": 8
+        }
+      },
+      "recovery_rate": 0.859375,
+      "word_error_rate": 0.2977303070761015
+    }
+  }
+}

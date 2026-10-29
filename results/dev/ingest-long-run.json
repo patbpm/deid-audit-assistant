@@ -1,0 +1,19 @@
+{
+  "audio_files": 1,
+  "audio_mode": "PUSH_TO_TALK",
+  "audio_model": "muse-voice-transcribe-1.0",
+  "audio_seconds_sent": 430.755,
+  "cost_usd_audio": 0.021537749999999998,
+  "cost_usd_tokens": null,
+  "errors": [],
+  "latency_s_median": 60.16558259999147,
+  "name": "ingest-long",
+  "notes_written": 1,
+  "scan_files": 0,
+  "stopped": [],
+  "tokens_in": 0,
+  "tokens_out": 0,
+  "truncated_scans": 0,
+  "vision_model": null,
+  "vision_prompt": "ocr1"
+}

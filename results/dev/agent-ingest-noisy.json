@@ -1,0 +1,79 @@
+{
+  "audit": {
+    "by_rule": {
+      "address-structured": 4,
+      "date-shift": 37,
+      "date-shift-assumed-month-first": 3,
+      "date-shift-no-year": 2,
+      "email-example-domain": 4,
+      "fallback-tag": 7,
+      "id-format-preserving": 18,
+      "name-token": 77,
+      "phone-fictional": 20
+    },
+    "by_type": {
+      "ADDRESS": 8,
+      "DATE": 45,
+      "EMAIL": 4,
+      "ID": 18,
+      "NAME": 77,
+      "PHONE": 20
+    },
+    "changes": 172,
+    "changes_needing_review": 14,
+    "notes": 10,
+    "notes_not_cleaned": 0,
+    "notes_with_review_items": 8,
+    "review_items": 14,
+    "risk_levels": {
+      "low": 10
+    }
+  },
+  "cost_usd": 0.316269,
+  "latency_s_median_detect_verify": 11.066915399977006,
+  "low_confidence": 0.8,
+  "max_rounds": 2,
+  "max_total_tokens": 200000,
+  "model": "muse-spark-1.3",
+  "name": "agent-ingest-noisy",
+  "notes_detected": 10,
+  "notes_finished": 10,
+  "notes_not_cleaned": 0,
+  "notes_requested": 10,
+  "parse_errors": {
+    "detect": 0,
+    "redteam": 0,
+    "verify": 0
+  },
+  "prompt_versions": {
+    "detect": "v1",
+    "redteam": "rt1",
+    "verify": "vf1"
+  },
+  "provider": "meta",
+  "redteam_calls": 11,
+  "request_params": {
+    "max_completion_tokens": 4096
+  },
+  "retry_output_tokens": 16384,
+  "risk_after_feedback": {
+    "low": 10
+  },
+  "risk_before_feedback": {
+    "high": 1,
+    "low": 9
+  },
+  "spans_added_by_feedback": 3,
+  "split": "dev",
+  "stopped_early": false,
+  "tokens_in": 19340,
+  "tokens_out": 68728,
+  "truncated": 0,
+  "unmatched_strings": 0,
+  "verifier": {
+    "spans_asked": 5,
+    "verdicts": {
+      "identifier": 5
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "audit": {
+    "by_rule": {
+      "date-shift": 17,
+      "email-example-domain": 2,
+      "fallback-tag": 3,
+      "id-format-preserving": 7,
+      "name-token": 28,
+      "phone-fictional": 9
+    },
+    "by_type": {
+      "ADDRESS": 3,
+      "DATE": 17,
+      "EMAIL": 2,
+      "ID": 7,
+      "NAME": 28,
+      "PHONE": 9
+    },
+    "changes": 66,
+    "changes_needing_review": 7,
+    "notes": 1,
+    "notes_not_cleaned": 0,
+    "notes_with_review_items": 1,
+    "review_items": 7,
+    "risk_levels": {
+      "low": 1
+    }
+  },
+  "cost_usd": 0.080925,
+  "latency_s_median_detect_verify": 47.85744380002143,
+  "low_confidence": 0.8,
+  "max_rounds": 2,
+  "max_total_tokens": 100000,
+  "model": "muse-spark-1.3",
+  "name": "agent-ingest-long",
+  "notes_detected": 1,
+  "notes_finished": 1,
+  "notes_not_cleaned": 0,
+  "notes_requested": 1,
+  "parse_errors": {
+    "detect": 0,
+    "redteam": 0,
+    "verify": 0
+  },
+  "prompt_versions": {
+    "detect": "v1",
+    "redteam": "rt1",
+    "verify": "vf1"
+  },
+  "provider": "meta",
+  "redteam_calls": 1,
+  "request_params": {
+    "max_completion_tokens": 4096
+  },
+  "retry_output_tokens": 16384,
+  "risk_after_feedback": {
+    "low": 1
+  },
+  "risk_before_feedback": {
+    "low": 1
+  },
+  "spans_added_by_feedback": 0,
+  "split": "dev",
+  "stopped_early": false,
+  "tokens_in": 4832,
+  "tokens_out": 17620,
+  "truncated": 0,
+  "unmatched_strings": 0,
+  "verifier": {
+    "spans_asked": 5,
+    "verdicts": {
+      "identifier": 4,
+      "unsure": 1
+    }
+  }
+}
