@@ -66,6 +66,25 @@ class AdversarialSetTests(unittest.TestCase):
             self.assertFalse(any(a <= first_line_start < b for a, b in labeled), first_word)
 
 
+class ReplacementOnHardCasesTests(unittest.TestCase):
+    """The replacement engine, given the true spans, on every adversarial note."""
+
+    def test_no_crash_nothing_unchanged_and_only_known_formats_are_flagged(self):
+        from deid.replace.engine import Replacer
+        notes = adversarial.generate_notes(FROZEN["seed"], FROZEN["per_family"])
+        replacer = Replacer(0).fit([{"text": n["text"], "spans": n["spans"]} for n in notes])
+        flagged, unchanged = set(), []
+        for n in notes:
+            _, changes = replacer.apply({"text": n["text"], "spans": n["spans"], "patient_key": n["patient_id"]})
+            for span, change in zip(n["spans"], changes):
+                if change["flagged"]:
+                    flagged.add(span["subtype"])
+                elif change["replacement"] == span["text"]:
+                    unchanged.append(span["text"])
+        self.assertEqual(unchanged, [])
+        self.assertEqual(flagged, {"double_slash", "no_commas"})
+
+
 class ScoringTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

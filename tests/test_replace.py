@@ -227,3 +227,74 @@ class CorpusCheckTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MoreFormatTests(unittest.TestCase):
+    """Formats found by running the engine on the adversarial set."""
+
+    def shifted(self, text, days=100, ref_year=2025):
+        return dates.render(dates.shift(dates.parse_date(text), days, ref_year))
+
+    def test_new_date_styles_keep_their_shape_and_the_interval(self):
+        for text in ("2025-3-4", "2025.12.19", "1-Apr-25", "16-Aug-2025", "17Feb2025", "6th of February 2024",
+                     "21st of March", "30.04.2025", "11-10"):
+            moved = self.shifted(text)
+            self.assertEqual(re.sub(r"[A-Za-z]+", "a", re.sub(r"\d+", "9", moved)).count("a"),
+                             re.sub(r"[A-Za-z]+", "a", re.sub(r"\d+", "9", text)).count("a"), text)
+            self.assertNotEqual(moved, text)
+            back = dates.shift(dates.parse_date(moved), -100, 2025)
+            self.assertEqual((back.month, back.day), (dates.parse_date(text).month, dates.parse_date(text).day), text)
+
+    def test_unpadded_iso_stays_unpadded_and_padded_stays_padded(self):
+        self.assertEqual(self.shifted("2025-3-4", 0), "2025-3-4")
+        self.assertEqual(self.shifted("2025-03-04", 0), "2025-03-04")
+
+    def test_ordinal_suffix_follows_the_new_day(self):
+        self.assertEqual(self.shifted("1st of May 2025", 1), "2nd of May 2025")
+        self.assertEqual(self.shifted("1st of May 2025", 10), "11th of May 2025")
+        self.assertEqual(self.shifted("1st of May 2025", 21), "22nd of May 2025")
+
+    def test_dotted_dates_are_day_first_and_ambiguous_ones_are_marked(self):
+        self.assertEqual(self.shifted("30.04.2025", 1), "01.05.2025")
+        self.assertTrue(dates.parse_date("04.05.2025").assumed_day_first)
+        self.assertFalse(dates.parse_date("30.04.2025").assumed_day_first)
+        self.assertEqual(dates.parse_date("04.05.2025").day, 4)
+
+    def test_garbage_dates_still_raise(self):
+        for text in ("7/7//2025", "31.02.2025", "2025-13-01", "hello"):
+            with self.assertRaises(dates.DateError, msg=text):
+                dates.parse_date(text)
+
+    def test_engine_flags_ambiguous_dotted_dates_by_rule_name(self):
+        text = "Seen 04.05.2025."
+        out, changes = Replacer(0).fit([note(text, [span("04.05.2025", text, "DATE")])]).apply(
+            note(text, [span("04.05.2025", text, "DATE")]))
+        self.assertIn("assumed-day-first", changes[0]["rule"])
+        self.assertNotIn("04.05.2025", out)
+
+    def test_po_box_and_spelled_out_state_and_unit_first_addresses(self):
+        cases = {"PO Box 8437, Larkspur, NE 71472": "address-po-box",
+                 "739 Elm Street, Fox Hollow, Illinois 59298": "address-structured",
+                 "Unit 33, 694 Orchard Ave, Stillwater Bay, MN 43409": "address-structured",
+                 "P.O. Box 12, Westmoor, IA": "address-po-box"}
+        for text, rule in cases.items():
+            n = note("Lives at " + text + ".", [span(text, "Lives at " + text + ".", "ADDRESS")])
+            out, changes = Replacer(0).fit([n]).apply(n)
+            self.assertEqual(changes[0]["rule"], rule, text)
+            self.assertFalse(changes[0]["flagged"], text)
+            for piece in re.findall(r"\d{3,}|Larkspur|Fox Hollow|Elm|Orchard|Stillwater Bay|Westmoor", text):
+                self.assertNotIn(piece, changes[0]["replacement"], (text, piece))
+            self.assertEqual(re.findall(r"\b[A-Z]{2}\b|Illinois", text)[-1:], re.findall(r"\b[A-Z]{2}\b|Illinois", changes[0]["replacement"])[-1:])
+
+    def test_address_without_commas_is_still_flagged_not_guessed(self):
+        text = "92 Forest St Apt 5B Larkspur NE 71472"
+        n = note(text, [span(text, text, "ADDRESS")])
+        _, changes = Replacer(0).fit([n]).apply(n)
+        self.assertTrue(changes[0]["flagged"])
+        self.assertEqual(changes[0]["replacement"], "[ADDRESS]")
+
+    def test_a_phone_that_is_already_fictional_still_changes(self):
+        s = Surrogates(0)
+        for text in ("555 0109", "555-0142", "(312) 555-0100", "1-312-555-0145"):
+            self.assertNotEqual(s.phone(text), text)
+            self.assertEqual(len(s.phone(text)), len(text))

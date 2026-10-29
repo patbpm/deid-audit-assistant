@@ -31,6 +31,8 @@ def verify_span(change, confidence=None, low=LOW_CONFIDENCE):
         reasons.append("could not be rewritten safely; replaced with a tag")
     if "assumed-month-first" in change["rule"]:
         reasons.append("date read month-first; the day/month order is a guess")
+    if "assumed-day-first" in change["rule"]:
+        reasons.append("dotted date read day-first; the day/month order is a guess")
     if "-no-year" in change["rule"]:
         reasons.append("date has no year; the year used for shifting is a guess")
     reasons += format_problems(change["type"], change["original"])

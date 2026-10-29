@@ -13,12 +13,12 @@ python -m deid.replace.check                                                    
 
 | Type | Rule |
 |---|---|
-| DATE | Shifted by one fixed number of days per patient (30-365 days, either direction, chosen from a hash of the patient key and the seed). Intervals between a patient's dates are unchanged. The written style is kept (`2025-04-11`, `Apr 11`, `4/11/25`, `11 Apr 2025`...). |
+| DATE | Shifted by one fixed number of days per patient (30-365 days, either direction, chosen from a hash of the patient key and the seed). Intervals between a patient's dates are unchanged. The written style is kept (`2025-04-11`, `2025-4-11`, `Apr 11`, `4/11/25`, `11 Apr 2025`, `11-Apr-25`, `11Apr2025`, `11th of April 2025`, `2025.04.11`, `11.04.2025`...). Dotted dates are read day-first; slash and dash dates month-first. |
 | NAME | Replaced token by token. A real first name always maps to the same surrogate first name, a real surname to the same surrogate surname, wherever and however it is written. "Murphy, Patrick R", "Patrick Murphy" and "Murphy" stay linked; relatives who share a surname still share one. Titles (Dr., Mrs.) and credentials (MD, PA-C) are kept. Which tokens are first names or surnames is read from the full names in the batch; a name seen only on its own gets a name that works as either. |
 | ID | Same shape, different characters. A leading letter run that looks like a label (4+ letters, or followed by a separator) is kept, so `ACCT` and `RAD-` survive. Nine-digit dashed numbers stay in the 900 range, which is never issued as a real SSN. Different originals never share a surrogate. |
 | PHONE | Punctuation kept; digits become a fictional `555-01xx` number. The same digits give the same surrogate in any format. |
 | EMAIL | `firstname.lastnameNN@example.com` or `.org`. |
-| ADDRESS | Street number, street name, unit number, town and ZIP replaced; street type and state kept. A town on its own maps to the same surrogate town as inside a full address. |
+| ADDRESS | Street number, street name, unit number, town and ZIP replaced; street type and state kept (two-letter or spelled out). Also handles `PO Box` and a unit written first. A town on its own maps to the same surrogate town as inside a full address. An address with no commas is flagged, not guessed. |
 
 Surrogate names, streets and towns come from pools that do not overlap the generator's (tested), and a surrogate that equals a real value in the batch is never used.
 
@@ -34,6 +34,10 @@ From `results/dev/replace-dev.json`, produced by `python -m deid.replace.check` 
 - 0 phone, ID or email shapes changed; 0 notes with text changed outside the replaced spans.
 
 Because the engine is given the true spans, the zero-leak result is partly by construction. It shows the replacement step is sound, not that the pipeline is. End-to-end leakage depends on what the detector misses, and will be measured with detector output on the test split on Day 8.
+
+## Hard formats (adversarial set, true spans)
+
+Run on the 180 adversarial notes (`docs/ADVERSARIAL.md`, checked by `tests/test_adversarial.py`): no crash and no replacement equal to its original. Before the fixes below, 128 of 540 replacements fell back to a tag; now 31 do, all of them either a mistyped date with a doubled slash (`7/7//2025`) or an address with no commas. Fixes: a 7-digit phone that was already in the fictional block was returned unchanged and is now always changed; more date styles (unpadded ISO, dotted, `11-Apr-25`, `11Apr2025`, `11th of April`, `11-10`); PO boxes, spelled-out states and a unit written first. The dev-split check above is unchanged by these edits.
 
 ## Known limits (read before quoting anything)
 

@@ -20,12 +20,26 @@ SHIFT_MIN_DAYS, SHIFT_MAX_DAYS = 30, 365
 DEFAULT_YEAR = 2024  # reference year for year-less dates when a note has no other dated text
 
 WORD = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*")  # letters with inner apostrophes (O'Brien)
+US_STATES = (
+    "Alabama Alaska Arizona Arkansas California Colorado Connecticut Delaware Florida Georgia Hawaii Idaho "
+    "Illinois Indiana Iowa Kansas Kentucky Louisiana Maine Maryland Massachusetts Michigan Minnesota "
+    "Mississippi Missouri Montana Nebraska Nevada Ohio Oklahoma Oregon Pennsylvania Tennessee Texas Utah "
+    "Vermont Virginia Washington Wisconsin Wyoming").split() + ["New Hampshire", "New Jersey", "New Mexico",
+    "New York", "North Carolina", "North Dakota", "Rhode Island", "South Carolina", "South Dakota",
+    "West Virginia", "District of Columbia"]
+STATE = r"(?:[A-Z]{2}|" + "|".join(sorted(US_STATES, key=len, reverse=True)) + r")"
+ZIP = r"(?:\s+(?P<zip>\d{5}(?:-\d{4})?))?"
+UNIT = r"(?:Apt|Unit|Suite|Ste)\.?\s*#?\s*\w+"
 STREET = re.compile(
+    rf"(?:(?P<unit1>{UNIT}),\s*)?"
     r"(?P<num>\d+)\s+(?P<street>[A-Za-z][A-Za-z .'\-]*?)\s+"
     r"(?P<type>St|Ave|Dr|Rd|Ln|Blvd|Ct|Way|Street|Avenue|Drive|Road|Lane|Boulevard|Court)\.?"
-    r"(?:,?\s+(?P<unit>(?:Apt|Unit|Suite|Ste)\.?\s*#?\s*\w+|#\s*\w+))?"
-    r",\s*(?P<town>[A-Za-z][A-Za-z .'\-]*?),?\s+(?P<state>[A-Z]{2})(?:\s+(?P<zip>\d{5}(?:-\d{4})?))?")
-TOWN_STATE = re.compile(r"(?P<town>[A-Za-z][A-Za-z .'\-]*?),\s*(?P<state>[A-Z]{2})")
+    rf"(?:,?\s+(?P<unit>{UNIT}|#\s*\w+))?"
+    rf",\s*(?P<town>[A-Za-z][A-Za-z .'\-]*?),?\s+(?P<state>{STATE}){ZIP}")
+PO_BOX = re.compile(
+    r"(?P<po>P\.?\s?O\.?\s+Box)\s+(?P<num>\d+),\s*(?P<town>[A-Za-z][A-Za-z .'\-]*?),?\s+"
+    rf"(?P<state>{STATE}){ZIP}")
+TOWN_STATE = re.compile(rf"(?P<town>[A-Za-z][A-Za-z .'\-]*?),\s*(?P<state>{STATE})")
 TOWN_ONLY = re.compile(r"[A-Za-z][A-Za-z .'\-]*")
 TAGS = {"NAME": "[NAME]", "DATE": "[DATE]", "ID": "[ID]", "PHONE": "[PHONE]",
         "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]"}
@@ -155,7 +169,7 @@ class Replacer:
         parsed = dates.parse_date(body)
         moved = dates.shift(parsed, self.date_offset(key), ref_year)
         rule = "date-shift" + ("" if parsed.has_year else "-no-year") \
-            + ("-assumed-month-first" if parsed.assumed_month_first else "")
+            + ("-assumed-month-first" if parsed.assumed_month_first else "")             + ("-assumed-day-first" if parsed.assumed_day_first else "")
         return dates.render(moved), rule, False
 
     def _name(self, body, key, ref_year):
@@ -183,12 +197,20 @@ class Replacer:
 
     def _address(self, body, key, ref_year):
         s = self.surrogates
+        m = PO_BOX.fullmatch(body)
+        if m:
+            tail = f"{s.town_name(m['town'])}, {m['state']}"
+            if m["zip"]:
+                tail += " " + s.digits(m["zip"], "zip")
+            return f"{m['po']} {s.digits(m['num'], 'pobox')}, {tail}", "address-po-box", False
         m = STREET.fullmatch(body)
         if m:
             parts = [s.digits(m["num"], "num"), s.street_name(m["street"]), m["type"]]
             street = " ".join(parts) + ("." if body[m.end("type"):m.end("type") + 1] == "." else "")
             if m["unit"]:
                 street += ", " + re.sub(r"\w+$", lambda u: s.digits(u.group(0), "unit"), m["unit"])
+            if m["unit1"]:
+                street = re.sub(r"\w+$", lambda u: s.digits(u.group(0), "unit"), m["unit1"]) + ", " + street
             tail = f"{s.town_name(m['town'])}, {m['state']}"
             if m["zip"]:
                 tail += " " + s.digits(m["zip"], "zip")

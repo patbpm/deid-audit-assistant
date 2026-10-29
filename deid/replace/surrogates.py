@@ -157,6 +157,8 @@ class Surrogates:
             new_digits = f"55501{(h >> 20) % 100:02d}"
         else:
             return scramble_digits(original, self.seed, "phone")
+        if new_digits == digits:  # an already-fictional number must still change
+            new_digits = new_digits[:-2] + f"{(int(new_digits[-2:]) + 37) % 100:02d}"
         it = iter(new_digits)
         return re.sub(r"\d", lambda _: next(it), original)
 
