@@ -65,6 +65,8 @@ python -m deid.app --live --open   # same, with the hosted models (billed; synth
 
 Drop or paste notes (text or JSON lines) or CSV tables; with `--live`, also dictation (WAV) or scanned pages. By default the page uses an **offline rules engine with no AI model**, which is much weaker (it misses names that have no cue) and is there so the page can be used without a model; `--live` sends the content to the provider. See `docs/APP.md`. For the agent, review and watch commands see `docs/AGENT.md`, `docs/REVIEW.md` and `docs/WATCH.md`.
 
+To see an output without running anything, download `results/examples/sample-notes-live.audit.html` and open it in a browser. It is the audit report of one hosted-model run (Muse Spark, Oct 30) on four invented sample notes: every change with its evidence, and the items left for a person. It holds the invented originals, so it is safe to publish only because the notes are synthetic; the matching data is in the `.audit.json` next to it. Four easy notes, one run: a demonstration of the output, not an accuracy result.
+
 ## Limits
 
 - The synthetic data is template-based, short and easy; scores will not predict performance on real notes.

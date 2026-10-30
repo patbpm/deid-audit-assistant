@@ -1,0 +1,1376 @@
+{
+  "notes": [
+    {
+      "assessed": true,
+      "entries": [
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 53,
+          "id": "N0001:0",
+          "new_end": 58,
+          "new_start": 31,
+          "original": "Larsen-Hughes, Colleen",
+          "replacement": "Everhart-Mortensen, Tabitha",
+          "rule": "name-token",
+          "start": 31,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 66,
+          "id": "N0001:1",
+          "new_end": 71,
+          "new_start": 64,
+          "original": "6167853",
+          "replacement": "3247354",
+          "rule": "id-format-preserving",
+          "start": 59,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 93,
+          "id": "N0001:2",
+          "new_end": 98,
+          "new_start": 84,
+          "original": "ACCT1068456722",
+          "replacement": "ACCT2296426281",
+          "rule": "id-format-preserving",
+          "start": 79,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 109,
+          "id": "N0001:3",
+          "new_end": 114,
+          "new_start": 104,
+          "original": "1980-08-17",
+          "replacement": "1981-05-26",
+          "rule": "date-shift",
+          "start": 99,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 142,
+          "id": "N0001:4",
+          "new_end": 147,
+          "new_start": 137,
+          "original": "2025-04-11",
+          "replacement": "2026-01-18",
+          "rule": "date-shift",
+          "start": 132,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 162,
+          "id": "N0001:5",
+          "new_end": 172,
+          "new_start": 163,
+          "original": "Nash",
+          "replacement": "Islington",
+          "rule": "name-token",
+          "start": 158,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 176,
+          "id": "N0001:6",
+          "new_end": 198,
+          "new_start": 178,
+          "original": "Mei Long",
+          "replacement": "Ambrose Merriweather",
+          "rule": "name-token",
+          "start": 168,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 209,
+          "id": "N0001:7",
+          "new_end": 231,
+          "new_start": 219,
+          "original": "DWJ194963587",
+          "replacement": "PQT486502851",
+          "rule": "id-format-preserving",
+          "start": 197,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 292,
+          "id": "N0001:8",
+          "new_end": 319,
+          "new_start": 301,
+          "original": "Larsen-Hughes",
+          "replacement": "Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 279,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 614,
+          "id": "N0001:9",
+          "new_end": 641,
+          "new_start": 631,
+          "original": "2023-12-05",
+          "replacement": "2024-09-12",
+          "rule": "date-shift",
+          "start": 604,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 766,
+          "id": "N0001:10",
+          "new_end": 794,
+          "new_start": 759,
+          "original": "5338 Meadow Rd, Eastvale, IL 54219",
+          "replacement": "7079 Clover Rd, Havenwood, IL 65781",
+          "rule": "address-structured",
+          "start": 732,
+          "status": "accept",
+          "type": "ADDRESS",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 0.9,
+          "detector": "muse-spark-1.3",
+          "end": 786,
+          "id": "N0001:11",
+          "new_end": 813,
+          "new_start": 807,
+          "original": "Kenneth",
+          "replacement": "Carson",
+          "rule": "name-token",
+          "start": 779,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 830,
+          "id": "N0001:12",
+          "new_end": 861,
+          "new_start": 836,
+          "original": "Harriet Larsen-Hughes",
+          "replacement": "Jasper Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 809,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 857,
+          "id": "N0001:13",
+          "new_end": 888,
+          "new_start": 876,
+          "original": "681.555.0181",
+          "replacement": "947.555.0108",
+          "rule": "phone-fictional",
+          "start": 845,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 895,
+          "id": "N0001:14",
+          "new_end": 926,
+          "new_start": 914,
+          "original": "528.555.0137",
+          "replacement": "456.555.0171",
+          "rule": "phone-fictional",
+          "start": 883,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1364,
+          "id": "N0001:15",
+          "new_end": 1393,
+          "new_start": 1387,
+          "original": "Sandoval",
+          "replacement": "Oswald",
+          "rule": "name-token",
+          "start": 1356,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1391,
+          "id": "N0001:16",
+          "new_end": 1418,
+          "new_start": 1412,
+          "original": "Sandoval",
+          "replacement": "Oswald",
+          "rule": "name-token",
+          "start": 1383,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1503,
+          "id": "N0001:17",
+          "new_end": 1533,
+          "new_start": 1518,
+          "original": "Priya Larsen",
+          "replacement": "Helena Everhart",
+          "rule": "name-token",
+          "start": 1491,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1525,
+          "id": "N0001:18",
+          "new_end": 1557,
+          "new_start": 1541,
+          "original": "April 11, 2025",
+          "replacement": "January 18, 2026",
+          "rule": "date-shift",
+          "start": 1511,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        }
+      ],
+      "failed": [],
+      "ignored": [],
+      "note_id": "N0001",
+      "review": [],
+      "risk": "low",
+      "text": "HISTORY AND PHYSICAL\n\nPatient: Larsen-Hughes, Colleen\nMRN: 6167853    Account: ACCT1068456722\nDOB: 1980-08-17    Date of admission: 2025-04-11\nAttending: Dr. Nash\nPCP: Mei Long, PA-C\nInsurance ID: DWJ194963587\n\nCHIEF COMPLAINT: cough and fever.\n\nHISTORY OF PRESENT ILLNESS:\nMrs. Larsen-Hughes is a 44-year-old woman with a history of asthma, hypertension, former tobacco use who presents with cough and fever. She reports five days of productive cough, fevers to 101.8 F, and pleuritic chest pain on the right.\n\nPAST MEDICAL HISTORY: asthma, hypertension, former tobacco use. Prior related evaluation on 2023-12-05.\nMEDICATIONS: amoxicillin-clavulanate 875/125 mg twice daily; albuterol inhaler as needed.\n\nSOCIAL HISTORY: Lives at 5338 Meadow Rd, Eastvale, IL 54219. Lives with Kenneth. Emergency contact is Harriet Larsen-Hughes, reachable at 681.555.0181. Patient's cell phone is 528.555.0137.\n\nOBJECTIVE: BP 120/66, HR 113, RR 14, Temp 99.9 F, SpO2 93%. Pain 7/10. Crackles and egophony at the right base. No accessory muscle use.\nLABS: WBC 14.2, procalcitonin 1.9, lactate 1.4.\nIMAGING: Right lower lobe airspace opacity consistent with pneumonia. No effusion.\n\nASSESSMENT AND PLAN: community-acquired pneumonia (ICD-10 K35.80). Ceftriaxone 1 g daily and azithromycin 500 mg daily, supplemental oxygen to keep saturation above 92%.\nDiscussed with Dr. Sandoval (cardiology); Dr. Sandoval recommends outpatient follow-up with primary care.\nAdmitted to room 304.\n\nElectronically signed by Priya Larsen, NP on April 11, 2025."
+    },
+    {
+      "assessed": true,
+      "entries": [
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 28,
+          "id": "N0002:0",
+          "new_end": 28,
+          "new_start": 20,
+          "original": "04/13/25",
+          "replacement": "01/20/26",
+          "rule": "date-shift",
+          "start": 20,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "review",
+            "reasons": [
+              "date read month-first; the day/month order is a guess"
+            ]
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 50,
+          "id": "N0002:1",
+          "new_end": 50,
+          "new_start": 42,
+          "original": "04/11/25",
+          "replacement": "01/18/26",
+          "rule": "date-shift-assumed-month-first",
+          "start": 42,
+          "status": "review",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 83,
+          "id": "N0002:2",
+          "new_end": 88,
+          "new_start": 60,
+          "original": "Colleen J Larsen-Hughes",
+          "replacement": "Tabitha M Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 60,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 99,
+          "id": "N0002:3",
+          "new_end": 104,
+          "new_start": 97,
+          "original": "6167853",
+          "replacement": "3247354",
+          "rule": "id-format-preserving",
+          "start": 92,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 116,
+          "id": "N0002:4",
+          "new_end": 121,
+          "new_start": 113,
+          "original": "08/17/80",
+          "replacement": "05/26/81",
+          "rule": "date-shift",
+          "start": 108,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 0.95,
+          "detector": "muse-spark-1.3",
+          "end": 137,
+          "id": "N0002:5",
+          "new_end": 142,
+          "new_start": 135,
+          "original": "Colleen",
+          "replacement": "Tabitha",
+          "rule": "name-token",
+          "start": 130,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 0.9,
+          "detector": "muse-spark-1.3",
+          "end": 271,
+          "id": "N0002:6",
+          "new_end": 275,
+          "new_start": 269,
+          "original": "Harriet",
+          "replacement": "Jasper",
+          "rule": "name-token",
+          "start": 264,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 296,
+          "id": "N0002:7",
+          "new_end": 300,
+          "new_start": 288,
+          "original": "681.555.0181",
+          "replacement": "947.555.0108",
+          "rule": "phone-fictional",
+          "start": 284,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 0.95,
+          "detector": "muse-spark-1.3",
+          "end": 741,
+          "id": "N0002:8",
+          "new_end": 750,
+          "new_start": 741,
+          "original": "Nash",
+          "replacement": "Islington",
+          "rule": "name-token",
+          "start": 737,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 777,
+          "id": "N0002:9",
+          "new_end": 788,
+          "new_start": 771,
+          "original": "Gloria Sandoval",
+          "replacement": "Marguerite Oswald",
+          "rule": "name-token",
+          "start": 762,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 859,
+          "id": "N0002:10",
+          "new_end": 866,
+          "new_start": 838,
+          "original": "colleen.larsenhughes@example.org",
+          "replacement": "rupert.ivesley34@example.org",
+          "rule": "email-example-domain",
+          "start": 827,
+          "status": "accept",
+          "type": "EMAIL",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 874,
+          "id": "N0002:11",
+          "new_end": 884,
+          "new_start": 869,
+          "original": "Priya Larsen",
+          "replacement": "Helena Everhart",
+          "rule": "name-token",
+          "start": 862,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        }
+      ],
+      "failed": [],
+      "ignored": [],
+      "note_id": "N0002",
+      "review": [
+        {
+          "kind": "span",
+          "reasons": [
+            "date read month-first; the day/month order is a guess"
+          ],
+          "ref": "N0002:1"
+        }
+      ],
+      "risk": "low",
+      "text": "PROGRESS NOTE\nDate: 04/13/25    Admitted: 04/11/25\nPatient: Colleen J Larsen-Hughes    MRN: 6167853    DOB: 08/17/80\n\nSUBJECTIVE: Colleen reports feeling better today. Pain 8/10. Afebrile for 24 hours. Oxygen weaned to room air. Tolerating oral intake.\nSpoke with Harriet by phone at 681.555.0181 to update the family.\n\nOBJECTIVE: BP 113/67, HR 60, RR 19, Temp 98.3 F, SpO2 88%.\nCrackles and egophony at the right base. No accessory muscle use. Labs this morning: WBC 14.2, procalcitonin 1.9, lactate 1.4.\n\nASSESSMENT/PLAN: community-acquired pneumonia (ICD-10 L03.116), improving. Continue the following: Ceftriaxone 1 g daily and azithromycin 500 mg daily, supplemental oxygen to keep saturation above 92%.\nSeen and discussed with Dr. Nash. Case reviewed with Gloria Sandoval, PA-C.\nPatient requested that results be sent to colleen.larsenhughes@example.org.\n\nPriya Larsen, NP"
+    },
+    {
+      "assessed": true,
+      "entries": [
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 50,
+          "id": "N0003:0",
+          "new_end": 55,
+          "new_start": 28,
+          "original": "Larsen-Hughes, Colleen",
+          "replacement": "Everhart-Mortensen, Tabitha",
+          "rule": "name-token",
+          "start": 28,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 74,
+          "id": "N0003:1",
+          "new_end": 76,
+          "new_start": 64,
+          "original": "August 17, 1980",
+          "replacement": "May 26, 1981",
+          "rule": "date-shift",
+          "start": 59,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 90,
+          "id": "N0003:2",
+          "new_end": 92,
+          "new_start": 85,
+          "original": "6167853",
+          "replacement": "3247354",
+          "rule": "id-format-preserving",
+          "start": 83,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 121,
+          "id": "N0003:3",
+          "new_end": 125,
+          "new_start": 109,
+          "original": "April 11, 2025",
+          "replacement": "January 18, 2026",
+          "rule": "date-shift",
+          "start": 107,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 155,
+          "id": "N0003:4",
+          "new_end": 161,
+          "new_start": 145,
+          "original": "April 15, 2025",
+          "replacement": "January 22, 2026",
+          "rule": "date-shift",
+          "start": 141,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 179,
+          "id": "N0003:5",
+          "new_end": 190,
+          "new_start": 173,
+          "original": "Beatriz Nash",
+          "replacement": "Yolanda Islington",
+          "rule": "name-token",
+          "start": 167,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 275,
+          "id": "N0003:6",
+          "new_end": 291,
+          "new_start": 273,
+          "original": "Larsen-Hughes",
+          "replacement": "Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 262,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 470,
+          "id": "N0003:7",
+          "new_end": 488,
+          "new_start": 470,
+          "original": "December 5, 2023",
+          "replacement": "September 12, 2024",
+          "rule": "date-shift",
+          "start": 454,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 689,
+          "id": "N0003:8",
+          "new_end": 715,
+          "new_start": 703,
+          "original": "Long",
+          "replacement": "Merriweather",
+          "rule": "name-token",
+          "start": 685,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 704,
+          "id": "N0003:9",
+          "new_end": 730,
+          "new_start": 719,
+          "original": "May 3, 2025",
+          "replacement": "Feb 9, 2026",
+          "rule": "date-shift",
+          "start": 693,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 743,
+          "id": "N0003:10",
+          "new_end": 772,
+          "new_start": 734,
+          "original": "7113 Ridge Ave, Quail Run, KS 54169",
+          "replacement": "1209 Bluebell Ave, Iron Mill, KS 25770",
+          "rule": "address-structured",
+          "start": 708,
+          "status": "accept",
+          "type": "ADDRESS",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 762,
+          "id": "N0003:11",
+          "new_end": 791,
+          "new_start": 779,
+          "original": "956-555-0114",
+          "replacement": "904-555-0105",
+          "rule": "phone-fictional",
+          "start": 750,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 780,
+          "id": "N0003:12",
+          "new_end": 809,
+          "new_start": 797,
+          "original": "328-555-0110",
+          "replacement": "315-555-0197",
+          "rule": "phone-fictional",
+          "start": 768,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 816,
+          "id": "N0003:13",
+          "new_end": 845,
+          "new_start": 838,
+          "original": "Colleen",
+          "replacement": "Tabitha",
+          "rule": "name-token",
+          "start": 809,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 832,
+          "id": "N0003:14",
+          "new_end": 861,
+          "new_start": 849,
+          "original": "363-555-0125",
+          "replacement": "903-555-0104",
+          "rule": "phone-fictional",
+          "start": 820,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 901,
+          "id": "N0003:15",
+          "new_end": 931,
+          "new_start": 896,
+          "original": "5338 Meadow Rd, Eastvale, IL 54219",
+          "replacement": "7079 Clover Rd, Havenwood, IL 65781",
+          "rule": "address-structured",
+          "start": 867,
+          "status": "accept",
+          "type": "ADDRESS",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 965,
+          "id": "N0003:16",
+          "new_end": 991,
+          "new_start": 963,
+          "original": "colleen.larsenhughes@example.org",
+          "replacement": "rupert.ivesley34@example.org",
+          "rule": "email-example-domain",
+          "start": 933,
+          "status": "accept",
+          "type": "EMAIL",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 980,
+          "id": "N0003:17",
+          "new_end": 1018,
+          "new_start": 998,
+          "original": "Mei Long",
+          "replacement": "Ambrose Merriweather",
+          "rule": "name-token",
+          "start": 972,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1012,
+          "id": "N0003:18",
+          "new_end": 1055,
+          "new_start": 1037,
+          "original": "Nash, Beatriz",
+          "replacement": "Islington, Yolanda",
+          "rule": "name-token",
+          "start": 999,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 1030,
+          "id": "N0003:19",
+          "new_end": 1075,
+          "new_start": 1059,
+          "original": "April 15, 2025",
+          "replacement": "January 22, 2026",
+          "rule": "date-shift",
+          "start": 1016,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        }
+      ],
+      "failed": [],
+      "ignored": [],
+      "note_id": "N0003",
+      "review": [],
+      "risk": "low",
+      "text": "DISCHARGE SUMMARY\n\nPatient: Larsen-Hughes, Colleen    DOB: August 17, 1980    MRN: 6167853\nAdmission date: April 11, 2025    Discharge date: April 15, 2025\nAttending: Beatriz Nash, MD\n\nDIAGNOSIS: community-acquired pneumonia (ICD-10 J44.1).\nHOSPITAL COURSE: Ms. Larsen-Hughes presented with cough and fever. Treated with ceftriaxone and azithromycin, then transitioned to oral amoxicillin-clavulanate to complete seven days. Last prior evaluation was on December 5, 2023.\nDISCHARGE MEDICATIONS: amoxicillin-clavulanate 875/125 mg twice daily; albuterol inhaler as needed.\nCONDITION AT DISCHARGE: Stable. BP 147/75, HR 64, RR 16, Temp 97.4 F, SpO2 99%.\n\nFOLLOW-UP: Appointment with Dr. Long on May 3, 2025 at 7113 Ridge Ave, Quail Run, KS 54169.\nCall 956-555-0114 (fax 328-555-0110) with questions, or contact Colleen at 363-555-0125.\nDischarge instructions mailed to 5338 Meadow Rd, Eastvale, IL 54219.\nPatient portal email on file: colleen.larsenhughes@example.org.\n\ncc: Mei Long, PA-C\nDictated by Nash, Beatriz on April 15, 2025."
+    },
+    {
+      "assessed": true,
+      "entries": [
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 35,
+          "id": "N0004:0",
+          "new_end": 35,
+          "new_start": 26,
+          "original": "4/17/2025",
+          "replacement": "1/24/2026",
+          "rule": "date-shift",
+          "start": 26,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 68,
+          "id": "N0004:1",
+          "new_end": 73,
+          "new_start": 45,
+          "original": "Colleen J Larsen-Hughes",
+          "replacement": "Tabitha M Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 45,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 86,
+          "id": "N0004:2",
+          "new_end": 91,
+          "new_start": 82,
+          "original": "8/17/1980",
+          "replacement": "5/26/1981",
+          "rule": "date-shift",
+          "start": 77,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 102,
+          "id": "N0004:3",
+          "new_end": 107,
+          "new_start": 100,
+          "original": "6167853",
+          "replacement": "3247354",
+          "rule": "id-format-preserving",
+          "start": 95,
+          "status": "accept",
+          "type": "ID",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 128,
+          "id": "N0004:4",
+          "new_end": 138,
+          "new_start": 120,
+          "original": "Larsen-Hughes",
+          "replacement": "Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 115,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 146,
+          "id": "N0004:5",
+          "new_end": 156,
+          "new_start": 142,
+          "original": "(528) 555-0137",
+          "replacement": "(456) 555-0171",
+          "rule": "phone-fictional",
+          "start": 132,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 185,
+          "id": "N0004:6",
+          "new_end": 195,
+          "new_start": 188,
+          "original": "Colleen",
+          "replacement": "Tabitha",
+          "rule": "name-token",
+          "start": 178,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 326,
+          "id": "N0004:7",
+          "new_end": 336,
+          "new_start": 325,
+          "original": "15 Apr 2025",
+          "replacement": "22 Jan 2026",
+          "rule": "date-shift",
+          "start": 315,
+          "status": "accept",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 357,
+          "id": "N0004:8",
+          "new_end": 375,
+          "new_start": 363,
+          "original": "Long",
+          "replacement": "Merriweather",
+          "rule": "name-token",
+          "start": 353,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "review",
+            "reasons": [
+              "date read month-first; the day/month order is a guess"
+            ]
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 388,
+          "id": "N0004:9",
+          "new_end": 406,
+          "new_start": 398,
+          "original": "5/3/2025",
+          "replacement": "2/9/2026",
+          "rule": "date-shift-assumed-month-first",
+          "start": 380,
+          "status": "review",
+          "type": "DATE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 426,
+          "id": "N0004:10",
+          "new_end": 448,
+          "new_start": 423,
+          "original": "Harriet Larsen-Hughes",
+          "replacement": "Jasper Everhart-Mortensen",
+          "rule": "name-token",
+          "start": 405,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 442,
+          "id": "N0004:11",
+          "new_end": 464,
+          "new_start": 450,
+          "original": "(681) 555-0181",
+          "replacement": "(947) 555-0108",
+          "rule": "phone-fictional",
+          "start": 428,
+          "status": "accept",
+          "type": "PHONE",
+          "verifier": null
+        },
+        {
+          "also_found_by": [],
+          "checks": {
+            "decision": "accept",
+            "reasons": []
+          },
+          "confidence": 1,
+          "detector": "muse-spark-1.3",
+          "end": 501,
+          "id": "N0004:12",
+          "new_end": 526,
+          "new_start": 511,
+          "original": "Priya Larsen",
+          "replacement": "Helena Everhart",
+          "rule": "name-token",
+          "start": 489,
+          "status": "accept",
+          "type": "NAME",
+          "verifier": null
+        }
+      ],
+      "failed": [],
+      "ignored": [],
+      "note_id": "N0004",
+      "review": [
+        {
+          "kind": "span",
+          "reasons": [
+            "date read month-first; the day/month order is a guess"
+          ],
+          "ref": "N0004:9"
+        }
+      ],
+      "risk": "low",
+      "text": "TELEPHONE ENCOUNTER\nDate: 4/17/2025\nPatient: Colleen J Larsen-Hughes    DOB: 8/17/1980    MRN: 6167853\n\nCalled Ms. Larsen-Hughes at (528) 555-0137; reached the patient directly.\nColleen reported that she is taking medications as prescribed with no side effects.\nRecent discharge for community-acquired pneumonia on 15 Apr 2025. Follow-up visit with Dr. Long remains scheduled for 5/3/2025.\nFamily contact Harriet Larsen-Hughes ((681) 555-0181) was notified with permission.\n\nDocumented by Priya Larsen, NP."
+    }
+  ],
+  "summary": {
+    "by_rule": {
+      "address-structured": 3,
+      "date-shift": 15,
+      "date-shift-assumed-month-first": 2,
+      "email-example-domain": 2,
+      "id-format-preserving": 6,
+      "name-token": 28,
+      "phone-fictional": 8
+    },
+    "by_type": {
+      "ADDRESS": 3,
+      "DATE": 17,
+      "EMAIL": 2,
+      "ID": 6,
+      "NAME": 28,
+      "PHONE": 8
+    },
+    "changes": 64,
+    "changes_needing_review": 2,
+    "notes": 4,
+    "notes_not_cleaned": 0,
+    "notes_with_review_items": 2,
+    "review_items": 2,
+    "risk_levels": {
+      "low": 4
+    }
+  }
+}

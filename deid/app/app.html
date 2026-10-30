@@ -8,12 +8,12 @@
 :root{--bg:#fff;--fg:#1c1f23;--muted:#5b6470;--line:#d8dce1;--card:#f6f7f9;--warn:#fff4d6;--bad:#f3c4c4;--badfg:#2a0f0f;--ok:#d7efe0;--primary:#1f5fbf;--primary-fg:#fff;--btn:#fff;--drop:#eef4fd}
 @media (prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e6e8eb;--muted:#9aa3ad;--line:#2d333a;--card:#1d2228;--warn:#3a3014;--bad:#5b2323;--badfg:#ffdede;--ok:#1f4a33;--primary:#4f8fe8;--primary-fg:#0b1220;--btn:#232a31;--drop:#1b2736}}
 *{box-sizing:border-box}
-body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0}
+body{font:16px/1.55 system-ui,sans-serif;background:var(--bg);color:var(--fg);margin:0}
 header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 h1{font-size:1.2rem;margin:0}h2{font-size:1.1rem;margin:1.2rem 0 .4rem}h3{font-size:1rem;margin:.9rem 0 .3rem}
 .banner{background:var(--warn);border-bottom:1px solid var(--line);padding:6px 16px;font-size:.85rem}
 .banner.hosted{background:var(--bad);color:var(--badfg)}
-main{max-width:1060px;margin:0 auto;padding:12px 16px 40px}
+main{max-width:1180px;margin:0 auto;padding:12px 16px 40px}
 button,select,input[type=number]{font:inherit;border:1px solid var(--line);background:var(--btn);color:var(--fg);border-radius:6px;padding:3px 10px}
 button{cursor:pointer}button.primary{background:var(--primary);color:var(--primary-fg);border-color:var(--primary);padding:6px 16px}
 button:disabled{opacity:.5;cursor:default}
@@ -40,6 +40,13 @@ ol.steps .dot{width:1.2em;text-align:center}
 #msg{font-size:.9rem}.err{color:#c33}
 label.opt{display:block;margin:6px 0}
 .changed{background:var(--warn)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.pair{grid-template-columns:1fr}}
+.pair h3{margin:.2rem 0}
+.pair pre{white-space:pre-wrap;word-break:break-word;font:15px/1.7 ui-monospace,monospace;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin:0}
+mark.was{background:var(--bad);color:var(--badfg);border-radius:3px;padding:0 2px}
+mark.now{background:var(--ok);color:inherit;border-radius:3px;padding:0 2px}
+mark.kept{background:var(--warn);color:inherit;border-radius:3px;padding:0 2px}
 </style>
 </head>
 <body>
@@ -265,11 +272,51 @@ function downloadsView(job) {
 }
 const stat = (n, label, bad) => h("div", {class: "stat" + (bad ? " bad" : "")}, h("b", {}, n), label);
 
+function marked(text, ranges, cls) {
+  const frag = document.createDocumentFragment();
+  let cursor = 0;
+  for (const r of ranges.slice().sort((a, b) => a.start - b.start || a.end - b.end)) {
+    if (r.start < cursor || r.end > text.length) continue;
+    frag.append(text.slice(cursor, r.start), h("mark", {class: r.cls || cls, title: r.title || ""}, text.slice(r.start, r.end)));
+    cursor = r.end;
+  }
+  frag.append(text.slice(cursor));
+  return frag;
+}
+
+// Original and cleaned text side by side for one note, from the same data the review page reads.
+function previewView(job) {
+  const box = h("div", {class: "card"}, h("span", {class: "muted small"}, "Loading the before and after..."));
+  api("/job/" + job.id + "/api/state").then((data) => {
+    const notes = data.notes.filter((n) => !(n.failed && n.failed.length));
+    if (!notes.length) { box.replaceChildren(h("span", {class: "muted small"}, "No cleaned note to show.")); return; }
+    const pick = h("select", {"aria-label": "note to show"}, notes.map((n) => h("option", {value: n.note_id},
+      n.note_id + " (" + n.entries.length + " changes" + (n.review.length ? ", " + n.review.length + " to review" : "") + ")")));
+    const body = h("div", {});
+    const show = () => {
+      const n = notes.find((x) => x.note_id === pick.value), final = data.views[n.note_id].final;
+      const before = n.entries.map((e) => ({start: e.start, end: e.end, title: e.type + ": " + e.original}));
+      const after = final.marks.map((m) => ({start: m.start, end: m.end, cls: m.kind === "restored" ? "kept" : "now"}));
+      const leftAsWritten = n.review.filter((i) => i.kind === "not-replaced").length;
+      body.replaceChildren(h("div", {class: "pair"},
+        h("div", {}, h("h3", {}, "Before ", h("span", {class: "muted small"}, "(identifiers in red)")), h("pre", {}, marked(n.text, before, "was"))),
+        h("div", {}, h("h3", {}, "After ", h("span", {class: "muted small"}, "(stand-ins in green)")), h("pre", {}, marked(final.text, after, "now")))),
+        h("div", {class: "small muted", style: "margin-top:6px"}, final.counts.replaced + " replaced" +
+          (leftAsWritten ? ", " + leftAsWritten + " left as written for you to check" : "") + ". Risk: " + (n.assessed ? n.risk : "not assessed with this engine") + "."));
+    };
+    pick.addEventListener("change", show);
+    box.replaceChildren(h("div", {class: "row"}, h("b", {}, "See the change"), h("span", {class: "grow"}), notes.length > 1 ? pick : null), body);
+    show();
+  }).catch(() => box.replaceChildren(h("span", {class: "muted small"}, "The before and after could not be loaded; the review page still works.")));
+  return box;
+}
+
 function notesResult(job) {
   const r = job.result;
   return [h("h2", {}, "Done"),
     h("div", {class: "stats"}, stat(r.notes, "notes processed"), stat(r.replacements, "replacements"),
       stat(r.review_items, "items for a person to review"), stat(r.not_cleaned, "notes NOT cleaned", r.not_cleaned > 0)),
+    previewView(job),
     h("div", {class: "small muted"}, "Engine: " + r.engine + ". Replacements by type: " + (Object.entries(r.by_type).map(([k, v]) => k + " " + v).join(", ") || "none") +
       ". Re-identification risk: " + (r.assessed ? Object.entries(r.risk_levels).map(([k, v]) => k + " " + v).join(", ") : "not assessed with this engine") + "."),
     r.assessed ? null : h("div", {class: "card"}, h("b", {}, "Read the cleaned text yourself. "),

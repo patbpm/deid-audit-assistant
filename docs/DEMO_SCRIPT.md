@@ -19,7 +19,7 @@ Judges score Demo at 25%, and the video is the main thing they watch, so the ord
 | Time | On screen | What the viewer should get |
 |---|---|---|
 | 0:00 - 0:20 | Note B0001 original text, the words "Sage Fair", "Fair skin", "Sage tea", "Ms. Fair" highlighted | The problem: a name can also be an ordinary word, so find-and-replace tools make mistakes in both directions |
-| 0:20 - 0:55 | Front page, live: sample notes, the synthetic tick, start, the four steps filling in, result card | It runs end to end on a hosted Meta model, and tells you what it is unsure about |
+| 0:20 - 0:55 | Front page, live: sample notes, the synthetic tick, start, the four steps filling in, result card with the "See the change" before-and-after panel | It runs end to end on a hosted Meta model, and tells you what it is unsure about |
 | 0:55 - 1:30 | Review page: side by side, click a replacement, evidence row, reject one | Every change has evidence you can check; a person decides |
 | 1:30 - 2:05 | Back to B0001 in the review page; then the results slide | The hard case, handled, and the number that goes with it, with its limits |
 | 2:05 - 2:30 | Red-team result, then the watch-mode terminals and status page | Agents that check each other, and notes cleaned as they arrive |
