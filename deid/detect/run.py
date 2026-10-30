@@ -19,7 +19,7 @@ from pathlib import Path
 from deid.baselines.common import read_notes, write_predictions
 from deid.eval.run import split_of
 
-from .client import Budget, ChatClient, estimate_tokens
+from .client import Budget, ChatClient, LargerLimitRetry, estimate_tokens
 from .detector import Cache, detect_note
 from .prompt import PROMPT_VERSION, build_messages
 
@@ -89,6 +89,8 @@ def main(argv=None):
     parser.add_argument("--live", action="store_true", help="make real API calls")
     parser.add_argument("--max-total-tokens", type=int, default=100_000)
     parser.add_argument("--max-output-tokens", type=int, default=4096)
+    parser.add_argument("--retry-output-tokens", type=int, default=0,
+                        help="a reply cut off at the limit is asked again once with this limit (0 = never; the agent uses 16384)")
     parser.add_argument("--price-in", type=float, help="USD per million input tokens")
     parser.add_argument("--price-out", type=float, help="USD per million output tokens")
     parser.add_argument("--cache-dir", default="runs/cache")
@@ -105,7 +107,7 @@ def main(argv=None):
         dry_run(requested, args.provider)
         return 0
 
-    client = ChatClient.from_env(args.provider, args.max_output_tokens)
+    client = LargerLimitRetry(ChatClient.from_env(args.provider, args.max_output_tokens), args.retry_output_tokens)
     budget = Budget(args.max_total_tokens, args.price_in, args.price_out)
 
     def progress(done, total, b):
