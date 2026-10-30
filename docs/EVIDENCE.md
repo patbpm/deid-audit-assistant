@@ -82,4 +82,4 @@ Dev split, true spans, 200 notes: no original names, IDs, phones, emails or addr
 
 ## Not measured
 
-The model-based system on the 400-note test split; Muse Spark Open or any open-weights model; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.
+The model-based system on the 400-note test split (not run, by decision on Oct 29); Muse Spark Open or any open-weights model; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.

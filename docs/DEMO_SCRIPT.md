@@ -44,7 +44,7 @@ Judges score Demo at 25%, and the video is the main thing they watch, so the ord
 - Say "false positives per note", not "accuracy". Do not say "beats Philter" or "better than"; say the numbers and the conditions.
 - Do not say "runs locally", "on-premises", "HIPAA compliant", "safe for patient data" or "production ready".
 - Do not claim watch mode or the two-model cross-check work with a hosted model; they are built and tested with scripted models only. The cross-check is not shown in the video.
-- The 400-note test split has not been run on the model-based system. If it is run before the deadline, add its numbers to the results slide and to the close; if not, the close already says what was not measured.
+- The 400-note test split was not run on the model-based system (Patrick's decision, Oct 29). Say so on the results slide: "no held-out model result"; do not imply one.
 - If the live run is slow, cut to the recorded fallback and keep the on-screen label "sped up" or "recorded".
 - Keep the key, job folders and `*.key.json` files off screen even though the data is synthetic: they hold what reverses the cleaning.
 

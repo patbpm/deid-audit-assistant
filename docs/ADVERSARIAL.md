@@ -74,7 +74,7 @@ What the run shows, and what it does not:
 - **Red-team.** 174 notes low risk, 6 medium (all eponym-name notes, where it quoted a rare condition such as Cushing syndrome as a clue). It added no spans, so the feedback loop did nothing here either.
 - **Review-burden curve** (`results/adversarial/burden-agent-meta-adv.json`): 56 candidates under 0.8 confidence, 5 of them true. Reading them in confidence order reached 90% of the gain after 6, near the best possible 5, against 52 in random order. A perfect reviewer is assumed, and the gain is under 1 point of recall.
 - **Cost.** About 685,000 tokens, 2.42 USD at list price.
-- **Now a tuned set.** These errors have been read, so this set can no longer judge a fix. Any change to the prompts or matching made because of them must be judged on a new adversarial set from a different seed, and on the 400 test notes.
+- **Now a tuned set.** These errors have been read, so this set can no longer judge a fix. Any change to the prompts or matching made because of them must be judged on a new adversarial set from a different seed (set B did this; the 400 test notes were not run).
 
 ## Fixes made after that run, and the second set (Oct 29)
 
@@ -124,7 +124,7 @@ What the run shows, and what it does not:
 
 **Dev re-run with prompt `v2` (Oct 29):** no regression. 3,023 of 3,023 labeled identifiers with exact boundaries, 0 false positives, nothing unreadable; the name check was asked about 6 occurrences and left none as written (`results/dev/agent-meta-dev-v2*.json`). Easy template text on the split the prompts were tuned on, so this shows no regression, not accuracy.
 
-**Still to do:** the 400 test notes once, on the final system. Optionally the agent with prompt `v2` on set A, for a like-for-like before and after on one set (set A is a tuned set).
+**Not run:** the 400 test notes were deliberately not run on the final system (decision of Oct 29), so no held-out model result exists. Optionally the agent with prompt `v2` on set A, for a like-for-like before and after on one set (set A is a tuned set).
 
 ## Rules for using it
 

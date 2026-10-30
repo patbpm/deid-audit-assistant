@@ -55,7 +55,7 @@ All results are on synthetic notes, are reproducible from the repository, and co
 
 ### What was not measured, and limits
 
-- The model-based system has **not** been run on the 400-note held-out test split. [Update if it is run before the deadline.]
+- The model-based system was **not run** on the 400-note held-out test split (a decision made on Oct 29), so there is no held-out result for it; the model results are on the dev split and two adversarial sets the project wrote.
 - The open-weights comparison, the two-model cross-check with a real second model, and watch mode with a hosted model were **not run**. They are built and pass their tests with scripted models only.
 - The synthetic notes are template-based and short; scores will not predict performance on real clinical text. **Nothing was tested on real notes, and it must not be used on real patient data.**
 - The adversarial sets were written by the project, with 20 notes or fewer per family, so intervals are wide.
@@ -68,7 +68,7 @@ Setup files and a smoke-test script were created on Oct 26, 2026. All project co
 
 ### What I would do next
 
-Run the held-out test split once on the final system; run the same pipeline on Muse Spark Open through a partner endpoint to compare accuracy, cost and latency; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
+Run the held-out test split once on the final system (not run for this submission); run the same pipeline on Muse Spark Open through a partner endpoint to compare accuracy, cost and latency; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
 
 ## Anti-project check (for my own use, not for the form)
 

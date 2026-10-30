@@ -46,7 +46,7 @@ About 2.74 USD at list price (an estimate). The first run of the final stage had
 
 **Baselines on 400 held-out synthetic notes** (regex written knowing the synthetic formats): recall / precision regex 54.0 / 100.0, Presidio 94.7 / 74.3, Philter 100.0 / 86.4 (`docs/RESULTS.md`).
 
-**Not measured:** the model-based system on the 400-note test split; Muse Spark Open or any open-weights model (a comparison was planned and **not run**); the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
+**Not measured:** the model-based system on the 400-note test split (not run, by decision); Muse Spark Open or any open-weights model (a comparison was planned and **not run**); the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
 
 ## How it uses Meta's models
 

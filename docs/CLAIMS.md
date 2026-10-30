@@ -50,4 +50,4 @@ Every number and statement in the README, demo and submission must trace to a ru
 - Decide which planning and setup docs (for example `docs/PLAN.md`, `docs/RESOURCES.md`, `docs/PRE_KICKOFF_CHECKLIST.md`) should stay out of the public repository, and review them line by line before it goes public.
 - Re-check every row above after the final runs; numbers from smoke tests will be replaced by full-run numbers.
 - Patrick to fill the bracketed lines in `docs/SUBMISSION.md` (project name, legal name, why he knows the problem firsthand, links) and approve the video narration in `docs/DEMO_SCRIPT.md`.
-- Decide whether to run the 400-note test split once on the final system (about 7 USD estimated; needs approval). Until then every document says it was not run.
+- The 400-note test split is **not run** on the model-based system (Patrick's decision, Oct 29). Every document says so; do not add a held-out model claim.
