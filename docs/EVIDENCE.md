@@ -12,6 +12,12 @@ All numbers are on synthetic notes and come from files in `results/`, reproducib
 | Presidio, default settings | 94.7 | 74.3 |
 | Philter, through a compatibility shim | 100.0 | 86.4 |
 
+## Full agent on the 400 held-out test notes
+
+Pre-registered in `docs/TEST_RUN.md` before the run and run once (two sessions, no change between them), Muse Spark `muse-spark-1.3`, prompt v2 with the name check, 4 workers. Notes P0051-P0150, frozen Oct 27, never used for tuning. Easy template text, the same generator as dev.
+
+All four pre-stated criteria passed: 5,992 of 5,992 labeled identifiers found with exact boundaries and the right type (names 2,587, dates 1,700, phones 712, IDs 634, addresses 300, emails 59), 0 false positives, 400 of 400 notes cleaned with no unreadable or cut-off replies, and no original identifier left word for word (two search hits, both coincidences: the date "8/1" inside "Pain 8/10", and "King" at the start of the stand-in "Kingsley"). The name check was asked about 11 occurrences and left none as written; the red-team rated 397 low, 1 medium and 2 high (all three for the template generator's implausible combination of a young woman with COPD on home oxygen) and sent nothing back; 376 review items, 373 of them date guesses. 2.70 million tokens, about 9.43 USD at list price (the first session hit its token cap before the red-team stage and was resumed with approval; details in `docs/TEST_RUN.md`). A held-out result for the model-based system on this kind of text; it does not show performance on real notes, and the hard cases are in the adversarial sets.
+
 ## Adversarial set A (180 notes, nine families)
 
 Written before any fix. The agent was run on it once; it is now a tuned set. `docs/ADVERSARIAL.md`.
@@ -82,4 +88,4 @@ Dev split, true spans, 200 notes: no original names, IDs, phones, emails or addr
 
 ## Not measured
 
-The model-based system on the 400-note test split (not run, by decision on Oct 29); Muse Spark Open or any open-weights model; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.
+Muse Spark Open or any open-weights model; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.

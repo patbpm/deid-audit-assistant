@@ -42,11 +42,13 @@ note ──► detect ──► verify doubtful spans ──► check name uses 
 
 About 2.74 USD at list price (an estimate). The first run of the final stage had 7 false positives because my date fix made the red-team reviewer re-add year-only dates; fixing that stage took it to 1, and that row was fixed after reading set B's errors, so it is a tuned row. The 108 false positives that the first adversarial set (set A) exposed, and the two fixes that followed, are in `docs/ADVERSARIAL.md`; set A is now a tuned set.
 
-**Easy template notes** (200 dev notes, the split the prompts were tuned on, so no held-out claim): 3,023 of 3,023 identifiers found with no false positives, and none left word for word. This shows no regression, not accuracy.
+**Held-out test notes** (400 easy template notes the prompts never saw; pass criteria written before the run, `docs/TEST_RUN.md`): all 5,992 identifiers found with exact boundaries, 0 false positives, all 400 notes cleaned, no original identifier left in place (about 9.43 USD at list price, an estimate). It shows the prompts did not overfit to the dev notes; it says nothing about real notes or notes unlike these templates.
+
+**Dev notes** (200 easy template notes, the split the prompts were tuned on): 3,023 of 3,023 found with no false positives. This shows no regression, not accuracy.
 
 **Baselines on 400 held-out synthetic notes** (regex written knowing the synthetic formats): recall / precision regex 54.0 / 100.0, Presidio 94.7 / 74.3, Philter 100.0 / 86.4 (`docs/RESULTS.md`).
 
-**Not measured:** the model-based system on the 400-note test split (not run, by decision); Muse Spark Open or any open-weights model (a comparison was planned and **not run**); the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
+**Not measured:** Muse Spark Open or any open-weights model (a comparison was planned and **not run**); the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
 
 ## How it uses Meta's models
 

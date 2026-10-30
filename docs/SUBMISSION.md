@@ -49,13 +49,13 @@ All results are on synthetic notes, are reproducible from the repository, and co
 
 - **Hard cases (adversarial set B, 200 short notes, 609 labeled identifiers, written by the project):** all 609 covered, including 21 real surnames written bare, with 1 false positive at the detection stage (0.005 per note) and 1 in the final output. Philter makes 0.83 false positives per note on the same set and Presidio 1.55. The success test was stated before the run, and it passed. Estimated cost 2.74 USD at list price.
 - **A failure found and fixed in public:** the first adversarial set (180 notes) exposed two causes of false positives (every occurrence of a listed name replaced; relative and year-only dates listed): 108 false positives, 0.60 per note. I fixed both, built set B from a new seed and different vocabulary to judge the fixes, and a stage disagreement that the date fix created (the red-team re-adding year-only dates, 7 false positives at the end) was found and corrected (1). Set A is now a tuned set and set B has been read for that last fix; both are disclosed as such.
-- **Easy template notes (200 dev notes):** 3,023 of 3,023 identifiers found with no false positives and nothing left word for word. This is the split the prompts were tuned on, so it shows no regression, not accuracy.
+- **Held-out test notes (400 easy template notes the prompts never saw):** the pass criteria were written and committed before the run, and all four passed: 5,992 of 5,992 identifiers found with exact boundaries, 0 false positives, 400 of 400 notes cleaned, no original identifier left in place. About 9.43 USD at list price; the first session stopped at its token cap and was resumed with the same code. It shows the prompts did not overfit to the dev notes; the text is the same easy templates, so it says nothing about real notes.
+- **Easy template notes (200 dev notes):** 3,023 of 3,023 found with no false positives; the split the prompts were tuned on, so it shows no regression, not accuracy.
 - **Baselines on 400 held-out synthetic notes:** regex 54.0% recall, Presidio 94.7% / 74.3% precision, Philter 100.0% / 86.4% (recall / precision).
 - **Review burden:** on the first adversarial set, ranking flags by confidence reached 90% of the gain after 6 reviews against 52 in random order, with a perfect reviewer assumed.
 
 ### What was not measured, and limits
 
-- The model-based system was **not run** on the 400-note held-out test split (a decision made on Oct 29), so there is no held-out result for it; the model results are on the dev split and two adversarial sets the project wrote.
 - The open-weights comparison, the two-model cross-check with a real second model, and watch mode with a hosted model were **not run**. They are built and pass their tests with scripted models only.
 - The synthetic notes are template-based and short; scores will not predict performance on real clinical text. **Nothing was tested on real notes, and it must not be used on real patient data.**
 - The adversarial sets were written by the project, with 20 notes or fewer per family, so intervals are wide.
@@ -68,7 +68,7 @@ Setup files and a smoke-test script were created on Oct 26, 2026. All project co
 
 ### What I would do next
 
-Run the held-out test split once on the final system (not run for this submission); run the same pipeline on Muse Spark Open through a partner endpoint to compare accuracy, cost and latency; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
+Run the same pipeline on Muse Spark Open through a partner endpoint to compare accuracy, cost and latency; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
 
 ## Anti-project check (for my own use, not for the form)
 

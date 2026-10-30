@@ -33,7 +33,7 @@ From `results/dev/replace-dev.json`, produced by `python -m deid.replace.check` 
 - Names: 103 distinct real name tokens; none maps to more than one surrogate, no two share one, none maps to a value that is a real name in the batch; all 161 people keep consistent tokens across their notes.
 - 0 phone, ID or email shapes changed; 0 notes with text changed outside the replaced spans.
 
-Because the engine is given the true spans, the zero-leak result is partly by construction. It shows the replacement step is sound, not that the pipeline is. End-to-end leakage depends on what the detector misses, and was not measured with detector output on the test split (not run).
+Because the engine is given the true spans, the zero-leak result is partly by construction. It shows the replacement step is sound, not that the pipeline is. End-to-end leakage depends on what the detector misses, and was then measured with the detector's output on the test split: no original identifier was left in place in 400 cleaned notes (`docs/TEST_RUN.md`).
 
 ## Hard formats (adversarial set, true spans)
 

@@ -25,10 +25,21 @@ Whatever happens is reported as it comes out, including a failed criterion. If t
 
 The test notes come from the same templates as the dev notes. A pass shows the prompts did not overfit to the dev patients; it does not show performance on real notes or on notes unlike these.
 
-## Outcome so far (Oct 29)
+## Outcome (Oct 29 - 30)
 
-The run stopped at the 2,500,000-token cap after all 400 detections (2.04 million tokens) and 8 red-team first looks, with no note finished, so no final (post-red-team) output exists and the run is partial. Cost 8.87 USD at list price (600,404 tokens in, 1,910,663 out), above the 7 USD estimate: the detection replies used more output tokens than the dev run did.
+**All four criteria passed.** One run in two sessions, 400 of 400 notes cleaned, nothing changed between them.
 
-Detector stage, scored offline from the saved replies with no model call (`python -m deid.eval.replay --split test --version v2 ...` then `deid.eval.run --only-predicted`; the name check left none of its 11 occurrences as written, so the replay, which cannot run that check, matches the run): 5,992 of 5,992 labeled identifiers found with exact boundaries and the right type, 0 false positives, 0 unreadable or cut-off replies, 0 unmatched strings. Name check asked about 11 occurrences, left none as written. The verifier's 19 verdicts were all "identifier". Median detection call 13.1 s.
+The first session stopped at the 2,500,000-token cap after all 400 detections, before any note finished (600,404 tokens in, 1,910,663 out, 8.87 USD at list price; the detection replies used more output tokens than the dev run did, so my 7 USD estimate was low). With Patrick's approval the same command was resumed with a 1,500,000-token cap; detections came from the cache, so only the red-team calls were new (84,282 in, 107,370 out, 0.56 USD). In all 2,702,719 tokens and 9.43 USD at list price (an estimate; reasoning-token billing is not stated). The first session's partial summary is in the commit that recorded it (74cd8c4).
 
-Criteria 1 and 2 (recall at least 99%, at most 0.05 false positives per note) pass at the detector stage. Criteria 3 and 4 (every note cleaned; no labeled identifier verbatim in a cleaned note) and the final-stage scores cannot be judged until the red-team and cleaning stages have run.
+| Criterion | Result |
+|---|---|
+| 1. Recall at least 99% | 5,992 of 5,992 labeled identifiers (100%), exact boundaries and the right type, in the detector spans and after red-team feedback (names 2,587, dates 1,700, phones 712, IDs 634, addresses 300, emails 59) |
+| 2. At most 0.05 false positives per note | 0 false positives (0.00 per note) in both |
+| 3. Every note cleaned, no unresolved unreadable or cut-off replies | 400 of 400 cleaned, 0 not cleaned, 0 unreadable, 0 cut off, 0 unmatched strings |
+| 4. No labeled identifier verbatim in a cleaned note beyond what a review item explains | Two hits out of 5,992, both coincidences on inspection: the date "8/1" (replaced by "2/8") sits inside "Pain 8/10", and the name part "King" (from "David King", replaced) is the start of the stand-in "Kingsley". No original identifier was left in place. Run `python -m deid.eval.leak` (`deid/eval/leak.py`) to list them with context |
+
+Other numbers from the run: the name check was asked about 11 occurrences and left none as written; the verifier's 19 verdicts were all "identifier"; median detection call 13.1 s; the red-team rated 397 notes low, 1 medium and 2 high and sent nothing back (0 spans added by feedback). The three non-low notes were all flagged for a rare-condition clue, the template generator's occasional implausible combination (a woman in her twenties with COPD on home oxygen), which is the red-team doing its job on an artifact of the synthetic data. 376 review items: 373 are date guesses (day/month order assumed, or no year) and 3 are those clues.
+
+Reproduce: `python -m deid.agent.run --live --split test --allow-test --limit 0 --name agent-meta-test --workers 4 --max-total-tokens 2500000 --price-in 1.25 --price-out 4.25 --results-dir results/test` (billed; resume with a larger cap if it stops at the cap). Scores in `results/test/`, written by the run itself (detector and final stages). Before the resume, the detector stage was also scored offline from the saved replies (`python -m deid.eval.replay --split test --version v2 ...`, then `deid.eval.run --only-predicted`) with identical numbers; that is the `-agnostic` file.
+
+What this does and does not show: the test notes come from the same templates as the dev notes, so a perfect score says the prompts did not overfit to the dev patients and that the pipeline holds on 400 more notes of this kind. It says nothing about real clinical text or notes unlike these, and the hard cases are in the adversarial sets, not here.
