@@ -43,10 +43,10 @@ Stretch features, then audit report polish, then the open-weights-vs-API compari
 
 ## Submission checklist
 - [ ] Public repo with README, setup steps and reproducible evaluation
-- [ ] 3-minute demo video, link accessible without login
-- [ ] Everyone who worked on the project is listed (solo: you)
-- [ ] Clear statement of what was built during the hackathon
-- [ ] Limitations section (not a compliance certification)
+- [ ] 3-minute demo video, link accessible without login (script drafted: `docs/DEMO_SCRIPT.md`; not recorded)
+- [ ] Everyone who worked on the project is listed (solo: you; `docs/SUBMISSION.md` has the field)
+- [x] Clear statement of what was built during the hackathon: README and `docs/SUBMISSION.md`, pending Patrick's approval
+- [x] Limitations section (not a compliance certification): README and `docs/SUBMISSION.md`, pending Patrick's approval
 - [ ] Submitted on the CV platform before 5:00 PM Central on Nov 4
 - [ ] Optional: post the demo on X and submit the link (Most Viral prize, judged on engagement until Nov 8)
 
@@ -83,3 +83,4 @@ Stretch features, then audit report polish, then the open-weights-vs-API compari
 - Day 6 (Oct 29): you approved the live runs. Agent on adversarial set B, one run (785,579 tokens, about 2.74 USD): 609 of 609 covered including all 21 bare real surnames, 1 false positive at detection (0.005 per note; Philter 0.83), 7 after red-team feedback. The name check was asked about 51 occurrences, released 29 ordinary uses and kept 22 replaced. Pre-stated test passed. Found a stage disagreement caused by my fix: the reviewer re-added year-only dates; fixed (same rule for the reviewer's leftovers), re-run from cache for free, final false positives 7 to 1. Set B is now read. Dev re-run with prompt v2 started; the 400 test notes wait until the system is final.
 - Day 6 (Oct 29): two-model cross-check built (`deid/agent/crosscheck.py`, `--second-provider custom`, `docs/CROSSCHECK.md`) and tested with scripted models only: a span only one model found is flagged for review with both models named, a span only the second found is added, an unreadable second model costs a notice and not the clean, the verifier gives a third opinion, and `deid.eval.burden --cross` measures disagreement against confidence as a review signal. Needs the partner endpoint to run for real. Watch mode (folder or SQLite source, persistent mapping, update on change, hold until reviewed) is next, capped at about a day.
 - Day 6 (Oct 29): dev re-run with prompt v2 finished (3.75 USD): 3,023 of 3,023, 0 false positives, name check left nothing as written, no regression. Watch mode built (`deid/watch`, `docs/WATCH.md`): folder or SQLite source, persistent replacement mapping (`Replacer.extend`/`state`), edits re-clean and withdraw the old copy, removals delete output, notes held until every review item is decided, offline-engine notes always held for a person, review page `--follow`, status page, demo feeder. Tested with a scripted model and by hand on synthetic notes; 465 tests pass. Not run with a hosted model.
+- Day 7 (Oct 29): Patrick chose to skip the open-weights comparison and the cross-check live runs and to spend the remaining time on the demo, README and write-up. Drafted for his approval: `docs/DEMO_SCRIPT.md` (3-minute storyboard, narration, pre-recording checklist, what not to say), `docs/SUBMISSION.md` (form text, what was and was not measured), `docs/EVIDENCE.md` (every result with its conditions, moved out of the README), and a shorter README that leads with the problem and the set B result. No claims were added; each restates a row in `docs/CLAIMS.md`. The open-weights comparison, the two-model cross-check with a real model and watch mode with a hosted model are stated everywhere as not run.

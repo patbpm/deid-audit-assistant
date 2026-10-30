@@ -32,7 +32,8 @@ Every number and statement in the README, demo and submission must trace to a ru
 | 6u | Two-model cross-check and watch mode are built and pass their scripted-model tests; neither has been run with a real second model or a hosted model, and no accuracy or usefulness claim is made for either | `tests/test_crosscheck.py`, `tests/test_watch.py` | `python -m unittest tests.test_crosscheck tests.test_watch` | |
 | 7 | Replacement check on dev with true spans: 0 originals left, one shift per patient, no inconsistent name surrogates; 3 of 46 year-less dates one day off | `results/dev/replace-dev.json` | `python -m deid.replace.check` | |
 | 8 | The dataset has 600 notes and 9,015 labeled spans, frozen with recorded hashes | `data/frozen.json`, `tests/test_frozen.py` | `python -m deid.synth.generate`, `python -m deid.eval.freeze` | |
-| 9 | Every parts-status line in the "Status of each part" table | `docs/PLAN.md` progress log, `git log` | `python -m unittest discover -s tests` for the offline parts | |
+| 9 | The "built and tested with scripted models only" and "Not measured" statements in `README.md`, `docs/EVIDENCE.md` and `docs/SUBMISSION.md` (cross-check, watch mode, open-weights comparison, test split, real text) | `docs/PLAN.md` progress log, `git log` | `python -m unittest discover -s tests` for the offline parts | |
+| 10 | README, `docs/EVIDENCE.md`, `docs/SUBMISSION.md` and `docs/DEMO_SCRIPT.md` restate rows 1-6u and 7-9 only; the set B table in the README lists Philter 95.9% / 0.83, Presidio 83.6% / 1.55, regex 14.0% / 0.00 and the agent at 609 of 609 with 1 false positive (detection and final, after the red-team fix); the closing statements "open-weights comparison planned and not run", "no real text", "not a compliance certification" and "solo project" | rows 6p, 6r, 6s; `docs/EVIDENCE.md` | see the rows cited | |
 
 ## Wording rules this README follows
 
@@ -48,3 +49,5 @@ Every number and statement in the README, demo and submission must trace to a ru
 - Choose a licence (none is set).
 - Decide which planning and setup docs (for example `docs/PLAN.md`, `docs/RESOURCES.md`, `docs/PRE_KICKOFF_CHECKLIST.md`) should stay out of the public repository, and review them line by line before it goes public.
 - Re-check every row above after the final runs; numbers from smoke tests will be replaced by full-run numbers.
+- Patrick to fill the bracketed lines in `docs/SUBMISSION.md` (project name, legal name, why he knows the problem firsthand, links) and approve the video narration in `docs/DEMO_SCRIPT.md`.
+- Decide whether to run the 400-note test split once on the final system (about 7 USD estimated; needs approval). Until then every document says it was not run.
