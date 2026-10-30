@@ -1,0 +1,98 @@
+{
+  "bootstrap_resamples": 1000,
+  "gold_file_sha256": "af755b29987f92ec13b46a22cbb69c30f536c669783ae0eb700d5cb400a7c779",
+  "metrics": {
+    "PHI": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 5992,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 5992
+    }
+  },
+  "name": "agent-meta-test-detector-agnostic",
+  "notes": 400,
+  "notes_without_predictions": 0,
+  "only_predicted": true,
+  "pred_file_sha256": "dce22ef2df5dd7e32768f94ca1aba97e460c01b118220455f4899f83455228de",
+  "recall_by_gold_type": {
+    "ADDRESS": {
+      "gold": 300,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "DATE": {
+      "gold": 1700,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "EMAIL": {
+      "gold": 59,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "ID": {
+      "gold": 634,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "NAME": {
+      "gold": 2587,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "PHONE": {
+      "gold": 712,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "split": "test",
+  "type_agnostic": true
+}
