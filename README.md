@@ -48,9 +48,9 @@ About 2.74 USD at list price (an estimate). The first run of the final stage had
 
 **Baselines on 400 held-out synthetic notes** (regex written knowing the synthetic formats): recall / precision regex 54.0 / 100.0, Presidio 94.7 / 74.3, Philter 100.0 / 86.4 (`docs/RESULTS.md`).
 
-**Open-weights check (one run, dev notes, detector only):** Meta's open-weights Muse Spark Open on Baseten, with the same prompt, found 99.2% of the dev identifiers (3,023 labeled) with 0 false positives, against 100.0% for Muse Spark on the same notes; all 25 misses are names mentioned again later in a note. On the held-out test notes it found 99.0% (5,093 identifiers in the first 340 of 400 notes, the run stopped at its token cap; 0 false positives, all 50 misses are names). It was not run on the adversarial sets or inside the full agent, and the dev notes are the split the prompts were tuned on. Details and the first, cut-off run: `docs/COMPARISON.md`.
+**Open-weights check (one run, dev notes, detector only):** Meta's open-weights Muse Spark Open on Baseten, with the same prompt, found 99.2% of the dev identifiers (3,023 labeled) with 0 false positives, against 100.0% for Muse Spark on the same notes; all 25 misses are names mentioned again later in a note. On the 400 held-out test notes it found 98.9% (5,992 identifiers; 0 false positives, all 67 misses are names). It was not run on the adversarial sets or inside the full agent, and the dev notes are the split the prompts were tuned on. Details and the first, cut-off run: `docs/COMPARISON.md`.
 
-**Not measured:** Muse Spark Open on the last 60 held-out notes, on the adversarial sets, or inside the full agent; Muse Spark's own cost and latency under the same command; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
+**Not measured:** Muse Spark Open on the adversarial sets or inside the full agent; Muse Spark's own cost and latency under the same command; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
 
 ## How it uses Meta's models
 

@@ -42,7 +42,7 @@ Muse Spark Open (`meta-models/muse-spark-open`, Baseten Model APIs), detector on
 
 Cost and speed of the open model (estimated at list price, $1.25 in / $4.25 out per million tokens): the first run used a 4,096-token output limit with no retry and 82 of 200 replies were cut off (recall 51.8% at that setting: a setting problem, not a measure of the model). The rerun, which asked the cut-off notes again once at 16,384 tokens, finished all 200. Both runs together used 310,161 input and 1,187,479 output tokens, about $5.43; first-attempt latency was 10.6 s median (13.5 s p90); the 82 retried notes took 20.1 s median counting both attempts. The model reasons at length, so output limit and retry matter.
 
-Caveats: one run each; easy template notes; the dev notes are the split the prompts were tuned on, with Muse Spark, so the open model used a prompt that was not tuned for it; only the detector was run, not the verifier, name check or red-team, and not the adversarial sets (the held-out set was run only partly, see the next result); Muse Spark's own cost and latency were not measured with the same command, so no cost or latency comparison between the two models is claimed.
+Caveats: one run each; easy template notes; the dev notes are the split the prompts were tuned on, with Muse Spark, so the open model used a prompt that was not tuned for it; only the detector was run, not the verifier, name check or red-team, and not the adversarial sets (the held-out set is the next result); Muse Spark's own cost and latency were not measured with the same command, so no cost or latency comparison between the two models is claimed.
 
 Files: `results/compare/meta-vs-open.json` (final comparison), `results/compare/meta-vs-open-4096.json` and `results/compare/open-dev-4096.log.json` (first run, no retry), `results/compare/open-dev-retry.log.json` and `results/dev/open-dev-retry-dev.json` (rerun, per-type scores).
 
@@ -57,16 +57,17 @@ python -m deid.eval.compare --split dev --name meta-vs-open --system meta=runs/a
 
 Baseten's model list on this account showed `meta-models/muse-spark-open`, not the `-1026` id in the hackathon notes.
 
-## Result (Oct 30, 2026, held-out test split, partial: 340 of 400 notes)
+## Result (Oct 30, 2026, held-out test split, all 400 notes)
 
-Muse Spark Open, detector only, prompt v2, held-out test notes: **the run hit its token cap (2.2M) after 340 of 400 notes**, so the result covers those 340 notes (5,093 labeled identifiers; the other 60 were not run). Scored against the saved Muse Spark detector output on the same 340 notes: **99.0% recall (98.8-99.3), 100.0% precision, 0 false positives, -1.0 points of recall against Muse Spark (paired interval -1.2 to -0.7).** All 50 misses are names (name recall 97.7%); dates, IDs, phones, emails and addresses were all found. Cost about $8.00 at list price ($1.25 in / $4.25 out per million tokens; 452,045 in / 1,748,726 out tokens); median latency 12.3 s per note (p90 31.7 s); no cut-off replies and no parse errors. Caveats: the 340 are the first 340 notes of the split, not a random sample; one run; easy template text; detector only; the test split has now been used for this run, so it is no longer untouched for tuning.
+Muse Spark Open, detector only, prompt v2, all 400 held-out test notes, scored against the saved Muse Spark detector output on the same notes: **98.9% recall (98.6-99.1) of 5,992 labeled identifiers, 100.0% precision, 0 false positives, -1.1 points of recall against Muse Spark (paired interval -1.4 to -0.9).** All 67 misses are names (name recall 97.4%); dates, IDs, phones, emails and addresses were all found. Cost about $9.26 at list price ($1.25 in / $4.25 out per million tokens; 527,789 in / 2,022,963 out tokens in total); no cut-off replies and no parse errors. The run was done in two parts: the first hit its 2.2M-token cap after 340 notes (99.0% recall on those 340, about $8.00) and the last 60 were run afterwards with the first 340 replies reused from the saved copy (about $1.26). Latency: median 12.3 s per note on the first 340 and 16.3 s on the last 60 (not pooled). Caveats: one run; easy template text; detector only; the test split has now been used for this run, so it is no longer untouched for tuning.
 
-Files: `results/compare/meta-vs-open-test.json`, `results/compare/open-test.log.json`, `results/test/open-test-test.json` (per-type scores).
+Files: `results/compare/meta-vs-open-test-full.json` (comparison on all 400), `results/test/open-test-full-test.json` (per-type scores), `results/compare/open-test.log.json` (first 340 notes) and `results/compare/open-test-rest.log.json` (last 60 live, 340 from cache), `results/compare/meta-vs-open-test.json` and `results/test/open-test-test.json` (the 340-note partial score).
 
-Reproduce (billed; needs a Baseten key and Patrick's yes; the cap used was 2.2M tokens, which was not enough for all 400 notes):
+Reproduce (billed; needs a Baseten key and Patrick's yes; the first command stops at 2.2M tokens, so the second is needed to finish):
 
 ```powershell
 python -m deid.detect.run --live --provider custom --split test --allow-test --name open-test --limit 0 --retry-output-tokens 16384 --max-total-tokens 2200000 --price-in 1.25 --price-out 4.25
-python -m deid.eval.compare --split test --allow-test --name meta-vs-open-test --system meta=runs/agent-meta-test.detector.jsonl --system open=runs/open-test.jsonl --log open=runs/open-test.log.json --price open=1.25,4.25
-python -m deid.eval.run --pred runs/open-test.jsonl --name open-test --split test --only-predicted --out results/test
+python -m deid.detect.run --live --provider custom --split test --allow-test --name open-test-rest --limit 0 --retry-output-tokens 16384 --max-total-tokens 500000 --price-in 1.25 --price-out 4.25
+python -m deid.eval.compare --split test --allow-test --name meta-vs-open-test-full --system meta=runs/agent-meta-test.detector.jsonl --system open=runs/open-test-rest.jsonl
+python -m deid.eval.run --pred runs/open-test-rest.jsonl --name open-test-full --split test --out results/test
 ```

@@ -78,3 +78,5 @@ Two detector runs on the 200 dev notes (the first with no retry, the second aski
 ## Measured: Muse Spark Open on Baseten, held-out notes (Oct 30)
 
 340 of 400 test notes (detector only) used 452,045 input and 1,748,726 output tokens, about $8.00 at list price, against a forecast of about $7.80 for all 400 notes; the model used more output tokens per note than forecast, so the 2.2M-token cap stopped the run early. About 6,470 tokens per note, so all 400 notes would have needed about 2.6M tokens (about $9.4 at list price). Whether the Baseten account was charged or credited was not checked.
+
+The last 60 held-out notes used 75,744 input and 274,237 output tokens, about $1.26 (forecast about $1.40). All 400 held-out notes together: 527,789 input and 2,022,963 output tokens, about $9.26 at list price, about 6,380 tokens per note.
