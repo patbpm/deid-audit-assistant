@@ -1,0 +1,216 @@
+{
+  "bootstrap_resamples": 1000,
+  "gold_file_sha256": "af755b29987f92ec13b46a22cbb69c30f536c669783ae0eb700d5cb400a7c779",
+  "metrics": {
+    "ADDRESS": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 255,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 255
+    },
+    "ALL": {
+      "ci95": {
+        "leak": [
+          0.0037453777911793384,
+          0.0068442030711575175
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          0.9875592417061612,
+          0.9929064039408867
+        ]
+      },
+      "exact": {
+        "f1": 0.995067087608524,
+        "precision": 1.0,
+        "recall": 0.9901826035735323
+      },
+      "gold": 5093,
+      "leaked_char_rate": 0.005362285260335664,
+      "overlap": {
+        "f1": 0.995067087608524,
+        "precision": 1.0,
+        "recall": 0.9901826035735323
+      },
+      "pred": 5043
+    },
+    "DATE": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 1445,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 1445
+    },
+    "EMAIL": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 52,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 52
+    },
+    "ID": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 543,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 543
+    },
+    "NAME": {
+      "ci95": {
+        "leak": [
+          0.010020822488287395,
+          0.018008052741029124
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          0.9711841512832058,
+          0.9834006280843428
+        ]
+      },
+      "exact": {
+        "f1": 0.9884739511295527,
+        "precision": 1.0,
+        "recall": 0.9772105742935278
+      },
+      "gold": 2194,
+      "leaked_char_rate": 0.014192474484208684,
+      "overlap": {
+        "f1": 0.9884739511295527,
+        "precision": 1.0,
+        "recall": 0.9772105742935278
+      },
+      "pred": 2144
+    },
+    "PHONE": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 604,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 604
+    }
+  },
+  "name": "open-test",
+  "notes": 340,
+  "notes_without_predictions": 0,
+  "only_predicted": true,
+  "pred_file_sha256": "d7c744ed33a6df70c16516352cb4c2db2573d7c0ec29ebfafad0cb9801cc96b3",
+  "split": "test",
+  "type_agnostic": false
+}

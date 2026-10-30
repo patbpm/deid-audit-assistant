@@ -1,0 +1,71 @@
+{
+  "bootstrap_resamples": 1000,
+  "gold_file_sha256": "af755b29987f92ec13b46a22cbb69c30f536c669783ae0eb700d5cb400a7c779",
+  "name": "meta-vs-open-test",
+  "notes_compared": 340,
+  "recall_difference_vs_reference_ci95": {
+    "open": [
+      -0.012440758293838838,
+      -0.007093596059113305
+    ]
+  },
+  "reference": "meta",
+  "split": "test",
+  "systems": {
+    "meta": {
+      "false_positives": 0,
+      "gold": 5093,
+      "leaked_char_rate": 0.0,
+      "log": null,
+      "precision": 1.0,
+      "precision_ci95": [
+        1.0,
+        1.0
+      ],
+      "pred": 5093,
+      "pred_file_sha256": "91b3c7025f5f19d4410f8403e22ec33cfe661d06f7cf03bc5eb1e7cb6f180d82",
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "open": {
+      "cost_usd": 7.99714175,
+      "cost_usd_per_1000_notes": 23.521005147058826,
+      "false_positives": 0,
+      "gold": 5093,
+      "latency_s_median": 12.298602299997583,
+      "latency_s_p90": 31.72138860000996,
+      "leaked_char_rate": 0.005362285260335664,
+      "log": "runs/open-test.log.json",
+      "model": "meta-models/muse-spark-open",
+      "notes_from_cache": 0,
+      "notes_in_log": 340,
+      "parse_errors": 0,
+      "precision": 1.0,
+      "precision_ci95": [
+        1.0,
+        1.0
+      ],
+      "pred": 5043,
+      "pred_file_sha256": "d7c744ed33a6df70c16516352cb4c2db2573d7c0ec29ebfafad0cb9801cc96b3",
+      "price_usd_per_million": [
+        1.25,
+        4.25
+      ],
+      "provider": "custom",
+      "recall": 0.9901826035735323,
+      "recall_ci95": [
+        0.9875592417061612,
+        0.9929064039408867
+      ],
+      "tokens_in": 452045,
+      "tokens_out": 1748726,
+      "tokens_per_live_note": 6472.855882352941,
+      "truncated": 0,
+      "unmatched_strings": 0
+    }
+  },
+  "type_agnostic": true
+}
