@@ -41,7 +41,7 @@ Around the pipeline: a front page where a person drops or pastes notes (plus CSV
 
 - **Muse Spark (`muse-spark-1.3`, Meta Model API)** runs four separate roles: detector, verifier, name-use check and the re-identification red-team, each with its own prompt and failure behavior (fail closed). The same model reads scanned pages.
 - **Muse Voice Transcribe** turns dictation into notes that go through the same pipeline.
-- The client speaks an OpenAI-style endpoint, so the model is swappable (`--provider custom`), and a second model can be added for the cross-check. **Muse Spark Open on partner inference was planned for a comparison and was not run; no open-weights result is claimed.**
+- The client speaks an OpenAI-style endpoint, so the model is swappable (`--provider custom`), and a second model can be added for the cross-check. **Muse Spark Open on Baseten was run as the detector on the 200 dev notes (99.2% recall, 0 false positives, against 100.0% for Muse Spark; one run; details in `docs/COMPARISON.md`).**
 
 ### What was measured
 
@@ -50,13 +50,14 @@ All results are on synthetic notes, are reproducible from the repository, and co
 - **Hard cases (adversarial set B, 200 short notes, 609 labeled identifiers, written by the project):** all 609 covered, including 21 real surnames written bare, with 1 false positive at the detection stage (0.005 per note) and 1 in the final output. Philter makes 0.83 false positives per note on the same set and Presidio 1.55. The success test was stated before the run, and it passed. Estimated cost 2.74 USD at list price.
 - **A failure found and fixed in public:** the first adversarial set (180 notes) exposed two causes of false positives (every occurrence of a listed name replaced; relative and year-only dates listed): 108 false positives, 0.60 per note. I fixed both, built set B from a new seed and different vocabulary to judge the fixes, and a stage disagreement that the date fix created (the red-team re-adding year-only dates, 7 false positives at the end) was found and corrected (1). Set A is now a tuned set and set B has been read for that last fix; both are disclosed as such.
 - **Held-out test notes (400 easy template notes the prompts never saw):** the pass criteria were written and committed before the run, and all four passed: 5,992 of 5,992 identifiers found with exact boundaries, 0 false positives, 400 of 400 notes cleaned, no original identifier left in place. About 9.43 USD at list price; the first session stopped at its token cap and was resumed with the same code. It shows the prompts did not overfit to the dev notes; the text is the same easy templates, so it says nothing about real notes.
+- **Open-weights check (200 dev notes, detector only, one run):** Muse Spark Open on Baseten, same prompt: 99.2% of 3,023 identifiers found, 0 false positives, against 100.0% for Muse Spark on the same notes (the split the prompts were tuned on); all 25 misses are names mentioned again later in a note. A first run with a 4,096-token output limit and no retry lost 82 of 200 replies to cut-offs (51.8% recall) and is reported as a setting problem.
 - **Easy template notes (200 dev notes):** 3,023 of 3,023 found with no false positives; the split the prompts were tuned on, so it shows no regression, not accuracy.
 - **Baselines on 400 held-out synthetic notes:** regex 54.0% recall, Presidio 94.7% / 74.3% precision, Philter 100.0% / 86.4% (recall / precision).
 - **Review burden:** on the first adversarial set, ranking flags by confidence reached 90% of the gain after 6 reviews against 52 in random order, with a perfect reviewer assumed.
 
 ### What was not measured, and limits
 
-- The open-weights comparison, the two-model cross-check with a real second model, and watch mode with a hosted model were **not run**. They are built and pass their tests with scripted models only.
+- The open-weights model was run only as a detector on the dev notes, not on the held-out or adversarial sets or inside the full agent, and Muse Spark's cost and latency were not measured the same way, so no cost or speed comparison is claimed. The two-model cross-check with a real second model and watch mode with a hosted model were **not run**. They are built and pass their tests with scripted models only.
 - The synthetic notes are template-based and short; scores will not predict performance on real clinical text. **Nothing was tested on real notes, and it must not be used on real patient data.**
 - The adversarial sets were written by the project, with 20 notes or fewer per family, so intervals are wide.
 - This is an assistant for human review, **not a compliance certification**. It does not guarantee removal of every identifier and gives no medical advice. The replacement key and audit files contain original identifiers and must never be shared with the cleaned notes.
@@ -68,7 +69,7 @@ Setup files and a smoke-test script were created on Oct 26, 2026. All project co
 
 ### What I would do next
 
-Run the same pipeline on Muse Spark Open through a partner endpoint to compare accuracy, cost and latency; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
+Run the whole pipeline and the held-out and adversarial sets on Muse Spark Open and compare cost and latency under the same command; run the cross-check with two real models and measure whether disagreement is a better review signal than confidence; and have someone other than the developer use the review page.
 
 ## Anti-project check (for my own use, not for the form)
 

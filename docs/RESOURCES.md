@@ -6,7 +6,7 @@ Partner credits are not guaranteed and are distributed at each partner's discret
 - Via Meta Model API: Muse Spark series, Muse Wonder, Muse Image, Muse Voice Transcribe, SAM 3.1
 - Open weights: Muse Glimmer, Muse Spark Open (run on your own hardware or through partner inference)
 - Coding agent: Muse Code
-- Baseten: use model id `meta-models/muse-spark-open-1026` for the hackathon (the docs show `meta-models/muse-spark-open`; use the -1026 version)
+- Baseten: the hackathon notes say to use `meta-models/muse-spark-open-1026`; the model list on Patrick's account (Oct 30) showed `meta-models/muse-spark-open`, which is what the run used
 
 ## Credits
 | Resource | Amount | How to get it | Use it for |

@@ -48,13 +48,15 @@ About 2.74 USD at list price (an estimate). The first run of the final stage had
 
 **Baselines on 400 held-out synthetic notes** (regex written knowing the synthetic formats): recall / precision regex 54.0 / 100.0, Presidio 94.7 / 74.3, Philter 100.0 / 86.4 (`docs/RESULTS.md`).
 
-**Not measured:** Muse Spark Open or any open-weights model (a comparison was planned and **not run**); the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
+**Open-weights check (one run, dev notes, detector only):** Meta's open-weights Muse Spark Open on Baseten, with the same prompt, found 99.2% of the dev identifiers (3,023 labeled) with 0 false positives, against 100.0% for Muse Spark on the same notes; all 25 misses are names mentioned again later in a note. It was not run on the held-out or adversarial sets or inside the full agent, and the dev notes are the split the prompts were tuned on. Details and the first, cut-off run: `docs/COMPARISON.md`.
+
+**Not measured:** Muse Spark Open on the held-out and adversarial sets or inside the full agent; Muse Spark's own cost and latency under the same command; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer. The cross-check and watch mode are built and pass their tests with scripted models only.
 
 ## How it uses Meta's models
 
 - **Muse Spark (`muse-spark-1.3`) through the Meta Model API** in four separate roles with their own prompts and fail-closed behavior: detector, verifier, name-use check and re-identification red-team. The same model reads scanned pages and, optionally, types unlabeled table columns and cleans free-text cells.
 - **Muse Voice Transcribe** turns dictation into notes that go through the same pipeline (30% word error on synthetic speech; names get respelled, so cleaning the transcript is what matters).
-- The client speaks an OpenAI-style endpoint (`--provider custom`), so a partner-hosted open-weights model could be tried; that has not been done.
+- The client speaks an OpenAI-style endpoint (`--provider custom`), and Muse Spark Open on Baseten was run through it as a detector (see above).
 
 ## Using it
 

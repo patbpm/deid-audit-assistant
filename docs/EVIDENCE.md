@@ -80,12 +80,19 @@ Run once on its two samples (`docs/APP.md`, `results/dev/app-live-check.json`): 
 
 Dev split, true spans, 200 notes: no original names, IDs, phones, emails or addresses left, one date shift per patient, no inconsistent or colliding name surrogates (`results/dev/replace-dev.json`). Because true spans were given, this shows the replacement step is sound, not that the pipeline is. Known weak spot: 3 of 46 year-less dates came out a day off across a leap day.
 
+## Open-weights model as the detector (dev notes, one run)
+
+Muse Spark Open (`meta-models/muse-spark-open`, Baseten Model APIs), detector only, prompt v2, the 200 dev notes, scored against the saved Muse Spark (`muse-spark-1.3`) detector output on the same notes: **99.2% recall (98.8-99.5), 100.0% precision, 0 false positives, -0.8 points of recall against Muse Spark (paired interval -1.2 to -0.5).** All 25 misses of 3,023 identifiers are names, and all are bare repeat mentions of a name (for example "Mrs. Kim" or "Karen reports") that the model did not list as a separate string; whether the replacement step would catch them anyway was not measured for this model.
+
+Cost and speed of the open model (estimated at list price, $1.25 in / $4.25 out per million tokens): the first run used a 4,096-token output limit with no retry and 82 of 200 replies were cut off (recall 51.8% at that setting: a setting problem, not a measure of the model). The rerun, which asked the cut-off notes again once at 16,384 tokens, finished all 200. Both runs together used 310,161 input and 1,187,479 output tokens, about $5.43; first-attempt latency was 10.6 s median (13.5 s p90); the 82 retried notes took 20.1 s median counting both attempts. The model reasons at length, so output limit and retry matter.
+
+Caveats: one run each; easy template notes; the dev notes are the split the prompts were tuned on, with Muse Spark, so the open model used a prompt that was not tuned for it; only the detector was run, not the verifier, name check or red-team, and not the held-out or adversarial sets; Muse Spark's own cost and latency were not measured with the same command, so no cost or latency comparison between the two models is claimed. Files and commands: `docs/COMPARISON.md`.
+
 ## Built, tested with scripted models only
 
 - Two-model cross-check (`docs/CROSSCHECK.md`): no real second model run; no claim that disagreement is a better review signal than confidence.
 - Watch mode (`docs/WATCH.md`): tried by hand on synthetic notes with the offline rules; not run with a hosted model.
-- Muse Spark Open comparison script (`docs/COMPARISON.md`): not run, no partner endpoint was used.
 
 ## Not measured
 
-Muse Spark Open or any open-weights model; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.
+Muse Spark Open on the held-out or adversarial sets, inside the full agent, or its cost and latency against Muse Spark's under the same command; the two-model cross-check with a real second model; watch mode with a hosted model; any real clinical text; any reviewer other than the developer.

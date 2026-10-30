@@ -1,0 +1,216 @@
+{
+  "bootstrap_resamples": 1000,
+  "gold_file_sha256": "af755b29987f92ec13b46a22cbb69c30f536c669783ae0eb700d5cb400a7c779",
+  "metrics": {
+    "ADDRESS": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 150,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 150
+    },
+    "ALL": {
+      "ci95": {
+        "leak": [
+          0.0026013560260135238,
+          0.0064946211947813914
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          0.9882903981264637,
+          0.9949351060462172
+        ]
+      },
+      "exact": {
+        "f1": 0.9958478658030228,
+        "precision": 1.0,
+        "recall": 0.9917300694674165
+      },
+      "gold": 3023,
+      "leaked_char_rate": 0.004341775674923443,
+      "overlap": {
+        "f1": 0.9958478658030228,
+        "precision": 1.0,
+        "recall": 0.9917300694674165
+      },
+      "pred": 2998
+    },
+    "DATE": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 850,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 850
+    },
+    "EMAIL": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 31,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 31
+    },
+    "ID": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 319,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 319
+    },
+    "NAME": {
+      "ci95": {
+        "leak": [
+          0.006843331391962693,
+          0.016976675524062568
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          0.9731925264012997,
+          0.9882075471698113
+        ]
+      },
+      "exact": {
+        "f1": 0.9903809157368219,
+        "precision": 1.0,
+        "recall": 0.9809451219512195
+      },
+      "gold": 1312,
+      "leaked_char_rate": 0.01139601139601143,
+      "overlap": {
+        "f1": 0.9903809157368219,
+        "precision": 1.0,
+        "recall": 0.9809451219512195
+      },
+      "pred": 1287
+    },
+    "PHONE": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          1.0,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "gold": 361,
+      "leaked_char_rate": 0.0,
+      "overlap": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "pred": 361
+    }
+  },
+  "name": "open-dev-retry",
+  "notes": 200,
+  "notes_without_predictions": 0,
+  "only_predicted": true,
+  "pred_file_sha256": "96bed19654782493e0c1bfedd2132d855116d99a263a4aa2b1f51808c384e1b1",
+  "split": "dev",
+  "type_agnostic": false
+}

@@ -70,3 +70,7 @@ python -m deid.detect.run --provider custom --limit 5             # dry run firs
 ```
 
 Check before a real run: the base URL and bearer-token auth match what Baseten documents; the output-token limit (`--max-output-tokens`, default 4096) leaves room for reasoning, since a truncated reply is counted as a failure; and a first run on 5 dev notes confirms the replies parse.
+
+## Measured: Muse Spark Open on Baseten (Oct 30)
+
+Two detector runs on the 200 dev notes (the first with no retry, the second asking cut-off notes again once at 16,384 tokens) used 310,161 input and 1,187,479 output tokens together, about $5.43 at the list prices above, against the forecast of about $2.70 for one clean run (the model reasons at length and 82 notes needed a second attempt). The model id on this account's model list was `meta-models/muse-spark-open`. Whether the Baseten account was charged or credited was not checked.
