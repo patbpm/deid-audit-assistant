@@ -107,3 +107,7 @@ The exact command behind each number is in `docs/CLAIMS.md`. Keys live in enviro
 ## What was built during the hackathon
 
 Setup files and a smoke-test script were created on Oct 26, 2026; all project code was written during the building period, Oct 27 - Nov 4. No earlier code was imported, and no real patient data or data from any research project was used. The commit history shows what was added when. Solo project.
+
+## Licence
+
+MIT (see `LICENSE`). This is an assistant for human-reviewed de-identification, not a compliance certification, and it comes with no warranty.

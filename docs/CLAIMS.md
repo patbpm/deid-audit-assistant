@@ -47,8 +47,8 @@ Every number and statement in the README, demo and submission must trace to a ru
 
 ## Open items before publishing
 
-- Choose a licence (none is set).
-- Decide which planning and setup docs (for example `docs/PLAN.md`, `docs/RESOURCES.md`, `docs/PRE_KICKOFF_CHECKLIST.md`) should stay out of the public repository, and review them line by line before it goes public.
+- Licence: MIT (`LICENSE`), chosen as the default; Patrick to confirm or change.
+- Planning and setup docs: the personal pre-kickoff checklist and the Claude co-author trailers were removed from the whole history before publishing (history rewritten on Oct 30, 2026; commit times kept). `CLAUDE.md` stays untracked. Patrick to read `docs/PLAN.md`, `docs/RESOURCES.md`, `docs/RULES_AND_JUDGING.md` and `docs/PRICES.md` line by line and say which, if any, should also stay out (they mention his budget cap and credits).
 - Re-check every row above after the final runs; numbers from smoke tests will be replaced by full-run numbers.
 - Patrick to fill the bracketed lines in `docs/SUBMISSION.md` (project name, legal name, why he knows the problem firsthand, links) and approve the video narration in `docs/DEMO_SCRIPT.md`.
 - The 400-note test split was run once (row 6v, criteria in `docs/TEST_RUN.md`). Keep it labeled as easy template text; do not describe it as accuracy on real notes.
