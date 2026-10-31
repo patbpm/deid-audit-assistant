@@ -43,7 +43,7 @@ PO_BOX = re.compile(
 TOWN_STATE = re.compile(rf"(?P<town>[A-Za-z][A-Za-z .'\-]*?),\s*(?P<state>{STATE})")
 TOWN_ONLY = re.compile(r"[A-Za-z][A-Za-z .'\-]*")
 TAGS = {"NAME": "[NAME]", "DATE": "[DATE]", "ID": "[ID]", "PHONE": "[PHONE]",
-        "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]", **{t: f"[{t}]" for t in RULE_TYPES}}
+        "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]", "FACILITY": "[FACILITY]", **{t: f"[{t}]" for t in RULE_TYPES}}
 DATE_MODES = ("shift", "year")  # "year" keeps only the year, as Safe Harbor does; "shift" keeps intervals
 
 
@@ -75,6 +75,7 @@ class Replacer:
         self.seed = seed
         self.date_mode = date_mode
         self.ips = {}  # real IP address -> documentation-block stand-in
+        self.facilities = {}  # lowercase facility name -> "Facility N"
         self.kinds = {}  # lowercase name token -> "first" | "last" | "either"
         self.surrogates = Surrogates(seed)
         self.offsets = {}  # patient key -> days
@@ -137,12 +138,14 @@ class Replacer:
     def state(self):
         """Everything needed to carry on later with the same stand-ins. Sensitive: never share it."""
         return {"seed": self.seed, "date_mode": self.date_mode, "kinds": dict(self.kinds),
-                "offsets": dict(self.offsets), "ips": dict(self.ips), "surrogates": self.surrogates.state()}
+                "offsets": dict(self.offsets), "ips": dict(self.ips), "facilities": dict(self.facilities),
+                "surrogates": self.surrogates.state()}
 
     @classmethod
     def from_state(cls, state):
         replacer = cls(state["seed"], state.get("date_mode", "shift"))
         replacer.ips = dict(state.get("ips", {}))
+        replacer.facilities = dict(state.get("facilities", {}))
         replacer.kinds = dict(state["kinds"])
         replacer.offsets = {k: int(v) for k, v in state["offsets"].items()}
         replacer.surrogates.load(state["surrogates"])
@@ -241,6 +244,11 @@ class Replacer:
             return "www.example.org", "url-example-domain", False
         return body.split("://", 1)[0].lower() + "://example.org", "url-example-domain", False
 
+    def _facility(self, body, key, ref_year):
+        if body.lower() not in self.facilities:
+            self.facilities[body.lower()] = f"Facility {len(self.facilities) + 1}"
+        return self.facilities[body.lower()], "facility-numbered", False
+
     def _ip(self, body, key, ref_year):
         if body not in self.ips:
             self.ips[body] = f"192.0.2.{len(self.ips) % 254 + 1}"  # the documentation block, never a real host
@@ -295,5 +303,5 @@ class Replacer:
             "seed": self.seed, "date_offsets_days": dict(self.offsets),
             "first": s.first.table, "last": s.last.table, "either": s.either.table,
             "street": s.street.table, "town": s.town.table, "ids": dict(s.ids),
-            "ips": dict(self.ips), "date_mode": self.date_mode,
+            "ips": dict(self.ips), "facilities": dict(self.facilities), "date_mode": self.date_mode,
         }

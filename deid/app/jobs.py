@@ -71,6 +71,30 @@ class Ctx:
         self.store.update(self.id, lambda job: job.update(result=value))
 
 
+def site_names(value):
+    """Local facility names typed in the options box: a string with one per line (or a list); a clean list."""
+    if value in (None, ""):
+        return []
+    lines = value.splitlines() if isinstance(value, str) else value
+    if not isinstance(lines, list) or not all(isinstance(x, str) for x in lines):
+        raise ValueError("local names must be text, one per line")
+    names = [x.strip() for x in lines if x.strip()]
+    from deid.detect import site
+    try:
+        site.parse({"facilities": names})
+    except site.ProfileError as err:
+        raise ValueError("local names: " + str(err)) from None
+    return names
+
+
+def site_notes(value):
+    if value in (None, ""):
+        return ""
+    if not isinstance(value, str) or len(value) > 600:
+        raise ValueError("the hint about local names must be text of at most 600 characters")
+    return value.strip()
+
+
 class JobStore:
     def __init__(self, root, backend, max_job_tokens=100_000, seed=0):
         self.root, self.backend, self.max_job_tokens, self.seed = Path(root), backend, max_job_tokens, seed
@@ -198,7 +222,8 @@ class JobStore:
         out = {"same_patient": bool(raw.get("same_patient")), "model_typing": bool(raw.get("model_typing")),
                "header": raw.get("header", "auto"), "unknown": raw.get("unknown", "withhold"),
                "freetext": raw.get("freetext", "mask"), "token_cap": min(cap, self.max_job_tokens),
-               "max_audio_seconds": seconds, "confirm_synthetic": raw.get("confirm_synthetic") is True}
+               "max_audio_seconds": seconds, "confirm_synthetic": raw.get("confirm_synthetic") is True,
+               "site_names": site_names(raw.get("site_names")), "site_notes": site_notes(raw.get("site_notes"))}
         for key, choices in (("header", HEADER_CHOICES), ("unknown", UNKNOWN_CHOICES), ("freetext", FREETEXT_CHOICES)):
             if out[key] not in choices:
                 raise ValueError(f"{key} must be one of {', '.join(choices)}")

@@ -30,6 +30,7 @@ from deid.audit.report import render
 from deid.audit.verify import LOW_CONFIDENCE
 from deid.baselines.common import read_notes, write_predictions
 from deid.detect.client import Budget, ChatClient, LargerLimitRetry, estimate_tokens
+from deid.detect import site
 from deid.detect.detector import Cache
 from deid.detect.prompt import PROMPT_VERSION as DETECT_VERSION
 from deid.detect.prompt import build_messages
@@ -134,6 +135,8 @@ def main(argv=None):
     parser.add_argument("--max-rounds", type=int, default=2, help="extra feedback rounds per note")
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--site-profile", default=None,
+                        help="a site profile JSON file: local facility names and ID formats to look for (docs/SITE.md)")
     parser.add_argument("--date-mode", choices=("shift", "year"), default="shift",
                         help="shift = move each patient's dates by one offset (keeps intervals); year = keep only the year (Safe Harbor)")
     parser.add_argument("--live", action="store_true", help="make real API calls")
@@ -174,6 +177,8 @@ def main(argv=None):
         return 0
 
     client = LargerLimitRetry(ChatClient.from_env(args.provider, args.max_output_tokens), args.retry_output_tokens)
+    profile = site.load(args.site_profile) if args.site_profile else None
+    client = site.wrap(client, profile)
     second = None
     if args.second_provider:
         second = (LargerLimitRetry(ChatClient.from_env(args.second_provider, args.max_output_tokens),
@@ -189,10 +194,10 @@ def main(argv=None):
         args.low_confidence, progress, workers=args.workers, second=second)
     redteam_cache = Cache(root / "cache-redteam", REDTEAM_VERSION)
     if args.workers > 1:  # the first look at every note in parallel; the loop below then reads them from the cache
-        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress, args.date_mode) or stopped1
+        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress, args.date_mode, profile) or stopped1
     outcomes, stopped2, replacer = review_and_clean(
         batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress,
-        date_mode=args.date_mode)
+        date_mode=args.date_mode, profile=profile)
 
     out_dir, results_dir = Path(args.out_dir), Path(args.results_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

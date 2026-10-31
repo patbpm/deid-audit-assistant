@@ -1,0 +1,9 @@
+{
+  "name": "Hartwell Regional (invented site for tests)",
+  "facilities": ["Hartwell Regional Hospital", "HRH", "Birch Pavilion", "MICU-3", "Hartwell Heart Clinic"],
+  "id_patterns": [
+    {"label": "Research ID", "regex": "HRH-\\d{5}", "example": "HRH-12345"},
+    {"label": "Study code", "regex": "HRH-ST-\\d{4}", "example": "HRH-ST-0731"}
+  ],
+  "notes": "Buildings, wings, units and clinics at this site are named after trees (Birch, Linden, Oak, Cedar, Maple, Willow). List any such name."
+}

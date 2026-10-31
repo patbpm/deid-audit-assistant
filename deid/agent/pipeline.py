@@ -53,10 +53,20 @@ class Outcome:
     calls: dict = field(default_factory=dict)
 
 
-def with_rules(d):
+def with_rules(d, profile=None):
     """The detector's spans plus the Safe Harbor rule spans (ages of 90 or more, ZIP codes, web and IP
-    addresses) that do not overlap them. Rules run on the note text only and call no model."""
-    return d.spans + find_rule_spans(d.note["text"], d.spans)
+    addresses) and, with a site profile, its listed names and codes, none overlapping a detector span.
+    A detector ADDRESS span that is exactly a listed facility name is retyped FACILITY so it gets the same
+    stand-in everywhere. Rules run on the note text only and call no model."""
+    text, spans = d.note["text"], d.spans
+    if profile is not None and profile.facilities:
+        listed = {f.lower() for f in profile.facilities}
+        spans = [{**s, "type": "FACILITY"} if s["type"] == "ADDRESS" and text[s["start"]:s["end"]].lower() in listed else s
+                 for s in spans]
+    extra = find_rule_spans(text, spans)
+    if profile is not None:
+        extra = sorted(extra + profile.rule_spans(text, spans + extra), key=lambda s: s["start"])
+    return spans + extra
 
 
 def sum_usage(*usages):
@@ -190,7 +200,7 @@ def cross_args(d):
     return args
 
 
-def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None, date_mode="shift"):
+def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None, date_mode="shift", profile=None):
     """Ask the red-team reviewer about every note's first masked view, several at once, so that the
     note-by-note stage that follows finds those replies in the cache. The masked view shows each
     change as its type tag, so it does not depend on which stand-in values are chosen; a throwaway
@@ -201,7 +211,7 @@ def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progre
     for d in batch:
         if d.failures:
             continue
-        spans = clean_spans(d.note["text"], with_rules(d))
+        spans = clean_spans(d.note["text"], with_rules(d, profile))
         _, changes = replacer.apply({"text": d.note["text"], "spans": spans, "patient_key": d.note["patient_id"],
                                      "note_id": d.note["note_id"]})
         views.append(masked_view(d.note["text"], changes))
@@ -228,11 +238,12 @@ def replace_only(replacer, d, note, client, low):
 
 
 def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True,
-                     replacer=None, date_mode="shift"):
+                     replacer=None, date_mode="shift", profile=None):
     """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer). redteam=False replaces
     once and leaves the risk "not assessed" (no reviewer model is available). replacer: one that already
     knows these notes (for a feed, deid.watch); by default a new one is fitted on the batch.
-    date_mode: "shift" (default) or "year" (keep only the year, the Safe Harbor form)."""
+    date_mode: "shift" (default) or "year" (keep only the year, the Safe Harbor form).
+    profile: a deid.detect.site.Profile whose listed names and codes are added as rule spans."""
     replacer = replacer or Replacer(seed, date_mode).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     outcomes = []
     for d in batch:
@@ -247,7 +258,7 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
             if progress:
                 progress("red-team", len(outcomes), len(batch), budget)
             continue
-        note = {"text": d.note["text"], "spans": with_rules(d),
+        note = {"text": d.note["text"], "spans": with_rules(d, profile),
                 "patient_key": d.note["patient_id"], "note_id": d.note["note_id"]}
         if not redteam:
             outcomes.append(replace_only(replacer, d, note, client, low))

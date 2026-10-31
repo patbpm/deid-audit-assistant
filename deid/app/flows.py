@@ -21,6 +21,7 @@ from deid.audit.build import summarize
 from deid.audit.report import render
 from deid.audit.verify import LOW_CONFIDENCE
 from deid.detect.client import ApiError, Budget
+from deid.detect import site
 from deid.detect.detector import Cache
 from deid.ingest import vision
 from deid.ingest.audio import AudioCache, WavError, check_wav, transcribe_file
@@ -120,7 +121,8 @@ def run_notes(ctx, backend, files, options, seed, cache_root):
     if not notes:
         raise JobError("No note could be read. " + "; ".join(f"{s['file']}: {s['reason']}" for s in skipped))
     ctx.step("read", "done", f"{len(notes)} note(s)" + (f", {len(skipped)} file(s) skipped" if skipped else ""))
-    client = backend.chat()
+    profile = site.from_names(options.get("site_names") or [], options.get("site_notes") or "")
+    client = backend.chat() if backend.replay_root is not None else site.wrap(backend.chat(), profile)  # replay: saved replies were made without a profile
     disk = backend.hosted or backend.replay_root is not None
     if backend.replay_root is not None:  # saved replies only: say so, never guess
         from .replay import missing
@@ -146,7 +148,8 @@ def run_notes(ctx, backend, files, options, seed, cache_root):
              + ("" if backend.verify else "; no verifier with this engine"))
     ctx.step("replace", "running", f"0 of {len(batch)} notes")
     outcomes, stopped2, replacer = review_and_clean(batch, client, redteam_cache, budget, seed, LOW_CONFIDENCE,
-                                                    MAX_ROUNDS, progress("replace"), redteam=backend.redteam)
+                                                    MAX_ROUNDS, progress("replace"), redteam=backend.redteam,
+                                                    profile=profile)
     ctx.step("replace", "done", f"{len(outcomes)} of {len(batch)} notes"
              + ("" if backend.redteam else "; no re-identification review with this engine"))
     stopped = stopped1 or stopped2
