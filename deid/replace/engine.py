@@ -14,6 +14,7 @@ import re
 from collections import Counter
 
 from . import dates
+from .rules import RULE_TYPES, zip_replacement
 from .surrogates import CREDENTIALS, TITLES, Surrogates, number
 
 SHIFT_MIN_DAYS, SHIFT_MAX_DAYS = 30, 365
@@ -42,7 +43,8 @@ PO_BOX = re.compile(
 TOWN_STATE = re.compile(rf"(?P<town>[A-Za-z][A-Za-z .'\-]*?),\s*(?P<state>{STATE})")
 TOWN_ONLY = re.compile(r"[A-Za-z][A-Za-z .'\-]*")
 TAGS = {"NAME": "[NAME]", "DATE": "[DATE]", "ID": "[ID]", "PHONE": "[PHONE]",
-        "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]"}
+        "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]", **{t: f"[{t}]" for t in RULE_TYPES}}
+DATE_MODES = ("shift", "year")  # "year" keeps only the year, as Safe Harbor does; "shift" keeps intervals
 
 
 def clean_spans(text, spans):
@@ -67,8 +69,12 @@ def name_words(text):
 
 
 class Replacer:
-    def __init__(self, seed=0):
+    def __init__(self, seed=0, date_mode="shift"):
+        if date_mode not in DATE_MODES:
+            raise ValueError(f"date_mode must be one of {DATE_MODES}")
         self.seed = seed
+        self.date_mode = date_mode
+        self.ips = {}  # real IP address -> documentation-block stand-in
         self.kinds = {}  # lowercase name token -> "first" | "last" | "either"
         self.surrogates = Surrogates(seed)
         self.offsets = {}  # patient key -> days
@@ -130,12 +136,13 @@ class Replacer:
 
     def state(self):
         """Everything needed to carry on later with the same stand-ins. Sensitive: never share it."""
-        return {"seed": self.seed, "kinds": dict(self.kinds), "offsets": dict(self.offsets),
-                "surrogates": self.surrogates.state()}
+        return {"seed": self.seed, "date_mode": self.date_mode, "kinds": dict(self.kinds),
+                "offsets": dict(self.offsets), "ips": dict(self.ips), "surrogates": self.surrogates.state()}
 
     @classmethod
     def from_state(cls, state):
-        replacer = cls(state["seed"])
+        replacer = cls(state["seed"], state.get("date_mode", "shift"))
+        replacer.ips = dict(state.get("ips", {}))
         replacer.kinds = dict(state["kinds"])
         replacer.offsets = {k: int(v) for k, v in state["offsets"].items()}
         replacer.surrogates.load(state["surrogates"])
@@ -200,6 +207,10 @@ class Replacer:
 
     def _date(self, body, key, ref_year):
         parsed = dates.parse_date(body)
+        if self.date_mode == "year":
+            if parsed.has_year:
+                return str(parsed.year), "date-year-only", False
+            return TAGS["DATE"], "date-removed-no-year", False
         moved = dates.shift(parsed, self.date_offset(key), ref_year)
         rule = "date-shift" + ("" if parsed.has_year else "-no-year") \
             + ("-assumed-month-first" if parsed.assumed_month_first else "")             + ("-assumed-day-first" if parsed.assumed_day_first else "")
@@ -218,6 +229,22 @@ class Replacer:
             return self.surrogates.name_token(word, self.kinds.get(word.lower(), "either"))
 
         return WORD.sub(swap, body), "name-token", False
+
+    def _age(self, body, key, ref_year):
+        return "90+", "age-90-plus", False
+
+    def _zip(self, body, key, ref_year):
+        return zip_replacement(body), "zip-first-three", False
+
+    def _url(self, body, key, ref_year):
+        if body.lower().startswith("www."):
+            return "www.example.org", "url-example-domain", False
+        return body.split("://", 1)[0].lower() + "://example.org", "url-example-domain", False
+
+    def _ip(self, body, key, ref_year):
+        if body not in self.ips:
+            self.ips[body] = f"192.0.2.{len(self.ips) % 254 + 1}"  # the documentation block, never a real host
+        return self.ips[body], "ip-documentation-block", False
 
     def _id(self, body, key, ref_year):
         return self.surrogates.identifier(body), "id-format-preserving", False
@@ -268,4 +295,5 @@ class Replacer:
             "seed": self.seed, "date_offsets_days": dict(self.offsets),
             "first": s.first.table, "last": s.last.table, "either": s.either.table,
             "street": s.street.table, "town": s.town.table, "ids": dict(s.ids),
+            "ips": dict(self.ips), "date_mode": self.date_mode,
         }

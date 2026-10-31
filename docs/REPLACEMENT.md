@@ -20,6 +20,10 @@ python -m deid.replace.check                                                    
 | EMAIL | `firstname.lastnameNN@example.com` or `.org`. |
 | ADDRESS | Street number, street name, unit number, town and ZIP replaced; street type and state kept (two-letter or spelled out). Also handles `PO Box` and a unit written first. A town on its own maps to the same surrogate town as inside a full address. An address with no commas is flagged, not guessed. |
 
+| AGE, ZIP, URL, IP | Found by rules with no model (`deid/replace/rules.py`), added in stage 2 of the agent next to the detector's spans and never over one of them. An age of 90 or more, written with a unit or cue (`94-year-old`, `94 yo`, `age 94`), becomes `90+`. A ZIP after a state abbreviation or the word ZIP keeps its first three digits plus `00` (`00000` for the 17 prefixes the HHS guidance lists for small areas; verify that list against the current guidance). A web address becomes `https://example.org` (or `www.example.org`). An IP address becomes one from the documentation block `192.0.2.x`, the same stand-in for the same address. The audit shows these as detector `safe-harbor rules`, confidence 1.0. Tested on invented text (`tests/test_safe_harbor.py`); no labeled note in the project has these, so no recall figure exists for them. |
+
+Dates: by default each patient's dates are shifted (above). `--date-mode year` (agent) or `Replacer(date_mode="year")` keeps only the year, the form Safe Harbor describes, and removes a date with no year as `[DATE]`. Shifting keeps intervals, which research often needs, but it is not the Safe Harbor form; see `docs/COVERAGE.md`.
+
 Surrogate names, streets and towns come from pools that do not overlap the generator's (tested), and a surrogate that equals a real value in the batch is never used.
 
 Anything the engine cannot rewrite safely is replaced with a tag such as `[DATE]` or `[ADDRESS]` and marked `flagged` in the change record. It is never left in the text and never guessed at. These flagged items are what the review step (Day 7) will show a person.
@@ -43,7 +47,7 @@ Run on the 180 adversarial notes (`docs/ADVERSARIAL.md`, checked by `tests/test_
 
 - **Year-less dates.** `Apr 21` has no year, so the engine assumes the most common year among the note's other dates. Where a shift crosses 29 February and that guess is wrong, the result is one day off: 3 of the 46 year-less dates on dev. Their `rule` ends in `-no-year` so they can be listed.
 - **Month-first assumption.** `04/05/2025` is read as 5 April. When both numbers could be a month the `rule` says `-assumed-month-first`; 162 of the dev dates were of that kind.
-- **Shifts are blunt.** Season and day of the week are not preserved. Ages of 90 or more are not aggregated, which Safe Harbor requires; the synthetic set has none. The shift is applied to every date type, including birth dates, with the same offset.
+- **Shifts are blunt.** Season and day of the week are not preserved. Ages of 90 or more are now aggregated by a rule (see the table), tested on invented text only; the synthetic set has none. The shift is applied to every date type, including birth dates, with the same offset.
 - **Names.** Surrogate first names do not match sex, so "Mrs." can precede a male-sounding name. Gender words and pronouns in the note are untouched. The first-name/surname split depends on the other names in the batch.
 - **Labels kept.** A 4+ letter ID prefix is kept as a label. An insurance ID with four or more leading letters would keep them.
 - **Not covered.** Identifying detail in unlabeled text (rare conditions, occupation, a small town named in prose). That is the re-identification check planned for Day 6.

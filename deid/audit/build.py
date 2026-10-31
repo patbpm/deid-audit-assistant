@@ -51,6 +51,7 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
     cross: {(start, end): span} for spans a second model was asked about, with the other model's name in
     second_name (spans the two disagree on go to review); notices: sentences for the review queue."""
     confidence = {(s["start"], s["end"]): s.get("confidence") for s in spans}
+    source = {(s["start"], s["end"]): s["source"] for s in spans if s.get("source")}
     added_keys = {(s["start"], s["end"]) for s in added}
     verdicts = verdicts or {}
     entries, review = [], []
@@ -73,7 +74,7 @@ def build_note_audit(note_id, text, spans, changes, detector, others=None, unmat
             "id": f"{note_id}:{i}", "type": c["type"],
             "start": c["start"], "end": c["end"], "new_start": c["new_start"], "new_end": c["new_end"],
             "original": c["original"], "replacement": c["replacement"], "rule": c["rule"],
-            "detector": FEEDBACK if from_feedback else detector, "confidence": conf,
+            "detector": FEEDBACK if from_feedback else source.get((c["start"], c["end"]), detector), "confidence": conf,
             "also_found_by": agree, "verifier": verdict, "checks": checks, "status": checks["decision"],
         }
         entries.append(entry)

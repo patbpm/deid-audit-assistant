@@ -33,6 +33,7 @@ from deid.detect.client import Budget, ChatClient, LargerLimitRetry, estimate_to
 from deid.detect.detector import Cache
 from deid.detect.prompt import PROMPT_VERSION as DETECT_VERSION
 from deid.detect.prompt import build_messages
+from deid.eval import TYPES
 from deid.eval.run import run as run_eval
 from deid.eval.run import split_of
 from deid.redteam.prompt import PROMPT_VERSION as REDTEAM_VERSION
@@ -133,6 +134,8 @@ def main(argv=None):
     parser.add_argument("--max-rounds", type=int, default=2, help="extra feedback rounds per note")
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--date-mode", choices=("shift", "year"), default="shift",
+                        help="shift = move each patient's dates by one offset (keeps intervals); year = keep only the year (Safe Harbor)")
     parser.add_argument("--live", action="store_true", help="make real API calls")
     parser.add_argument("--second-provider", choices=("meta", "custom"), default=None,
                         help="a second detector that reads every note alone (for example --provider meta "
@@ -186,9 +189,10 @@ def main(argv=None):
         args.low_confidence, progress, workers=args.workers, second=second)
     redteam_cache = Cache(root / "cache-redteam", REDTEAM_VERSION)
     if args.workers > 1:  # the first look at every note in parallel; the loop below then reads them from the cache
-        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress) or stopped1
+        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress, args.date_mode) or stopped1
     outcomes, stopped2, replacer = review_and_clean(
-        batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress)
+        batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress,
+        date_mode=args.date_mode)
 
     out_dir, results_dir = Path(args.out_dir), Path(args.results_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -200,7 +204,7 @@ def main(argv=None):
     failed = [{"note_id": o.note_id, "reasons": o.detected.failures} for o in outcomes if o.detected.failures]
     Path(f"{base}.failed.json").write_text(json.dumps(failed, indent=2) + "\n", encoding="utf-8", newline="\n")
     write_predictions({o.note_id: spans_of(o.detected.spans) for o in outcomes}, f"{base}.detector.jsonl")
-    write_predictions({o.note_id: spans_of(o.final_spans) for o in outcomes}, f"{base}.final.jsonl")
+    write_predictions({o.note_id: spans_of([s for s in o.final_spans if s["type"] in TYPES]) for o in outcomes}, f"{base}.final.jsonl")  # rule spans (AGE, ZIP, URL, IP) have no gold labels
     if second:  # what the second model found by itself, for scoring it on its own
         write_predictions({o.note_id: spans_of(o.detected.second_spans) for o in outcomes}, f"{base}.second.jsonl")
     Path(f"{base}.key.json").write_text(

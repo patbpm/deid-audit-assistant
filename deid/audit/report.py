@@ -97,6 +97,7 @@ def note_html(audit):
 
 
 def render(audits, summary, title="De-identification audit report"):
+    from .coverage import html as coverage_html
     counts = "".join(f"<tr><td>{escape(k)}</td><td>{v}</td></tr>" for k, v in [
         ("Notes", summary["notes"]), ("Changes", summary["changes"]),
         ("Changes needing review", summary["changes_needing_review"]),
@@ -111,7 +112,7 @@ def render(audits, summary, title="De-identification audit report"):
         f'cleaned text, so it is as sensitive as the notes. Synthetic data only. This is an assistant for human review, '
         f'not a compliance certification: a person should check every flagged item. Re-identification risk levels are a '
         f'model&rsquo;s judgment, not a guarantee.</div>'
-        f'<table>{counts}</table>'
+        f'<table>{counts}</table>{coverage_html()}'
         f'<label><input type="checkbox" id="only"> Show only what needs review</label>'
         f'<p class="muted">Click a highlighted span or a table row to link the original, the cleaned text and the trace. '
         f'Orange = a check asked for review; green = no check objected; purple = red-team clue.</p>'

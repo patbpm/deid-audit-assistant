@@ -16,6 +16,7 @@ from deid.detect.detector import detect_note
 from deid.redteam.assess import assess_note, masked_view
 from deid.redteam.loop import harden
 from deid.replace.engine import Replacer, clean_spans
+from deid.replace.rules import find_rule_spans
 
 from .crosscheck import cross_check, disagreements
 from .nameuse import check_name_use
@@ -50,6 +51,12 @@ class Outcome:
     risk_after: str
     audit: dict
     calls: dict = field(default_factory=dict)
+
+
+def with_rules(d):
+    """The detector's spans plus the Safe Harbor rule spans (ages of 90 or more, ZIP codes, web and IP
+    addresses) that do not overlap them. Rules run on the note text only and call no model."""
+    return d.spans + find_rule_spans(d.note["text"], d.spans)
 
 
 def sum_usage(*usages):
@@ -183,18 +190,18 @@ def cross_args(d):
     return args
 
 
-def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None):
+def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None, date_mode="shift"):
     """Ask the red-team reviewer about every note's first masked view, several at once, so that the
     note-by-note stage that follows finds those replies in the cache. The masked view shows each
     change as its type tag, so it does not depend on which stand-in values are chosen; a throwaway
     Replacer fitted the same way gives the same views, and the real run's own Replacer is not touched.
     Later feedback rounds (rare) are still asked one note at a time. Returns True if the cap stopped it."""
-    replacer = Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    replacer = Replacer(seed, date_mode).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     views = []
     for d in batch:
         if d.failures:
             continue
-        spans = clean_spans(d.note["text"], d.spans)
+        spans = clean_spans(d.note["text"], with_rules(d))
         _, changes = replacer.apply({"text": d.note["text"], "spans": spans, "patient_key": d.note["patient_id"],
                                      "note_id": d.note["note_id"]})
         views.append(masked_view(d.note["text"], changes))
@@ -213,7 +220,7 @@ def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progre
 def replace_only(replacer, d, note, client, low):
     """One replacement pass with no red-team review; the audit says the risk was not assessed."""
     text, changes = replacer.apply({**note, "spans": clean_spans(note["text"], note["spans"])})
-    audit = build_note_audit(d.note["note_id"], d.note["text"], d.spans, changes, client.model,
+    audit = build_note_audit(d.note["note_id"], d.note["text"], note["spans"], changes, client.model,
                              unmatched=d.unmatched, low=low, verdicts=d.verdicts, ignored=d.ignored,
                              **cross_args(d))
     return Outcome(d.note["note_id"], d, text, changes, clean_spans(note["text"], note["spans"]), [],
@@ -221,11 +228,12 @@ def replace_only(replacer, d, note, client, low):
 
 
 def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True,
-                     replacer=None):
+                     replacer=None, date_mode="shift"):
     """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer). redteam=False replaces
     once and leaves the risk "not assessed" (no reviewer model is available). replacer: one that already
-    knows these notes (for a feed, deid.watch); by default a new one is fitted on the batch."""
-    replacer = replacer or Replacer(seed).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    knows these notes (for a feed, deid.watch); by default a new one is fitted on the batch.
+    date_mode: "shift" (default) or "year" (keep only the year, the Safe Harbor form)."""
+    replacer = replacer or Replacer(seed, date_mode).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     outcomes = []
     for d in batch:
         if budget.exceeded:
@@ -239,7 +247,7 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
             if progress:
                 progress("red-team", len(outcomes), len(batch), budget)
             continue
-        note = {"text": d.note["text"], "spans": d.spans,
+        note = {"text": d.note["text"], "spans": with_rules(d),
                 "patient_key": d.note["patient_id"], "note_id": d.note["note_id"]}
         if not redteam:
             outcomes.append(replace_only(replacer, d, note, client, low))
@@ -251,7 +259,7 @@ def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds
             budget.add(a.usage)
         final = result.assessments[-1]
         audit = build_note_audit(
-            d.note["note_id"], d.note["text"], d.spans, result.changes, client.model,
+            d.note["note_id"], d.note["text"], note["spans"], result.changes, client.model,
             unmatched=d.unmatched, low=low, verdicts=d.verdicts, added=result.added,
             assessment={"risk": final.risk, "clues": final.clues}, ignored=d.ignored, **cross_args(d))
         outcomes.append(Outcome(
