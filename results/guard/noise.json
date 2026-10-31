@@ -1,0 +1,26 @@
+{
+  "adversarial set A (180 notes)": {
+    "notes": 180,
+    "notices": {
+      "pattern rules disagree": 8
+    },
+    "pattern_strings": {
+      "'4.5-11'": 8
+    }
+  },
+  "adversarial set B (200 notes)": {
+    "notes": 200,
+    "notices": {},
+    "pattern_strings": {}
+  },
+  "dev (200 notes)": {
+    "notes": 200,
+    "notices": {},
+    "pattern_strings": {}
+  },
+  "held-out test (400 notes)": {
+    "notes": 400,
+    "notices": {},
+    "pattern_strings": {}
+  }
+}

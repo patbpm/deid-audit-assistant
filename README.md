@@ -27,6 +27,14 @@ note ──► detect ──► verify doubtful spans ──► check name uses 
 - **Audit report**: every change links to its character offsets, detector, confidence, the verifier's verdict and the rule that rewrote it. One self-contained HTML page.
 - **Review page**: a local page where a person accepts or rejects each flag, redacts clues, and selects text to redact what the agent missed. Anything left undecided stays replaced.
 - **Also built**: a front page for notes, CSV tables, dictation and scans; watch mode (notes cleaned as they arrive in a folder or SQLite table, re-cleaned when the original changes); a two-model cross-check; a review-burden curve.
+- **Added Oct 31** (built and tested offline; where a live run has not been made, the page says so):
+  - **Safe Harbor rules and coverage map**: ages of 90 or more become "90+", ZIP codes keep three digits, web and IP addresses are replaced, all by rules with no model; a year-only date mode; a table of which of the 18 HIPAA Safe Harbor categories the tool looks for and which it does not (`docs/COVERAGE.md`, also in the audit page and the app).
+  - **What each stage adds** (`docs/ABLATION.md`), computed from saved runs: on the hard set the name check takes the detector's false positives from 30 to 1; on the easy sets the detector alone is already perfect, so later stages show nothing there.
+  - **Site profile** (`docs/SITE.md`): type your clinic's own hospital, building and ward names (or give a file with ID formats) and they are removed by rule and added to the detection prompt. Live result not run yet.
+  - **Prompt-injection guard and test set** (`docs/INJECTION.md`): notices when a note contains text that looks like orders to the model, when the detector lists nothing, or when pattern rules find what it missed; no notices on the 800 dev, held-out and set B notes. Live test of whether the model is steered not run yet.
+  - **Patient-level linkage check** (`docs/LINKAGE.md`): reads a patient's cleaned notes together for risk no single note shows. Live demonstration not run yet.
+  - **Spanish** (`docs/SPANISH.md`): Spanish dates, names and addresses in the replacement step and a 40-note Spanish synthetic set; the replacement step handles all 566 labeled identifiers with no leak (true labels given). Detection in Spanish not run yet.
+  - **Replay mode** (`python -m deid.app --replay`): the app on saved model replies, no key needed, once the recording is made.
 
 ## Results (all synthetic notes; one run each; details and caveats in `docs/EVIDENCE.md`)
 
@@ -106,7 +114,7 @@ The exact command behind each number is in `docs/CLAIMS.md`. Keys live in enviro
 
 ## Docs
 
-`docs/EVIDENCE.md` (every result) · `docs/ADVERSARIAL.md` · `docs/RESULTS.md` (baselines) · `docs/DATASET.md` · `docs/AGENT.md` · `docs/REDTEAM.md` · `docs/REPLACEMENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/APP.md` · `docs/WATCH.md` · `docs/CROSSCHECK.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/TABLES.md` · `docs/COMPARISON.md` · `docs/CLAIMS.md` (claims ledger) · `docs/SUBMISSION.md` · `docs/DEMO_SCRIPT.md` · `docs/PLAN.md` (build log).
+`docs/EVIDENCE.md` (every result) · `docs/COVERAGE.md` · `docs/ABLATION.md` · `docs/SITE.md` · `docs/INJECTION.md` · `docs/LINKAGE.md` · `docs/SPANISH.md` · `docs/ADVERSARIAL.md` · `docs/RESULTS.md` (baselines) · `docs/DATASET.md` · `docs/AGENT.md` · `docs/REDTEAM.md` · `docs/REPLACEMENT.md` · `docs/AUDIT.md` · `docs/REVIEW.md` · `docs/APP.md` · `docs/WATCH.md` · `docs/CROSSCHECK.md` · `docs/BURDEN.md` · `docs/INGEST.md` · `docs/TABLES.md` · `docs/COMPARISON.md` · `docs/CLAIMS.md` (claims ledger) · `docs/SUBMISSION.md` · `docs/DEMO_SCRIPT.md` · `docs/PLAN.md` (build log).
 
 ## What was built during the hackathon
 

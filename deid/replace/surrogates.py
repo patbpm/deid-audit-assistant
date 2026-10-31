@@ -16,7 +16,7 @@ import unicodedata
 from . import pools
 
 TITLES = {"dr", "mr", "mrs", "ms", "miss", "mx", "prof", "rev", "sr", "jr", "ii", "iii", "iv",
-          "sra", "srta", "dra", "don", "dona", "daña", "dña"}  # the last ones are Spanish
+          "sra", "srta", "dra"}  # the last three are Spanish; "Don" is left out because it is also an English first name
 CREDENTIALS = {"md", "do", "np", "pa", "pa-c", "rn", "phd", "dds", "pharmd", "mph", "msn", "lpn"}
 SYLLABLES = ("ba", "dro", "ke", "li", "mor", "ne", "po", "ra", "sen", "tal", "vi", "wen", "zu")
 

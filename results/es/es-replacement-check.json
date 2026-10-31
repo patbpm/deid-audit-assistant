@@ -1,0 +1,21 @@
+{
+  "dates_compared": 165,
+  "fallback_tags": 0,
+  "flagged": 0,
+  "leaks": [],
+  "notes": 40,
+  "patients_with_dates": 20,
+  "patients_with_one_shift": 20,
+  "replacements": 566,
+  "rules": {
+    "address-structured-es": 26,
+    "date-shift": 124,
+    "date-shift-assumed-day-first": 41,
+    "date-shift-no-year": 7,
+    "date-shift-no-year-assumed-day-first": 1,
+    "email-example-domain": 6,
+    "id-format-preserving": 40,
+    "name-token": 222,
+    "phone-fictional": 99
+  }
+}
