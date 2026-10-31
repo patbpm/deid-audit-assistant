@@ -204,13 +204,15 @@ def cross_args(d):
     return args
 
 
-def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None, date_mode="shift", profile=None):
+def prefetch_redteam(batch, client, redteam_cache, budget, seed, workers, progress=None, date_mode="shift", profile=None,
+                     rep_options=None):
     """Ask the red-team reviewer about every note's first masked view, several at once, so that the
     note-by-note stage that follows finds those replies in the cache. The masked view shows each
     change as its type tag, so it does not depend on which stand-in values are chosen; a throwaway
     Replacer fitted the same way gives the same views, and the real run's own Replacer is not touched.
     Later feedback rounds (rare) are still asked one note at a time. Returns True if the cap stopped it."""
-    replacer = Replacer(seed, date_mode).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    replacer = Replacer(seed, **{"date_mode": date_mode, **(rep_options or {})}).fit(
+        [{"text": d.note["text"], "spans": d.spans} for d in batch])
     views = []
     for d in batch:
         if d.failures:
@@ -242,13 +244,14 @@ def replace_only(replacer, d, note, client, low):
 
 
 def review_and_clean(batch, client, redteam_cache, budget, seed, low, max_rounds, progress=None, redteam=True,
-                     replacer=None, date_mode="shift", profile=None):
+                     replacer=None, date_mode="shift", profile=None, rep_options=None):
     """Stage 2. Returns (list of Outcome, stopped_early, the fitted Replacer). redteam=False replaces
     once and leaves the risk "not assessed" (no reviewer model is available). replacer: one that already
     knows these notes (for a feed, deid.watch); by default a new one is fitted on the batch.
     date_mode: "shift" (default) or "year" (keep only the year, the Safe Harbor form).
-    profile: a deid.detect.site.Profile whose listed names and codes are added as rule spans."""
-    replacer = replacer or Replacer(seed, date_mode).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
+    profile: a deid.detect.site.Profile whose listed names and codes are added as rule spans.
+    rep_options: more Replacer settings, for example {"lang": "es"} for Spanish-language notes."""
+    replacer = replacer or Replacer(seed, **{"date_mode": date_mode, **(rep_options or {})}).fit([{"text": d.note["text"], "spans": d.spans} for d in batch])
     outcomes = []
     for d in batch:
         if budget.exceeded:

@@ -11,10 +11,12 @@ shared output.
 
 import hashlib
 import re
+import unicodedata
 
 from . import pools
 
-TITLES = {"dr", "mr", "mrs", "ms", "miss", "mx", "prof", "rev", "sr", "jr", "ii", "iii", "iv"}
+TITLES = {"dr", "mr", "mrs", "ms", "miss", "mx", "prof", "rev", "sr", "jr", "ii", "iii", "iv",
+          "sra", "srta", "dra", "don", "dona", "daña", "dña"}  # the last ones are Spanish
 CREDENTIALS = {"md", "do", "np", "pa", "pa-c", "rn", "phd", "dds", "pharmd", "mph", "msn", "lpn"}
 SYLLABLES = ("ba", "dro", "ke", "li", "mor", "ne", "po", "ra", "sen", "tal", "vi", "wen", "zu")
 
@@ -96,13 +98,16 @@ def scramble_digits(text, *parts):
 
 
 class Surrogates:
-    def __init__(self, seed, forbidden_names=()):
-        self.seed = seed
-        self.first = Registry(seed, "first", pools.FIRST, forbidden_names)
-        self.last = Registry(seed, "last", pools.LAST, forbidden_names)
-        self.either = Registry(seed, "either", pools.EITHER, forbidden_names)
-        self.street = Registry(seed, "street", pools.STREETS, forbidden_names)
-        self.town = Registry(seed, "town", pools.TOWNS, forbidden_names)
+    def __init__(self, seed, forbidden_names=(), lang="en"):
+        self.seed, self.lang = seed, lang
+        spanish = lang == "es"
+        self.first_pool = pools.FIRST_ES if spanish else pools.FIRST
+        self.last_pool = pools.LAST_ES if spanish else pools.LAST
+        self.first = Registry(seed, "first", self.first_pool, forbidden_names)
+        self.last = Registry(seed, "last", self.last_pool, forbidden_names)
+        self.either = Registry(seed, "either", pools.EITHER_ES if spanish else pools.EITHER, forbidden_names)
+        self.street = Registry(seed, "street", pools.STREETS_ES if spanish else pools.STREETS, forbidden_names)
+        self.town = Registry(seed, "town", pools.TOWNS_ES if spanish else pools.TOWNS, forbidden_names)
         self.ids = {}
         self.ids_used = set()
 
@@ -196,8 +201,9 @@ class Surrogates:
 
     def email(self, original):
         h = number(self.seed, "email", original.lower())
-        first = pools.FIRST[h % len(pools.FIRST)].lower()
-        last = pools.LAST[(h >> 16) % len(pools.LAST)].lower()
+        first = self.first_pool[h % len(self.first_pool)].lower()
+        last = self.last_pool[(h >> 16) % len(self.last_pool)].lower()
+        first, last = (re.sub(r"[^a-z]", "", unicodedata.normalize("NFKD", w).encode("ascii", "ignore").decode()) for w in (first, last))
         domain = pools.EMAIL_DOMAINS[(h >> 32) % len(pools.EMAIL_DOMAINS)]
         return f"{first}.{last}{(h >> 40) % 90 + 10}@{domain}"
 

@@ -224,8 +224,9 @@ class JobStore:
                "freetext": raw.get("freetext", "mask"), "token_cap": min(cap, self.max_job_tokens),
                "max_audio_seconds": seconds, "confirm_synthetic": raw.get("confirm_synthetic") is True,
                "site_names": site_names(raw.get("site_names")), "site_notes": site_notes(raw.get("site_notes")),
-               "linkage": raw.get("linkage") is True}
-        for key, choices in (("header", HEADER_CHOICES), ("unknown", UNKNOWN_CHOICES), ("freetext", FREETEXT_CHOICES)):
+               "linkage": raw.get("linkage") is True, "language": raw.get("language", "en")}
+        for key, choices in (("header", HEADER_CHOICES), ("unknown", UNKNOWN_CHOICES), ("freetext", FREETEXT_CHOICES),
+                             ("language", ("en", "es"))):
             if out[key] not in choices:
                 raise ValueError(f"{key} must be one of {', '.join(choices)}")
         if out["model_typing"] and not self.backend.model_help:

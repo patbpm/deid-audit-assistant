@@ -19,6 +19,10 @@ MONTH_LOOKUP = {m.lower(): i + 1 for i, m in enumerate(MONTHS)}
 MONTH_LOOKUP.update({a.lower(): i + 1 for i, a in enumerate(ABBR)})
 MONTH_LOOKUP["sept"] = 9
 MONTH = r"(?P<mon>[A-Za-z]{3,9})\.?"
+MONTHS_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+             "septiembre", "octubre", "noviembre", "diciembre"]
+MONTH_LOOKUP_ES = {m: i + 1 for i, m in enumerate(MONTHS_ES)}
+MONTH_LOOKUP_ES["setiembre"] = 9
 
 # (style, regex) tried in order; the regex must match the whole string.
 PATTERNS = [
@@ -35,11 +39,14 @@ PATTERNS = [
     ("slash2", re.compile(r"(?P<a>\d{1,2})/(?P<b>\d{1,2})/(?P<y>\d{2})")),
     ("dash", re.compile(r"(?P<a>\d{1,2})-(?P<b>\d{1,2})-(?P<y>\d{4})")),
     ("dot", re.compile(r"(?P<a>\d{1,2})\.(?P<b>\d{1,2})\.(?P<y>\d{4})")),
+    ("es_long", re.compile(r"(?P<d>\d{1,2})\s+de\s+(?P<mon>[A-Za-záé]{4,10})\s+(?P<of>de|del)\s+(?P<y>\d{4})", re.I)),
+    ("es_md", re.compile(r"(?P<d>\d{1,2})\s+de\s+(?P<mon>[A-Za-záé]{4,10})", re.I)),
     ("slash_md", re.compile(r"(?P<a>\d{1,2})/(?P<b>\d{1,2})")),
     ("dash_md", re.compile(r"(?P<a>\d{1,2})-(?P<b>\d{1,2})")),
 ]
 
 NAMED_MONTH_STYLES = ("long", "dmy", "mon_day", "dmy_dash", "dmy_tight", "ordinal_of")
+SPANISH_STYLES = ("es_long", "es_md")
 
 
 class DateError(ValueError):
@@ -59,6 +66,7 @@ class Parsed:
     assumed_month_first: bool = False  # both numbers could be a month
     assumed_day_first: bool = False  # dotted date with both numbers possible as a month
     short_year: bool = False  # two-digit year as written
+    of: str = "de"  # Spanish "de" or "del" before the year
 
     @property
     def has_year(self):
@@ -72,8 +80,9 @@ def _year(text):
     return n
 
 
-def parse_date(text):
-    """-> Parsed. Raises DateError if the text is not a recognizable date."""
+def parse_date(text, day_first_default=False):
+    """-> Parsed. Raises DateError if the text is not a recognizable date.
+    day_first_default: read slash and dash dates day-first (Spanish-language notes) instead of month-first."""
     text = text.strip()
     for style, pattern in PATTERNS:
         m = pattern.fullmatch(text)
@@ -81,7 +90,12 @@ def parse_date(text):
             continue
         g = m.groupdict()
         year = _year(g["y"]) if g.get("y") else None
-        if "mon" in g:
+        if style in SPANISH_STYLES:
+            month = MONTH_LOOKUP_ES.get(g["mon"].lower())
+            if month is None:
+                continue
+            parsed = Parsed(style, year, month, int(g["d"]), pad=g["d"].startswith("0"), of=g.get("of", "de").lower())
+        elif "mon" in g:
             mon = g["mon"].lower()
             if mon not in MONTH_LOOKUP:
                 continue  # a word that is not a month: try the next pattern
@@ -94,7 +108,7 @@ def parse_date(text):
         else:
             a, b = int(g["a"]), int(g["b"])
             dotted = style == "dot"
-            day_first = (a > 12 and b <= 12) or dotted
+            day_first = (a > 12 and b <= 12) or dotted or (day_first_default and b <= 12)
             month, day = (b, a) if day_first else (a, b)
             pad = g["a"].startswith("0") or g["b"].startswith("0") or (a >= 10 and b >= 10)
             if style == "ymd_slash":
@@ -102,7 +116,7 @@ def parse_date(text):
             ambiguous = a <= 12 and b <= 12 and a != b
             parsed = Parsed(style, year, month, day, pad=pad, day_first=day_first,
                             assumed_month_first=(not day_first and ambiguous),
-                            assumed_day_first=(dotted and ambiguous))
+                            assumed_day_first=((dotted or day_first_default) and ambiguous))
         _validate(parsed, year or 2000)
         return parsed
     raise DateError(f"not a recognized date: {text!r}")
@@ -139,6 +153,10 @@ def render(p):
         return f"{p.year:04d}-{mm}-{dd}"
     if p.style == "ymd_dot":
         return f"{p.year:04d}.{mm}.{dd}"
+    if p.style in SPANISH_STYLES:
+        day = f"{p.day:02d}" if p.pad else str(p.day)
+        text = f"{day} de {MONTHS_ES[p.month - 1]}"
+        return text + (f" {p.of} {p.year}" if p.style == "es_long" else "")
     if p.style in NAMED_MONTH_STYLES:
         name = ABBR[p.month - 1] if p.abbr else MONTHS[p.month - 1]
         comma = "," if p.comma else ""

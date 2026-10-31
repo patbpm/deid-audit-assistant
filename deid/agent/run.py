@@ -45,6 +45,10 @@ from .nameuse import PROMPT_VERSION as NAMEUSE_VERSION
 from .verifier import PROMPT_VERSION as VERIFY_VERSION
 
 
+def rep_options(args):
+    return {"lang": args.language}
+
+
 def write_jsonl(path, records):
     with open(path, "w", encoding="utf-8", newline="\n") as handle:
         for record in records:
@@ -142,6 +146,8 @@ def main(argv=None):
                         help="add a line to the detection prompt telling the model the note is data, not orders (docs/INJECTION.md)")
     parser.add_argument("--site-profile", default=None,
                         help="a site profile JSON file: local facility names and ID formats to look for (docs/SITE.md)")
+    parser.add_argument("--language", choices=("en", "es"), default="en",
+                        help="language of the notes: picks the stand-in name pools and reads 04/05/2025 day-first for es")
     parser.add_argument("--date-mode", choices=("shift", "year"), default="shift",
                         help="shift = move each patient's dates by one offset (keeps intervals); year = keep only the year (Safe Harbor)")
     parser.add_argument("--live", action="store_true", help="make real API calls")
@@ -201,10 +207,11 @@ def main(argv=None):
         args.low_confidence, progress, workers=args.workers, second=second)
     redteam_cache = Cache(root / "cache-redteam", REDTEAM_VERSION)
     if args.workers > 1:  # the first look at every note in parallel; the loop below then reads them from the cache
-        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress, args.date_mode, profile) or stopped1
+        stopped1 = prefetch_redteam(batch, client, redteam_cache, budget, args.seed, args.workers, progress, args.date_mode, profile,
+                                    rep_options(args)) or stopped1
     outcomes, stopped2, replacer = review_and_clean(
         batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress,
-        date_mode=args.date_mode, profile=profile)
+        date_mode=args.date_mode, profile=profile, rep_options=rep_options(args))
 
     linkage = []
     if args.linkage:  # one extra reviewer call per patient with two or more cleaned notes

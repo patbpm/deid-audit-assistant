@@ -62,3 +62,33 @@ TOWNS = [
     "Ashby Crossing", "Briarwood Falls", "Cinder Lake", "Dovecote", "Emberfield",
 ]
 EMAIL_DOMAINS = ("example.com", "example.org")
+
+# --- stand-ins for Spanish-language notes (lang="es"); disjoint from the generator's Spanish pools in deid/synth/spanish.py
+FIRST_ES = [
+    "Marta", "Pilar", "Noemí", "Adela", "Gloria", "Esperanza", "Julieta", "Mercedes", "Amparo", "Consuelo",
+    "Rocío", "Soledad", "Violeta", "Margarita", "Araceli", "Socorro", "Lidia", "Paloma", "Nuria", "Alba",
+    "Federico", "Gonzalo", "Ignacio", "Joaquín", "Leandro", "Mateo", "Nicolás", "Octavio", "Rodrigo",
+    "Santiago", "Tomás", "Ulises", "Valentín", "Emilio", "Gael", "Íñigo", "Leonel", "Mauricio",
+    "Néstor", "Óscar", "Celia", "Dalia", "Estela", "Fabiola", "Griselda", "Herminia", "Ileana", "Jimena",
+]
+LAST_ES = [
+    "Alvarado", "Barrios", "Benítez", "Bustamante", "Calderón", "Carrillo", "Cisneros", "Contreras",
+    "Delgado", "Escobar", "Espinoza", "Fuentes", "Galván", "Guerrero", "Henao", "Lara", "Maldonado", "Montoya",
+    "Nájera", "Olmos", "Paredes", "Quintero", "Rangel", "Segura", "Tapia", "Uribe", "Valencia", "Zamora",
+    "Arce", "Bermúdez", "Cordero", "Duarte", "Echeverría", "Figueroa", "Granados", "Hidalgo", "Ibáñez",
+    "Landa", "Mejía", "Noriega", "Palacios", "Quiroga", "Rosales", "Solano", "Trejo", "Urbina", "Villanueva",
+]
+EITHER_ES = [
+    "Alex", "Ariel", "Cris", "Dani", "Eli", "Jess", "Nico", "Sasha", "Toni", "Yael", "Acosta", "Barrera", "Cano",
+    "Duran", "Escamilla", "Frias", "Garza", "Huerta", "Izquierdo", "Jurado", "Lozano", "Meza", "Nava", "Ochoa",
+    "Pacheco", "Reyna", "Sandoval", "Tovar", "Ugalde", "Varela", "Zavala", "Aranda", "Bravo", "Cuevas", "Davila",
+    "Elizondo", "Fierro", "Gallegos", "Heredia", "Lugo",
+]
+STREETS_ES = [
+    "Los Cedros", "Las Palmas", "Del Sol", "La Loma", "Los Alamos", "Santa Fe", "El Roble", "Las Flores",
+    "San Marcos", "Buena Vista", "Los Pinos", "El Mirador", "La Cumbre", "Las Brisas", "Los Laureles",
+]
+TOWNS_ES = [
+    "Valle Sereno", "Piedra Alta", "Rio Manso", "Cerro Verde", "Lomas Claras", "Monte Fresco", "Villa Alba",
+    "Campo Real", "Arroyo Seco", "Puerto Nuevo", "Sierra Blanca Norte", "Llano Dorado",
+]

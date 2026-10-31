@@ -150,7 +150,7 @@ def run_notes(ctx, backend, files, options, seed, cache_root):
     ctx.step("replace", "running", f"0 of {len(batch)} notes")
     outcomes, stopped2, replacer = review_and_clean(batch, client, redteam_cache, budget, seed, LOW_CONFIDENCE,
                                                     MAX_ROUNDS, progress("replace"), redteam=backend.redteam,
-                                                    profile=profile)
+                                                    profile=profile, rep_options={"lang": options.get("language", "en")})
     linked = []
     if options.get("linkage") and backend.redteam and backend.replay_root is None:
         ctx.step("replace", "running", "reading each patient's notes together")

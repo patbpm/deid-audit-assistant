@@ -40,10 +40,17 @@ STREET = re.compile(
 PO_BOX = re.compile(
     r"(?P<po>P\.?\s?O\.?\s+Box)\s+(?P<num>\d+),\s*(?P<town>[A-Za-z][A-Za-z .'\-]*?),?\s+"
     rf"(?P<state>{STATE}){ZIP}")
+LETTER = r"[^\W\d_]"
+STREET_ES = re.compile(
+    r"(?P<type>Calle|Avenida|Av\.|Camino|Paseo|Carrera|Carretera|Plaza)\s+(?P<street>" + LETTER + r"[^\W\d_ .'\-]*(?:[ .'\-]+" + LETTER + r"+)*?)\s+(?P<num>\d+)"
+    r"(?:,?\s+(?P<unit>(?:Apto|Apt|Depto|Piso|Unidad)\.?\s*#?\s*\w+))?"
+    rf",\s*(?P<town>{LETTER}[\w .'\-]*?),?\s+(?P<state>{STATE}){ZIP}")
 TOWN_STATE = re.compile(rf"(?P<town>[A-Za-z][A-Za-z .'\-]*?),\s*(?P<state>{STATE})")
 TOWN_ONLY = re.compile(r"[A-Za-z][A-Za-z .'\-]*")
 TAGS = {"NAME": "[NAME]", "DATE": "[DATE]", "ID": "[ID]", "PHONE": "[PHONE]",
         "EMAIL": "[EMAIL]", "ADDRESS": "[ADDRESS]", "FACILITY": "[FACILITY]", **{t: f"[{t}]" for t in RULE_TYPES}}
+LANGS = ("en", "es")
+NUMERIC_DATES = ("month-first", "day-first")
 DATE_MODES = ("shift", "year")  # "year" keeps only the year, as Safe Harbor does; "shift" keeps intervals
 
 
@@ -69,15 +76,22 @@ def name_words(text):
 
 
 class Replacer:
-    def __init__(self, seed=0, date_mode="shift"):
+    def __init__(self, seed=0, date_mode="shift", lang="en", numeric_dates=None):
         if date_mode not in DATE_MODES:
             raise ValueError(f"date_mode must be one of {DATE_MODES}")
+        if lang not in LANGS:
+            raise ValueError(f"lang must be one of {LANGS}")
+        numeric_dates = numeric_dates or ("day-first" if lang == "es" else "month-first")
+        if numeric_dates not in NUMERIC_DATES:
+            raise ValueError(f"numeric_dates must be one of {NUMERIC_DATES}")
         self.seed = seed
         self.date_mode = date_mode
+        self.lang = lang  # which stand-in name pools to use: "en" or "es"
+        self.numeric_dates = numeric_dates  # how 04/05/2025 is read: US month-first, or day-first as in Spanish
         self.ips = {}  # real IP address -> documentation-block stand-in
         self.facilities = {}  # lowercase facility name -> "Facility N"
         self.kinds = {}  # lowercase name token -> "first" | "last" | "either"
-        self.surrogates = Surrogates(seed)
+        self.surrogates = Surrogates(seed, (), lang)
         self.offsets = {}  # patient key -> days
 
     # --- fitting: decide which name tokens are first names and which are surnames
@@ -96,7 +110,7 @@ class Replacer:
             self.kinds[token] = "last" if "last" in kinds else "first"
         for token in real_tokens:
             self.kinds.setdefault(token, "either")
-        self.surrogates = Surrogates(self.seed, real_tokens)
+        self.surrogates = Surrogates(self.seed, real_tokens, self.lang)
         return self
 
     @staticmethod
@@ -137,13 +151,13 @@ class Replacer:
 
     def state(self):
         """Everything needed to carry on later with the same stand-ins. Sensitive: never share it."""
-        return {"seed": self.seed, "date_mode": self.date_mode, "kinds": dict(self.kinds),
+        return {"seed": self.seed, "date_mode": self.date_mode, "lang": self.lang, "numeric_dates": self.numeric_dates, "kinds": dict(self.kinds),
                 "offsets": dict(self.offsets), "ips": dict(self.ips), "facilities": dict(self.facilities),
                 "surrogates": self.surrogates.state()}
 
     @classmethod
     def from_state(cls, state):
-        replacer = cls(state["seed"], state.get("date_mode", "shift"))
+        replacer = cls(state["seed"], state.get("date_mode", "shift"), state.get("lang", "en"), state.get("numeric_dates"))
         replacer.ips = dict(state.get("ips", {}))
         replacer.facilities = dict(state.get("facilities", {}))
         replacer.kinds = dict(state["kinds"])
@@ -195,7 +209,7 @@ class Replacer:
         for s in spans:
             if s["type"] == "DATE":
                 try:
-                    p = dates.parse_date(text[s["start"]:s["end"]])
+                    p = dates.parse_date(text[s["start"]:s["end"]], self.numeric_dates == "day-first")
                 except dates.DateError:
                     continue
                 if p.has_year:
@@ -209,7 +223,7 @@ class Replacer:
             return TAGS[kind], "fallback-tag", True
 
     def _date(self, body, key, ref_year):
-        parsed = dates.parse_date(body)
+        parsed = dates.parse_date(body, self.numeric_dates == "day-first")
         if self.date_mode == "year":
             if parsed.has_year:
                 return str(parsed.year), "date-year-only", False
@@ -283,6 +297,15 @@ class Replacer:
             if m["zip"]:
                 tail += " " + s.digits(m["zip"], "zip")
             return f"{street}, {tail}", "address-structured", False
+        m = STREET_ES.fullmatch(body)
+        if m:
+            street = f"{m['type']} {s.street_name(m['street'])} {s.digits(m['num'], 'num')}"
+            if m["unit"]:
+                street += ", " + re.sub(r"\w+$", lambda u: s.digits(u.group(0), "unit"), m["unit"])
+            tail = f"{s.town_name(m['town'])}, {m['state']}"
+            if m["zip"]:
+                tail += " " + s.digits(m["zip"], "zip")
+            return f"{street}, {tail}", "address-structured-es", False
         m = TOWN_STATE.fullmatch(body)
         if m:
             return f"{s.town_name(m['town'])}, {m['state']}", "address-town", False
@@ -304,4 +327,5 @@ class Replacer:
             "first": s.first.table, "last": s.last.table, "either": s.either.table,
             "street": s.street.table, "town": s.town.table, "ids": dict(s.ids),
             "ips": dict(self.ips), "facilities": dict(self.facilities), "date_mode": self.date_mode,
+            "lang": self.lang, "numeric_dates": self.numeric_dates,
         }
