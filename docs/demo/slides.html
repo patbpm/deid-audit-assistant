@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De-identification assistant: slides</title>
+<style>
+:root{--bg:#10151c;--fg:#f2f4f7;--muted:#a9b3bf;--line:#2c3642;--card:#18202a;--accent:#7cc4ff;--ok:#6fd39a;--warn:#ffd479}
+@media (prefers-color-scheme:light){:root{--bg:#fbfbfc;--fg:#15191f;--muted:#4c5663;--line:#d6dbe1;--card:#f0f2f5;--accent:#0b5cad;--ok:#17703f;--warn:#8a5a00}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:19px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+.slide{display:none;min-height:100vh;padding:4vh 6vw 8vh;flex-direction:column;justify-content:center}
+.slide.on{display:flex}
+h1{font-size:3rem;line-height:1.1;margin:0 0 .4em}
+h2{font-size:2.1rem;margin:0 0 .5em}
+.lead{font-size:1.5rem;color:var(--muted);max-width:42em}
+.muted{color:var(--muted)}
+.small{font-size:.8rem}
+.cap{color:var(--muted);font-size:.85rem;margin-top:1.1rem;max-width:60em}
+.pill{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.15em .8em;margin:.2em .3em .2em 0;font-size:.85rem}
+.flow{display:flex;flex-wrap:wrap;gap:.6rem;align-items:stretch;margin:1.2rem 0}
+.flow div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.6rem .9rem;min-width:8rem;flex:1}
+.flow b{display:block;color:var(--accent)}
+.flow span{font-size:.8rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;max-width:54rem;margin:.6rem 0}
+th,td{padding:.45rem .7rem;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.bar{display:inline-block;height:.7em;border-radius:4px;background:var(--accent);vertical-align:middle;margin-right:.5em}
+.bar.us{background:var(--ok)}
+.big{font-size:3.8rem;font-weight:700;color:var(--ok);line-height:1}
+.row{display:flex;gap:2.5rem;flex-wrap:wrap;margin:1rem 0}
+.row>div{flex:1;min-width:14rem}
+.banner{position:fixed;left:0;right:0;bottom:0;padding:.55rem 6vw;background:var(--card);border-top:1px solid var(--line);color:var(--muted);font-size:.8rem}
+.nav{position:fixed;right:1rem;top:.8rem;font-size:.8rem;color:var(--muted)}
+a{color:var(--accent)}
+@media print{.slide{display:flex!important;page-break-after:always;min-height:0;height:100vh}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="nav" id="nav"></div>
+
+<section class="slide on">
+  <h1>De-identification and audit assistant for clinical text</h1>
+  <p class="lead">Finds identifiers in free-text notes, replaces them consistently, flags what it is unsure about for a person, and keeps an audit trail of every change.</p>
+  <div><span class="pill">Meta Muse Spark</span><span class="pill">open-weights Muse Spark Open compared</span><span class="pill">model-agnostic (OpenAI-style endpoint), hosted inference in this demo</span><span class="pill">synthetic data only</span></div>
+  <p class="cap">Meta Global AI Developer Hackathon, Indie track. Built Oct 27 to Nov 4, 2026.</p>
+</section>
+
+<section class="slide">
+  <h2>How it works</h2>
+  <div class="flow">
+    <div><b>Detect</b><span>Muse Spark lists identifiers</span></div>
+    <div><b>Verify</b><span>doubtful spans re-checked</span></div>
+    <div><b>Name check</b><span>"Hunter" the surname or the word?</span></div>
+    <div><b>Replace</b><span>dates shifted, one fake name per real name</span></div>
+    <div><b>Red-team</b><span>reads the clean note, looks for clues</span></div>
+    <div><b>Audit + review</b><span>every change traced; a person decides</span></div>
+  </div>
+  <p class="lead">Fails closed: if a model reply cannot be read, the note is marked NOT CLEANED instead of being passed through.</p>
+  <p class="cap">An assistant for human review. It is not a compliance certification, and it gives no medical advice.</p>
+</section>
+
+<section class="slide">
+  <h2>Hard synthetic notes: 200 written to break detectors</h2>
+  <table>
+    <tr><th>System</th><th>Identifiers found (609)</th><th>False positives per note</th></tr>
+    <tr><td><b>This assistant</b> (Muse Spark)</td><td><span class="bar us" style="width:100%"></span>609 of 609 (100%)</td><td class="n">0.005 (1 in total)</td></tr>
+    <tr><td>Philter</td><td><span class="bar" style="width:95.9%"></span>95.9%</td><td class="n">0.83</td></tr>
+    <tr><td>Presidio</td><td><span class="bar" style="width:83.6%"></span>83.6%</td><td class="n">1.55</td></tr>
+    <tr><td>Regex</td><td><span class="bar" style="width:14%"></span>14.0%</td><td class="n">0.00</td></tr>
+  </table>
+  <p class="cap">One run. 200 synthetic notes in ten hard families (names that are common words, odd date formats, typos, non-English names), written by this project. Written after an earlier set's errors were read, and one fix was made after reading this set's errors, so treat it as a tuned result, not an estimate for real notes. Baselines were run unchanged.</p>
+</section>
+
+<section class="slide">
+  <h2>Held-out notes, and the open-weights model</h2>
+  <div class="row">
+    <div><div class="big">5,992 / 5,992</div><p>identifiers found by Muse Spark on 400 held-out notes, 0 false positives</p></div>
+    <div><div class="big" style="color:var(--accent)">98.9%</div><p>found by Meta's open-weights Muse Spark Open as the detector on the same kind of notes, 0 false positives (67 misses, all names)</p></div>
+  </div>
+  <p class="cap">One run each. The held-out notes are easy template text from this project's own generator, so this shows no regression, not accuracy on real notes. The open-weights model was run as the detector only, through Baseten. The assistant has not been tested on real clinical text.</p>
+</section>
+
+<section class="slide">
+  <h2>What each stage adds</h2>
+  <table>
+    <tr><th>Hard set, saved run</th><th>Found</th><th>False positives</th></tr>
+    <tr><td>Detector alone</td><td class="n">609 / 609</td><td class="n">30</td></tr>
+    <tr><td>+ name check</td><td class="n">609 / 609</td><td class="n">1</td></tr>
+    <tr><td>+ red-team feedback</td><td class="n">609 / 609</td><td class="n">1</td></tr>
+  </table>
+  <p class="lead">On easy notes the detector alone is already perfect, so later stages show nothing there. The name check earns its place on the hard set.</p>
+  <p class="cap">Computed from saved runs, no new model calls (docs/ABLATION.md). The name check was designed after reading an earlier set's errors, so this is a tuned result.</p>
+</section>
+
+<section class="slide">
+  <h2>Try it, check it, change it</h2>
+  <p class="lead">Open source (MIT). Every number on these slides comes from a command in the repository that anyone can rerun.</p>
+  <p style="font-size:1.6rem"><a href="https://github.com/patbpm/deid-audit-assistant">github.com/patbpm/deid-audit-assistant</a></p>
+  <div><span class="pill">python -m deid.app --replay: no key needed</span><span class="pill">docs/COVERAGE.md: what it does not check</span><span class="pill">docs/EVIDENCE.md: every claim and its source</span></div>
+  <p class="cap">Assistant for human review. Not a compliance certification. Synthetic data only.</p>
+</section>
+
+<div class="banner">Synthetic data only. Assistant for human review, not a compliance certification. Numbers: docs/CLAIMS.md.</div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];let i=0;
+function show(n){i=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,k)=>s.classList.toggle('on',k===i));document.getElementById('nav').textContent=(i+1)+' / '+slides.length+'  (arrow keys)';}
+document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();show(i+1);}if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();show(i-1);}if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1);});
+document.addEventListener('click',e=>{if(e.target.closest('a'))return;show(e.clientX>innerWidth/2?i+1:i-1);});
+show(0);
+</script>
+</body>
+</html>
