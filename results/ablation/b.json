@@ -1,0 +1,61 @@
+{
+  "name_check": {
+    "released": {
+      "not an identifier (a false positive avoided)": 29
+    }
+  },
+  "notes": 200,
+  "red_team_added": {
+    "not identifiers": 0,
+    "real identifiers": 0,
+    "spans": 0
+  },
+  "run": "agent-meta-advb-rtfix",
+  "set": "b",
+  "stages": [
+    {
+      "false_positives": 30,
+      "gold": 609,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "detector"
+    },
+    {
+      "false_positives": 1,
+      "gold": 609,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ name check"
+    },
+    {
+      "false_positives": 1,
+      "gold": 609,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ red-team feedback"
+    }
+  ],
+  "title": "adversarial set B (200 short notes written to be hard; the name check and a red-team fix were tuned on set A and read set B)",
+  "verifier": {
+    "identifier": {
+      "not real": 0,
+      "real": 26
+    },
+    "unsure": {
+      "not real": 1,
+      "real": 0
+    }
+  }
+}

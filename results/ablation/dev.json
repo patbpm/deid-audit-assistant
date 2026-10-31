@@ -1,0 +1,55 @@
+{
+  "name_check": {
+    "released": {}
+  },
+  "notes": 200,
+  "red_team_added": {
+    "not identifiers": 0,
+    "real identifiers": 0,
+    "spans": 0
+  },
+  "run": "agent-meta-dev-v2",
+  "set": "dev",
+  "stages": [
+    {
+      "false_positives": 0,
+      "gold": 3023,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "detector"
+    },
+    {
+      "false_positives": 0,
+      "gold": 3023,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ name check"
+    },
+    {
+      "false_positives": 0,
+      "gold": 3023,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ red-team feedback"
+    }
+  ],
+  "title": "200 dev notes (easy template text, the split the prompts were tuned on)",
+  "verifier": {
+    "identifier": {
+      "not real": 0,
+      "real": 10
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name_check": {
+    "released": {}
+  },
+  "notes": 400,
+  "red_team_added": {
+    "not identifiers": 0,
+    "real identifiers": 0,
+    "spans": 0
+  },
+  "run": "agent-meta-test",
+  "set": "test",
+  "stages": [
+    {
+      "false_positives": 0,
+      "gold": 5992,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "detector"
+    },
+    {
+      "false_positives": 0,
+      "gold": 5992,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ name check"
+    },
+    {
+      "false_positives": 0,
+      "gold": 5992,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ],
+      "stage": "+ red-team feedback"
+    }
+  ],
+  "title": "400 held-out test notes (easy template text, used once)",
+  "verifier": {
+    "identifier": {
+      "not real": 0,
+      "real": 19
+    }
+  }
+}
