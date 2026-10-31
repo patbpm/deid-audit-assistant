@@ -121,7 +121,14 @@ def run_notes(ctx, backend, files, options, seed, cache_root):
         raise JobError("No note could be read. " + "; ".join(f"{s['file']}: {s['reason']}" for s in skipped))
     ctx.step("read", "done", f"{len(notes)} note(s)" + (f", {len(skipped)} file(s) skipped" if skipped else ""))
     client = backend.chat()
-    disk = backend.hosted
+    disk = backend.hosted or backend.replay_root is not None
+    if backend.replay_root is not None:  # saved replies only: say so, never guess
+        from .replay import missing
+        cache_root = backend.replay_root
+        absent = missing(notes, cache_root)
+        if absent:
+            raise JobError(f"Replay mode only holds the replies saved for the sample notes, so it cannot process {len(absent)} of these "
+                           f"{len(notes)} note(s). Add a sample, or start the app with --live for other text.")
     detect_cache = Cache(cache_root / "cache") if disk else Cache(None)
     verify_cache = Cache(cache_root / "cache-verify", VERIFY_VERSION) if disk else Cache(None, VERIFY_VERSION)
     redteam_cache = Cache(cache_root / "cache-redteam", REDTEAM_VERSION) if disk else Cache(None, REDTEAM_VERSION)

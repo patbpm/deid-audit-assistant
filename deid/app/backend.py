@@ -26,6 +26,7 @@ class Backend:
     model_help: bool = False        # can propose column types and read images
     reads_images: bool = False
     notes: list = field(default_factory=list)  # limits to show a person
+    replay_root: object = None      # a folder of saved replies: the engine reads them instead of calling a model
 
     @property
     def kinds(self):
@@ -38,7 +39,8 @@ class Backend:
 
     def describe(self):
         return {"name": self.name, "label": self.label, "hosted": self.hosted, "kinds": self.kinds,
-                "verify": self.verify, "redteam": self.redteam, "model_help": self.model_help, "notes": self.notes}
+                "verify": self.verify, "redteam": self.redteam, "model_help": self.model_help, "notes": self.notes,
+                "replay": self.replay_root is not None}
 
 
 def offline_backend():

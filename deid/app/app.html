@@ -61,6 +61,7 @@ mark.kept{background:var(--warn);color:inherit;border-radius:3px;padding:0 2px}
   <div id="msg"></div>
   <section id="view"></section>
   <section id="recent"></section>
+  <section id="coverage"></section>
 </main>
 <script>
 "use strict";
@@ -368,6 +369,17 @@ function renderRecent() {
       h("span", {class: "badge"}, j.state), h("span", {class: "muted small"}, (j.kind || "not started") + ", " + j.files + " file(s) " + (j.title || ""))))] : []));
 }
 
+function renderCoverage() {
+  const rows = S.info.coverage || [];
+  if (!rows.length) return;
+  const count = (s) => rows.filter((r) => r.status === s).length;
+  $("coverage").replaceChildren(h("details", {},
+    h("summary", {}, "What this checks: " + ["measured", "rule", "asked", "partial", "not covered"].map((s) => count(s) + " " + s).join(", ") + " (HIPAA Safe Harbor categories)"),
+    h("p", {class: "muted small"}, "Which of the 18 Safe Harbor identifier categories this tool looks for, and how much is known about how well. Not a compliance certification."),
+    h("table", {}, h("tr", {}, ...["#", "Category", "Status", "What the tool does"].map((x) => h("th", {}, x))),
+      ...rows.map((r) => h("tr", {}, h("td", {}, String(r.number)), h("td", {}, r.category), h("td", {}, h("span", {class: "badge"}, r.status)), h("td", {class: "small"}, r.how))))));
+}
+
 $("newjob").addEventListener("click", startOver);
 (async () => {
   try {
@@ -375,9 +387,11 @@ $("newjob").addEventListener("click", startOver);
     const b = S.info.backend;
     $("engine").textContent = b.label;
     $("banner").className = "banner" + (b.hosted ? " hosted" : "");
+    if (b.replay) document.title = document.title + " (replay)";
     $("banner").replaceChildren(h("b", {}, "An assistant for human review, not a compliance certification. "),
       b.hosted ? "Your content is sent to a hosted service: use synthetic or public data only. " : "Nothing is sent anywhere. ",
       "Jobs are kept on this computer and hold original text: synthetic data only. ", b.notes.join(" "));
+    renderCoverage();
     await loadRecent();
     const id = location.hash.slice(1);
     if (id) await loadJob(id).catch(() => { S.job = null; render(); }); else render();

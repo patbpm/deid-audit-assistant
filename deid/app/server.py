@@ -19,6 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
 
+from deid.audit import coverage
 from deid.review import server as review_server
 from deid.review.decisions import Store
 
@@ -91,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/info":
             return self.send(200, {"backend": self.server.backend.describe(), "max_job_tokens": self.jobs.max_job_tokens,
                                    "max_file_bytes": MAX_FILE_BYTES, "type_help": TYPE_HELP,
-                                   "samples": sorted(samples.SAMPLES)})
+                                   "samples": sorted(samples.SAMPLES), "coverage": coverage.rows()})
         if path == "/api/jobs":
             return self.send(200, self.jobs.listing())
         m = JOB.fullmatch(path)
@@ -226,6 +227,9 @@ def main(argv=None):
     parser.add_argument("--live", action="store_true",
                         help="use the hosted models (text, audio and images are sent to the provider: synthetic data only)")
     parser.add_argument("--provider", choices=("meta", "custom"), default="meta", help="hosted provider with --live")
+    parser.add_argument("--replay", action="store_true",
+                        help="show saved Muse Spark replies for the sample notes: no key, no network, no cost (data/replay)")
+    parser.add_argument("--replay-dir", default=None, help="where the saved replies are (default data/replay)")
     parser.add_argument("--port", type=int, default=8780)
     parser.add_argument("--data-dir", default="runs/app", help="where jobs are kept (git-ignored; holds original text)")
     parser.add_argument("--max-job-tokens", type=int, default=100_000, help="most tokens one job may use with --live")
@@ -233,7 +237,13 @@ def main(argv=None):
     parser.add_argument("--reviewer", default="reviewer", help="name recorded with each review decision")
     parser.add_argument("--open", action="store_true", help="open the page in the default browser")
     args = parser.parse_args(argv)
-    backend = live_backend(args.provider) if args.live else offline_backend()
+    if args.live and args.replay:
+        parser.error("choose --live or --replay, not both")
+    if args.replay:
+        from .replay import DEFAULT_DIR, replay_backend
+        backend = replay_backend(args.replay_dir or DEFAULT_DIR)
+    else:
+        backend = live_backend(args.provider) if args.live else offline_backend()
     server = make_server(JobStore(args.data_dir, backend, args.max_job_tokens, args.seed), args.port, args.reviewer)
     url = f"http://127.0.0.1:{server.server_address[1]}/"
     print(f"De-identification app: {url}  (this computer only; Ctrl+C to stop)")
