@@ -1,0 +1,24 @@
+{
+  "false_positives": 0,
+  "false_positives_per_note": 0.0,
+  "groups": {
+    "base": {
+      "gold": 531,
+      "hit": 531
+    },
+    "listed": {
+      "gold": 62,
+      "hit": 62
+    },
+    "unlisted": {
+      "gold": 44,
+      "hit": 44
+    }
+  },
+  "missed_site_identifiers": [],
+  "name": "site-35-profile-rules",
+  "notes": 35,
+  "pred_file": "runs/site-profile.jsonl",
+  "predictions": 637,
+  "profile": "data/site/hartwell.json"
+}

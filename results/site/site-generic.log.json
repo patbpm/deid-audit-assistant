@@ -1,0 +1,15 @@
+{
+  "arm": "generic",
+  "cost_usd": 1.29946575,
+  "model": "muse-spark-1.3",
+  "notes_done": 59,
+  "notes_from_cache": 0,
+  "parse_errors": 0,
+  "request_params": {
+    "max_completion_tokens": 4096
+  },
+  "stopped_early": true,
+  "tokens_in": 63810,
+  "tokens_out": 286989,
+  "truncated": 0
+}

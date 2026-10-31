@@ -108,7 +108,10 @@ def do_detect(args):
 
 def do_score(args):
     notes = read_jsonl(args.notes)
+    keep = {r["note_id"] for r in read_jsonl(args.only_in or args.pred)}  # score only notes both arms were run on
     predictions = load_predictions(args.pred, {n["note_id"] for n in notes})
+    notes = [n for n in notes if n["note_id"] in keep]
+    predictions = {k: v for k, v in predictions.items() if k in keep}
     if args.profile:
         predictions = merge_profile(notes, predictions, site.load(args.profile))
     result = score(notes, predictions)
@@ -142,6 +145,7 @@ def main(argv=None):
     s.add_argument("--name", required=True)
     s.add_argument("--notes", default=NOTES)
     s.add_argument("--profile", default=None, help="also add this profile's rule spans before scoring")
+    s.add_argument("--only-in", default=None, help="score only the notes that this predictions file has (to compare arms on the same notes)")
     s.add_argument("--out", default="results/site")
     args = parser.parse_args(argv)
     return do_detect(args) if args.command == "detect" else do_score(args)

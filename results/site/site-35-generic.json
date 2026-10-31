@@ -1,0 +1,450 @@
+{
+  "false_positives": 0,
+  "false_positives_per_note": 0.0,
+  "groups": {
+    "base": {
+      "gold": 531,
+      "hit": 531
+    },
+    "listed": {
+      "gold": 62,
+      "hit": 17
+    },
+    "unlisted": {
+      "gold": 44,
+      "hit": 4
+    }
+  },
+  "missed_site_identifiers": [
+    {
+      "note_id": "N0001",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0001",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0002",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0002",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0002",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0002",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0003",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0003",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0004",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0004",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0005",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0006",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0007",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0007",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0008",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0008",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0008",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0009",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0009",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0010",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0010",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0010",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0011",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0011",
+      "site": "listed",
+      "text": "Birch Pavilion"
+    },
+    {
+      "note_id": "N0012",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0012",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0012",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0013",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0015",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0015",
+      "site": "listed",
+      "text": "Birch Pavilion"
+    },
+    {
+      "note_id": "N0016",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0016",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0016",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0016",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0017",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0017",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0017",
+      "site": "listed",
+      "text": "HRH-ST-8952"
+    },
+    {
+      "note_id": "N0018",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0018",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0019",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0019",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0020",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0020",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0020",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0021",
+      "site": "listed",
+      "text": "Birch Pavilion"
+    },
+    {
+      "note_id": "N0022",
+      "site": "listed",
+      "text": "Birch Pavilion"
+    },
+    {
+      "note_id": "N0022",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0022",
+      "site": "listed",
+      "text": "Birch Pavilion"
+    },
+    {
+      "note_id": "N0023",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0024",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0024",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0024",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0025",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0026",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0026",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0026",
+      "site": "listed",
+      "text": "HRH-ST-1051"
+    },
+    {
+      "note_id": "N0027",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0027",
+      "site": "listed",
+      "text": "MICU-3"
+    },
+    {
+      "note_id": "N0028",
+      "site": "listed",
+      "text": "Hartwell Heart Clinic"
+    },
+    {
+      "note_id": "N0028",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0028",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0028",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0029",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0029",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0030",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0030",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0030",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0030",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0031",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0031",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0032",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0032",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0032",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0032",
+      "site": "listed",
+      "text": "HRH-23525"
+    },
+    {
+      "note_id": "N0033",
+      "site": "listed",
+      "text": "Hartwell Regional Hospital"
+    },
+    {
+      "note_id": "N0034",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0034",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0035",
+      "site": "listed",
+      "text": "HRH"
+    },
+    {
+      "note_id": "N0035",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    }
+  ],
+  "name": "site-35-generic",
+  "notes": 35,
+  "pred_file": "runs/site-generic.jsonl",
+  "predictions": 552,
+  "profile": null
+}

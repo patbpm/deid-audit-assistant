@@ -1,0 +1,225 @@
+{
+  "false_positives": 0,
+  "false_positives_per_note": 0.0,
+  "groups": {
+    "base": {
+      "gold": 531,
+      "hit": 531
+    },
+    "listed": {
+      "gold": 62,
+      "hit": 62
+    },
+    "unlisted": {
+      "gold": 44,
+      "hit": 4
+    }
+  },
+  "missed_site_identifiers": [
+    {
+      "note_id": "N0002",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0004",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0004",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0005",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0006",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0007",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0008",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0008",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0009",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0010",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0011",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0012",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0012",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0013",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0014",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0015",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0016",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0016",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0017",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0018",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0019",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0020",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0022",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0024",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0028",
+      "site": "unlisted",
+      "text": "East Oak Unit"
+    },
+    {
+      "note_id": "N0028",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0029",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0029",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    },
+    {
+      "note_id": "N0030",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0030",
+      "site": "unlisted",
+      "text": "Linden Annex"
+    },
+    {
+      "note_id": "N0031",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0032",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0032",
+      "site": "unlisted",
+      "text": "Maple Wing"
+    },
+    {
+      "note_id": "N0034",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0034",
+      "site": "unlisted",
+      "text": "Cedar Outpatient Clinic"
+    },
+    {
+      "note_id": "N0035",
+      "site": "unlisted",
+      "text": "Willow Day Hospital"
+    }
+  ],
+  "name": "site-35-generic-rules",
+  "notes": 35,
+  "pred_file": "runs/site-generic.jsonl",
+  "predictions": 597,
+  "profile": "data/site/hartwell.json"
+}

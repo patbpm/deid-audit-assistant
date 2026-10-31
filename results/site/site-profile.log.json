@@ -1,0 +1,16 @@
+{
+  "arm": "profile",
+  "cost_usd": 1.335097,
+  "model": "muse-spark-1.3",
+  "notes_done": 35,
+  "notes_from_cache": 0,
+  "parse_errors": 0,
+  "request_params": {
+    "max_completion_tokens": 4096,
+    "site": "8ec39f6fe294"
+  },
+  "stopped_early": true,
+  "tokens_in": 61970,
+  "tokens_out": 295914,
+  "truncated": 0
+}

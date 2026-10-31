@@ -1,6 +1,6 @@
 # Site profile: teach it your clinic
 
-Status: Day 8 (Oct 31). Built and tested offline with scripted models. **No live model result exists yet**; this page says so until one does. This is an assistant for human review, not a compliance certification.
+Status: Day 8 (Oct 31). Built and tested offline, and run once live on 35 of the 60 invented-site notes (result below; the run hit its token cap before finishing). This is an assistant for human review, not a compliance certification.
 
 ## Why
 
@@ -43,4 +43,17 @@ python -m deid.eval.site score --pred runs/site-generic.jsonl --name generic
 python -m deid.eval.site score --pred runs/site-profile.jsonl --name profile --profile data/site/hartwell.json
 ```
 
-Not run yet. Caveats to state with any result: the site, the profile and the hint were written together by the project, and the hint was written knowing the unlisted names are tree-named (the point is the mechanism, not a measured gain on a real clinic); 60 short synthetic notes; one run per arm; no real hospital was used.
+## Result (Oct 31, 2026; one run per arm; Muse Spark `muse-spark-1.3`; detector only)
+
+Both arms were run under a 350,000-token cap each. The generic arm finished 59 of 60 notes (cap reached, about $1.30). The profile arm finished 35 of 60 (cap reached, about $1.34) because the model reasoned at length with the profile in the prompt: about 8,500 tokens per note against about 5,900 without it. **The comparison below uses the 35 notes both arms finished**, which are the first 35 of the set (not a random sample). Type is ignored; a hit is any overlap with a labeled identifier.
+
+| Arm | Base-note identifiers (531) | Local identifiers the profile lists (62) | Local identifiers it does not list (44) | False positives |
+|---|---|---|---|---|
+| Generic prompt | 100.0% | 27.4% (17) | 9.1% (4) | 0 |
+| Generic prompt + the profile's rules only | 100.0% | 100.0% | 9.1% (4) | 0 |
+| Profile in the prompt (model alone) | 100.0% | 100.0% | 100.0% | 0 |
+| Profile in the prompt + rules (the shipped setting) | 100.0% | 100.0% | 100.0% | 0 |
+
+What it shows: without a profile the model misses most of a site's own place names and codes (it found about a quarter of the listed ones and almost none of the others); the profile's rules alone fix exactly what is listed, as they must by construction; the prompt part is what reaches names the file does not list, here all 44. Nothing else got worse: recall on the base notes stayed at 100% and there were no false positives.
+
+Caveats: the site, the profile and the hint were written together by this project, and the hint was written knowing the unlisted names are named for trees, so the 44 unlisted identifiers are an easy case for it (the point is the mechanism, not a measured gain on a real clinic); 35 short synthetic notes; one run per arm; the profile arm costs about 45% more tokens per note here; no real hospital was used. Files: `results/site/site-35-*.json`, `results/site/site-*.log.json`. Reproduce (billed): the commands above, then `python -m deid.eval.site score --pred runs/site-profile.jsonl --name site-35-profile --only-in runs/site-profile.jsonl` and the same for `runs/site-generic.jsonl` (add `--profile data/site/hartwell.json` for the rules rows).
