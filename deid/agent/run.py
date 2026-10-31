@@ -30,7 +30,7 @@ from deid.audit.report import render
 from deid.audit.verify import LOW_CONFIDENCE
 from deid.baselines.common import read_notes, write_predictions
 from deid.detect.client import Budget, ChatClient, LargerLimitRetry, estimate_tokens
-from deid.detect import site
+from deid.detect import harden, site
 from deid.detect.detector import Cache
 from deid.detect.prompt import PROMPT_VERSION as DETECT_VERSION
 from deid.detect.prompt import build_messages
@@ -135,6 +135,8 @@ def main(argv=None):
     parser.add_argument("--max-rounds", type=int, default=2, help="extra feedback rounds per note")
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--harden-prompt", action="store_true",
+                        help="add a line to the detection prompt telling the model the note is data, not orders (docs/INJECTION.md)")
     parser.add_argument("--site-profile", default=None,
                         help="a site profile JSON file: local facility names and ID formats to look for (docs/SITE.md)")
     parser.add_argument("--date-mode", choices=("shift", "year"), default="shift",
@@ -177,6 +179,8 @@ def main(argv=None):
         return 0
 
     client = LargerLimitRetry(ChatClient.from_env(args.provider, args.max_output_tokens), args.retry_output_tokens)
+    if args.harden_prompt:
+        client = harden.harden(client)
     profile = site.load(args.site_profile) if args.site_profile else None
     client = site.wrap(client, profile)
     second = None

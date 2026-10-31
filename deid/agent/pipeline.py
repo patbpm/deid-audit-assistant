@@ -19,6 +19,7 @@ from deid.replace.engine import Replacer, clean_spans
 from deid.replace.rules import find_rule_spans
 
 from .crosscheck import cross_check, disagreements
+from .guard import guard_notices
 from .nameuse import check_name_use
 from .parallel import run_ordered
 from .verifier import select_uncertain, verify_spans
@@ -37,6 +38,7 @@ class Detected:
     second_spans: list = field(default_factory=list)  # what the second model found alone, when there is one
     second_name: str = ""
     notices: list = field(default_factory=list)  # things a person should know that are not about one span
+    guards: list = field(default_factory=list)  # notices from deid.agent.guard: steered, empty or contradicted by pattern rules
 
 
 @dataclass
@@ -147,6 +149,7 @@ def detect_one(note, client, detect_cache, verify_cache, low, verify, second=Non
         spans, theirs, more, notices, extra_usage, second_flags = second_opinion(
             note, spans, ignored, client, second, verify_cache, verify)
         name_verdicts = {**more, **name_verdicts}
+    guards = [] if failures else guard_notices(note["text"], spans)
     uncertain = [] if failures or not verify else select_uncertain(note["text"], spans, low)
     uncertain += [s for s in disagreements(spans) if verify and not failures and s not in uncertain]
     check = verify_spans(client, note["text"], uncertain, verify_cache)
@@ -163,7 +166,7 @@ def detect_one(note, client, detect_cache, verify_cache, low, verify, second=Non
          "nameuse_asked": nu.asked if nu else 0, "nameuse_parse_error": bool(nu and nu.parse_error),
          "nameuse_truncated": bool(nu and nu.truncated),
          "latency_s": found.latency_s + check.latency_s + (nu.latency_s if nu else 0.0), **second_flags},
-        failures, ignored, theirs, second[0].model if second else "", notices), sum_usage(
+        failures, ignored, theirs, second[0].model if second else "", notices, guards), sum_usage(
             check.usage, nu.usage if nu else None, extra_usage)
 
 
@@ -190,9 +193,10 @@ def detect_and_verify(notes, client, detect_cache, verify_cache, budget, low, pr
 
 def cross_args(d):
     """Arguments for build_note_audit that carry the second model's view, if there was one."""
-    if not d.second_name and not d.notices:
+    notices = d.notices + d.guards
+    if not d.second_name and not notices:
         return {}
-    args = {"notices": d.notices}
+    args = {"notices": notices}
     if d.second_name:
         args["others"] = {d.second_name: d.second_spans}
         args["cross"] = {(s["start"], s["end"]): s for s in d.spans if s.get("cross")}
