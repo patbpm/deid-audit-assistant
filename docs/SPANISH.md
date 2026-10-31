@@ -1,6 +1,6 @@
 # Spanish-language notes
 
-Status: Day 8 (Oct 31). The generator and the replacement engine's Spanish support are built and tested offline. **No live model result exists yet** for Spanish detection; this page says so until one does. This is an assistant for human review, not a compliance certification.
+Status: Day 8 (Oct 31). The generator and the replacement engine's Spanish support are built and tested offline, and the detector was run live once on the Spanish notes (result below). This is an assistant for human review, not a compliance certification.
 
 ## Why
 
@@ -15,15 +15,15 @@ A project that only ever shows English notes is untested on anything else. Many 
 
 The engine applied to the **true** labels: 566 of 566 replacements made, 0 fell back to a tag, 0 original names, IDs, phones, emails or addresses left in a cleaned note, and every one of the 20 patients' dates moved by a single shift (165 full dates compared). 42 of the dates were read day-first on a guess because both numbers could be a month; those are flagged in the audit. This shows the engine copes with these formats. Because the labels are given to it, it is not a detection result (`docs/REPLACEMENT.md` makes the same point for English).
 
-## Not measured yet: detection in Spanish
+## Detection in Spanish (Oct 31, 2026; Muse Spark `muse-spark-1.3`; English prompt; detector only; one run)
 
 ```powershell
-python -m deid.synth.spanish
-python -m deid.eval.spanish detect                       # dry run first
 python -m deid.eval.spanish detect --live --max-total-tokens 250000 --price-in 1.25 --price-out 4.25
 python -m deid.eval.spanish score --pred runs/es-detector.jsonl --name es-detector
 ```
 
-This runs the English-prompt detector on the Spanish notes once. Whatever it gives is reported, including misses. The offline rules engine (`python -m deid.app` with no key) is English-only and will miss most Spanish names and dates; use a hosted model for Spanish.
+565 of 566 labeled identifiers found (99.8%, interval 99.5 to 100), precision 100% (0 false positives), 40 of 40 notes read without error, 0.10% of identifier characters left uncovered. By type: ADDRESS 26 of 26, DATE 173 of 173, EMAIL 6 of 6, ID 40 of 40, PHONE 99 of 99, NAME 221 of 222. The one miss is a bare first name repeated in a telephone note ("Patricia tuvo dudas..."), the same kind of miss the open-weights model made in English: a name repeated alone, later in a note. About $0.49 at list price (30,200 tokens in, 107,418 out).
 
-Caveats: one language; 40 short, templated notes written by this project; the stories repeat across patients; no real Spanish-language note was used; the audio and scan paths were not tried in Spanish.
+What this shows: with the unchanged English prompt, the model handled these Spanish dates, two-surname names, `Calle` addresses and titles. What it does not show: anything about other languages, real Spanish-language notes, free-form (non-templated) writing, accents or typos beyond these 40 short templated notes written by this project, or the audio and scan paths in Spanish. One run. Files: `results/es/es-detector-all.json`, `results/es/es-detector-all-agnostic.json`, `results/es/es-detector.log.json`.
+
+The offline rules engine (`python -m deid.app` with no key) is English-only and will miss most Spanish names and dates; use a hosted model for Spanish.

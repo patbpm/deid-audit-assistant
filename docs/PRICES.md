@@ -80,3 +80,17 @@ Two detector runs on the 200 dev notes (the first with no retry, the second aski
 340 of 400 test notes (detector only) used 452,045 input and 1,748,726 output tokens, about $8.00 at list price, against a forecast of about $7.80 for all 400 notes; the model used more output tokens per note than forecast, so the 2.2M-token cap stopped the run early. About 6,470 tokens per note, so all 400 notes would have needed about 2.6M tokens (about $9.4 at list price). Whether the Baseten account was charged or credited was not checked.
 
 The last 60 held-out notes used 75,744 input and 274,237 output tokens, about $1.26 (forecast about $1.40). All 400 held-out notes together: 527,789 input and 2,022,963 output tokens, about $9.26 at list price, about 6,380 tokens per note.
+
+## Measured: Oct 31 experiments (Muse Spark, list price)
+
+| Run | Tokens in / out | About |
+|---|---|---|
+| Replay recording (4 sample notes, full app) | 7,411 / 22,039 | $0.10 |
+| Site, generic arm (59 notes) | 63,810 / 286,989 | $1.30 |
+| Site, profile arm (35 notes) | 61,970 / 295,914 | $1.34 |
+| Injection, plain (64 notes) | 61,983 / 245,864 | $1.12 |
+| Injection, hardened (46 new calls, 18 from an interrupted attempt) | 46,601 / 155,619 | $0.72 (+ about $0.3 for the interrupted attempt, estimated) |
+| Linkage (48 reviewer calls) | 29,658 / 84,170 | $0.39 |
+| Spanish detection (40 notes) | 30,200 / 107,418 | $0.49 |
+
+The profile arm used about 8,500 tokens per note against about 5,900 for the generic arm.

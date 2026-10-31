@@ -1,0 +1,417 @@
+{
+  "cost_usd": 0.394795,
+  "model": "muse-spark-1.3",
+  "rows": [
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "teacher-1",
+          "teacher-2",
+          "teacher-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk: \u201cstate's teacher of the year\u201d (public event, note 2); \u201ctown of about 900 people\u201d (small place, note 3)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "teacher",
+      "single_risks": [
+        "low",
+        "high",
+        "medium"
+      ],
+      "together_clues": [
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "state's teacher of the year",
+          "why": "Statewide award is publicly announced and searchable."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "town of about 900 people",
+          "why": "Town of 900 narrows identity to a tiny population."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "pilot-1",
+          "pilot-2",
+          "pilot-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk: \u201ccommercial airline pilot\u201d (occupation, note 1); \u201cemergency landing last winter that made the evening news\u201d (public event, note 2); \u201cregional airport with two gates\u201d (small place, note 3)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "pilot",
+      "single_risks": [
+        "medium",
+        "high",
+        "low"
+      ],
+      "together_clues": [
+        {
+          "category": "OCCUPATION",
+          "text": "commercial airline pilot",
+          "why": "Narrows the patient to pilots operating from a tiny airport."
+        },
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "emergency landing last winter that made the evening news",
+          "why": "News-covered landing is searchable in news and public records."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "regional airport with two gates",
+          "why": "Two-gate airport narrows location to a very small community."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "athlete-1",
+          "athlete-2",
+          "athlete-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk, up from medium for the riskiest single note: \u201cformer professional soccer goalkeeper\u201d (occupation, note 1); \u201cretired after a knee injury in the 2018 season\u201d (public event, note 2); \u201csmall town\u201d (small place, note 3)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "athlete",
+      "single_risks": [
+        "medium",
+        "low",
+        "medium"
+      ],
+      "together_clues": [
+        {
+          "category": "OCCUPATION",
+          "text": "former professional soccer goalkeeper",
+          "why": "Few people hold this professional sports role."
+        },
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "retired after a knee injury in the 2018 season",
+          "why": "A pro athlete's injury retirement would be in news records."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "small town",
+          "why": "A small town sharply limits the candidate pool."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "council-1",
+          "council-2",
+          "council-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk, up from medium for the riskiest single note: \u201cserves on the town council\u201d (occupation, note 1); \u201cran unopposed\u201d (public event, note 2); \u201cabout 700 residents\u201d (small place, note 3)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "council",
+      "single_risks": [
+        "medium",
+        "medium",
+        "medium"
+      ],
+      "together_clues": [
+        {
+          "category": "OCCUPATION",
+          "text": "serves on the town council",
+          "why": "Town council is an elected office held by very few people."
+        },
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "ran unopposed",
+          "why": "An unopposed election is public record and community knowledge."
+        },
+        {
+          "category": "LEFTOVER",
+          "text": "November",
+          "why": "Month is a partial date that should have been tagged."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "about 700 residents",
+          "why": "Population of 700 narrows the field to a tiny town."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "one stoplight",
+          "why": "Single stoplight identifies a very small specific town."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "chef-1",
+          "chef-2",
+          "chef-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk: \u201cfeatured on a national cooking show last year\u201d (public event, note 2); \u201conly restaurant in a mountain village of a few hundred people\u201d (small place, note 3)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "chef",
+      "single_risks": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "together_clues": [
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "featured on a national cooking show last year",
+          "why": "National TV feature is searchable and memorable."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "only restaurant in a mountain village of a few hundred people",
+          "why": "Tiny village with one restaurant narrows to a single owner."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": true,
+      "item": {
+        "kind": "linkage",
+        "patient_notes": [
+          "pastor-1",
+          "pastor-2",
+          "pastor-3"
+        ],
+        "reasons": [
+          "read together, this patient's 3 notes are rated high risk, up from medium for the riskiest single note: \u201cpastor of a small congregation\u201d (occupation, note 1); \u201cabout 40 members\u201d (other, note 2); \u201cmeets in a converted barn\u201d (small place, note 2)"
+        ],
+        "ref": null
+      },
+      "kind": "planted",
+      "patient": "pastor",
+      "single_risks": [
+        "medium",
+        "medium",
+        "medium"
+      ],
+      "together_clues": [
+        {
+          "category": "OCCUPATION",
+          "text": "pastor of a small congregation",
+          "why": "Only one person holds this local pastoral role."
+        },
+        {
+          "category": "OTHER",
+          "text": "about 40 members",
+          "why": "Tiny congregation size narrows the field sharply."
+        },
+        {
+          "category": "SMALL_PLACE",
+          "text": "meets in a converted barn",
+          "why": "Unusual meeting place makes the church findable."
+        },
+        {
+          "category": "PUBLIC_EVENT",
+          "text": "burned in a fire last year, which the local paper covered",
+          "why": "News-covered fire is searchable in public records."
+        }
+      ],
+      "together_risk": "high",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "bookkeeper",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "office",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "cashier",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "driver",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "nurse",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    },
+    {
+      "flagged": false,
+      "item": null,
+      "kind": "control",
+      "patient": "student",
+      "single_risks": [
+        "low",
+        "low",
+        "low"
+      ],
+      "together_clues": [],
+      "together_risk": "low",
+      "unreadable": [
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  ],
+  "summary": {
+    "control": {
+      "any_single_medium_or_high": 0,
+      "flagged": 0,
+      "patients": 6,
+      "together_medium_or_high": 0
+    },
+    "planted": {
+      "any_single_medium_or_high": 6,
+      "flagged": 6,
+      "patients": 6,
+      "together_medium_or_high": 6
+    }
+  },
+  "tokens_in": 29658,
+  "tokens_out": 84170
+}

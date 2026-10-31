@@ -1,0 +1,98 @@
+{
+  "bootstrap_resamples": 1000,
+  "gold_file_sha256": "59e86e19d8ab843a380feebd0b0f277be4a5220a6b254f1cd78d9652b0c3c6c1",
+  "metrics": {
+    "PHI": {
+      "ci95": {
+        "leak": [
+          0.0,
+          0.0029813664596273215
+        ],
+        "precision": [
+          1.0,
+          1.0
+        ],
+        "recall": [
+          0.9945652173913043,
+          1.0
+        ]
+      },
+      "exact": {
+        "f1": 0.9991158267020336,
+        "precision": 1.0,
+        "recall": 0.9982332155477032
+      },
+      "gold": 566,
+      "leaked_char_rate": 0.0009598080383923513,
+      "overlap": {
+        "f1": 0.9991158267020336,
+        "precision": 1.0,
+        "recall": 0.9982332155477032
+      },
+      "pred": 565
+    }
+  },
+  "name": "es-detector",
+  "notes": 40,
+  "notes_without_predictions": 0,
+  "only_predicted": false,
+  "pred_file_sha256": "88415467211cd5bd1f6a7cd44789df1276faf35d5414cd8c9187386101acbf62",
+  "recall_by_gold_type": {
+    "ADDRESS": {
+      "gold": 26,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "DATE": {
+      "gold": 173,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "EMAIL": {
+      "gold": 6,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "ID": {
+      "gold": 40,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "NAME": {
+      "gold": 222,
+      "leaked_char_rate": 0.002333041703120431,
+      "recall": 0.9954954954954955,
+      "recall_ci95": [
+        0.9864253393665159,
+        1.0
+      ]
+    },
+    "PHONE": {
+      "gold": 99,
+      "leaked_char_rate": 0.0,
+      "recall": 1.0,
+      "recall_ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "split": "all",
+  "type_agnostic": true
+}

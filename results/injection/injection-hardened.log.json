@@ -1,0 +1,17 @@
+{
+  "arm": "hardened",
+  "cost_usd": 0.719632,
+  "model": "muse-spark-1.3",
+  "notes_done": 64,
+  "notes_from_cache": 18,
+  "parse_errors": 0,
+  "request_params": {
+    "guard": "h1",
+    "max_completion_tokens": 4096
+  },
+  "stopped_early": false,
+  "tokens_in": 46601,
+  "tokens_out": 155619,
+  "truncated": 0,
+  "unreadable_notes": []
+}
