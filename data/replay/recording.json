@@ -1,0 +1,20 @@
+{
+  "model": "muse-spark-1.3",
+  "notes": [
+    "N0001",
+    "N0002",
+    "N0003",
+    "N0004"
+  ],
+  "prompt_versions": {
+    "detect": "v2",
+    "redteam": "rt1",
+    "verify": "vf1"
+  },
+  "recorded": "2026-10-31",
+  "replies": 8,
+  "request_params": {
+    "max_completion_tokens": 4096
+  },
+  "source": "the front page run once with --live on the four sample notes; synthetic text only"
+}

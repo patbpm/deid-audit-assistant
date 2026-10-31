@@ -1,0 +1,1 @@
+{"content": "{\"risk\": \"low\", \"clues\": []}", "usage": {"completion_tokens": 878, "prompt_tokens": 798, "total_tokens": 1676, "completion_tokens_details": {"reasoning_tokens": 857}, "prompt_tokens_details": {"cached_tokens": 0}}, "latency_s": 4.31191160005983, "finish_reason": "stop"}
