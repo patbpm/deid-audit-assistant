@@ -25,6 +25,7 @@ from deid.detect import site
 from deid.detect.detector import Cache
 from deid.ingest import vision
 from deid.ingest.audio import AudioCache, WavError, check_wav, transcribe_file
+from deid.redteam.bundle import run_linkage
 from deid.redteam.prompt import PROMPT_VERSION as REDTEAM_VERSION
 from deid.tables import model_typing
 from deid.tables.columns import ACTIONS, TYPES, build_plan
@@ -150,8 +151,13 @@ def run_notes(ctx, backend, files, options, seed, cache_root):
     outcomes, stopped2, replacer = review_and_clean(batch, client, redteam_cache, budget, seed, LOW_CONFIDENCE,
                                                     MAX_ROUNDS, progress("replace"), redteam=backend.redteam,
                                                     profile=profile)
+    linked = []
+    if options.get("linkage") and backend.redteam and backend.replay_root is None:
+        ctx.step("replace", "running", "reading each patient's notes together")
+        linked = run_linkage(outcomes, client, Cache(cache_root / "cache-linkage", REDTEAM_VERSION), budget)
     ctx.step("replace", "done", f"{len(outcomes)} of {len(batch)} notes"
-             + ("" if backend.redteam else "; no re-identification review with this engine"))
+             + ("" if backend.redteam else "; no re-identification review with this engine")
+             + (f"; {len(linked)} patient(s) read together, {sum(r['flagged'] for r in linked)} flagged" if linked else ""))
     stopped = stopped1 or stopped2
     done_ids = {o.note_id for o in outcomes}
     for n in notes:

@@ -158,6 +158,7 @@ async function startOver() {
 function readOptions() {
   const v = (id) => $(id) ? $(id).value : undefined, c = (id) => $(id) ? $(id).checked : false;
   const opts = {same_patient: c("o-same"), model_typing: c("o-typing"), confirm_synthetic: c("o-confirm")};
+  if ($("o-linkage")) opts.linkage = c("o-linkage");
   if ($("o-site")) { opts.site_names = v("o-site"); opts.site_notes = v("o-site-notes"); }
   if ($("o-header")) { opts.header = v("o-header"); opts.unknown = v("o-unknown"); opts.freetext = v("o-freetext"); }
   if ($("o-cap")) opts.token_cap = parseInt(v("o-cap"), 10);
@@ -177,6 +178,8 @@ function optionsPanel(job) {
   const parts = [];
   if (family === "notes") parts.push(h("label", {class: "opt"}, h("input", {type: "checkbox", id: "o-same"}),
     " These notes are all about the same patient (dates shift together and each name gets one stand-in). Leave unticked to treat each note as a different patient, unless a JSON line gives a patient_id."));
+  if (family === "notes" && S.info.backend.redteam && !S.info.backend.replay) parts.push(h("label", {class: "opt"}, h("input", {type: "checkbox", id: "o-linkage"}),
+    " Also read each patient's cleaned notes together, to catch details that are harmless alone but identify together (one more model call per patient)."));
   if (family === "notes") parts.push(h("label", {class: "opt"}, "Local names to remove (one per line): ",
     h("div", {class: "muted small"}, "Your clinic's own hospital, building, ward and unit names. Each is replaced by 'Facility N'. Optional."),
     h("textarea", {id: "o-site", rows: "3", style: "width:100%;max-width:34em", placeholder: "Hartwell Regional Hospital

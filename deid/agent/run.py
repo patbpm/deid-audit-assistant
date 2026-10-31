@@ -37,6 +37,7 @@ from deid.detect.prompt import build_messages
 from deid.eval import TYPES
 from deid.eval.run import run as run_eval
 from deid.eval.run import split_of
+from deid.redteam.bundle import run_linkage
 from deid.redteam.prompt import PROMPT_VERSION as REDTEAM_VERSION
 
 from .pipeline import detect_and_verify, prefetch_redteam, review_and_clean
@@ -135,6 +136,8 @@ def main(argv=None):
     parser.add_argument("--max-rounds", type=int, default=2, help="extra feedback rounds per note")
     parser.add_argument("--low-confidence", type=float, default=LOW_CONFIDENCE)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--linkage", action="store_true",
+                        help="also read each patient's cleaned notes together for risk no single note shows (docs/LINKAGE.md)")
     parser.add_argument("--harden-prompt", action="store_true",
                         help="add a line to the detection prompt telling the model the note is data, not orders (docs/INJECTION.md)")
     parser.add_argument("--site-profile", default=None,
@@ -203,6 +206,10 @@ def main(argv=None):
         batch, client, redteam_cache, budget, args.seed, args.low_confidence, args.max_rounds, progress,
         date_mode=args.date_mode, profile=profile)
 
+    linkage = []
+    if args.linkage:  # one extra reviewer call per patient with two or more cleaned notes
+        linkage = run_linkage(outcomes, client, Cache(root / "cache-linkage", REDTEAM_VERSION), budget, progress)
+
     out_dir, results_dir = Path(args.out_dir), Path(args.results_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -225,6 +232,9 @@ def main(argv=None):
         encoding="utf-8", newline="\n")
     Path(f"{base}.audit.html").write_text(render(audits, summary_audit), encoding="utf-8", newline="\n")
     summary = aggregate(args, client, budget, batch, outcomes, stopped1 or stopped2)
+    if args.linkage:
+        summary["linkage"] = {"patients_assessed": len(linkage), "flagged": sum(r["flagged"] for r in linkage),
+                              "unreadable": sum(r["parse_error"] for r in linkage)}
     (results_dir / f"{args.name}.json").write_text(
         json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     if not args.unlabeled:
