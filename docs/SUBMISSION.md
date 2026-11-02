@@ -4,13 +4,13 @@ Nothing here is submitted or published. Every number traces to a row in `docs/CL
 
 ## Fields
 
-**Project name:** [Patrick to choose. Working title: Clinical text de-identification and audit assistant.]
+**Project name:** Clinical text de-identification and audit assistant
 
 **Track:** Indie developer (solo). **Problem statement:** Build for Your World.
 
-**Representative / team:** Patrick [full name as on the CV account]. No other contributors.
+**Representative / team:** Patrick Matshumba. No other contributors.
 
-**Repository:** [public URL, set before submitting]  **Demo video (3 min):** [link, accessible without login]
+**Repository:** https://github.com/patbpm/deid-audit-assistant  **Demo video (3 min):** [link, accessible without login]
 
 **One line (under 140 characters):** An open-source assistant that de-identifies clinical notes with Meta's Muse Spark, shows evidence for every change, and leaves the hard calls to a person.
 
@@ -22,7 +22,7 @@ Nothing here is submitted or published. Every number traces to a row in `docs/CL
 
 De-identifying free-text clinical notes is slow, and it fails in two ways. Pattern tools miss identifiers that do not look like identifiers: a name that is also a word ("Fair", "Wood", "Swift"), an odd date format, a typo, a surname written without a title. Or they over-scrub and damage the clinical content, so a note stops being usable: "Fair skin" becomes a person, "Wilson disease" loses its name, "last Tuesday" becomes a date. In both cases the person who has to sign off gets no evidence about what was changed or why.
 
-[Patrick, in your own words, one or two sentences on why you know this problem firsthand. Do not name your employer's projects or data.]
+I am a health informatics student, and I have worked with clinical data. I have seen how hard it is to search and use data once it has been de-identified, which is why I wanted to build a tool that shows what it changed and why.
 
 ### What it does
 
