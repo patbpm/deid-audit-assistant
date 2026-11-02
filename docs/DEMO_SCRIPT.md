@@ -6,8 +6,8 @@ Judges score Demo at 25%, and the video is the main thing they watch, so the ord
 
 ## Before recording (checklist)
 
-- [ ] Meta Model API key set in the environment (never typed or shown on screen). Check Billing shows the credit; a rehearsal and a take together cost about 0.2 USD at list price (`results/dev/app-live-check.json`: about 0.17 USD for both samples). **Each live run needs Patrick's yes.**
-- [ ] Start the front page with the hosted models: `python -m deid.app --live --open`. Browser at 125% zoom, dark theme as is, one tab, bookmarks bar hidden, notifications off.
+- [ ] Patrick chose replay (2026-11-02): no key, no network, no cost. The front page runs on the 8 Muse Spark replies saved on 2026-10-31 (`data/replay/`), and the video says so. A live run would cost about 0.17 USD and needs Patrick's yes first.
+- [ ] Start the front page in replay mode: `python -m deid.app --replay --open`. Browser at 125% zoom, dark theme as is, one tab, bookmarks bar hidden, notifications off.
 - [ ] Start the review page on the saved set B run in a second tab: `python -m deid.review.server --audit runs/agent-meta-advb-rtfix.audit.json --open` (the file is git-ignored; if it is missing, rebuild it from the cached replies with the command in `docs/ADVERSARIAL.md`, which costs nothing). Open note B0001.
 - [ ] Prepare the watch-mode terminal (offline rules, no key needed): `python -m deid.watch.feed --out runs/demo-feed --count 8 --interval 4` in one terminal and `python -m deid.watch --source folder:runs/demo-feed --state runs/watch/demo` in another; `runs/watch/demo/status.html` open in a tab. Delete `runs/demo-feed` and `runs/watch/demo` first so it starts empty.
 - [ ] Results slide (one still image, made from `results/adversarial-b/*.json`): the four numbers in segment 4, the caption "one run, 200 synthetic notes written by the project", and one line for the held-out run: "400 held-out easy template notes: 5,992 of 5,992 found, 0 false positives".
@@ -19,7 +19,7 @@ Judges score Demo at 25%, and the video is the main thing they watch, so the ord
 | Time | On screen | What the viewer should get |
 |---|---|---|
 | 0:00 - 0:20 | Note B0001 original text, the words "Sage Fair", "Fair skin", "Sage tea", "Ms. Fair" highlighted | The problem: a name can also be an ordinary word, so find-and-replace tools make mistakes in both directions |
-| 0:20 - 0:55 | Front page, live: sample notes, the synthetic tick, start, the four steps filling in, result card with the "See the change" before-and-after panel | It runs end to end on a hosted Meta model, and tells you what it is unsure about |
+| 0:20 - 0:55 | Front page, replay of saved Muse Spark replies: sample notes, the synthetic tick, start, the four steps filling in, result card with the "See the change" before-and-after panel | It runs end to end on saved Muse Spark replies (labelled as such), and tells you what it is unsure about |
 | 0:55 - 1:30 | Review page: side by side, click a replacement, evidence row, reject one | Every change has evidence you can check; a person decides |
 | 1:30 - 2:05 | Back to B0001 in the review page; then the results slide | The hard case, handled, and the number that goes with it, with its limits |
 | 2:05 - 2:30 | Red-team result, then the watch-mode terminals and status page | Agents that check each other, and notes cleaned as they arrive |
@@ -29,7 +29,7 @@ Judges score Demo at 25%, and the video is the main thing they watch, so the ord
 
 **0:00 - 0:20 (problem).** "Clinical notes can't be shared for research until the identifiers are out. Here is a synthetic note. 'Sage Fair' is the patient. But 'Fair skin' and 'Sage tea' are ordinary words. A tool that replaces every match scrubs the medicine along with the name, and a tool that skips common words can leave a real name behind. I built an assistant that gets this right where it can, and tells a person where it can't."
 
-**0:20 - 0:55 (live run).** "This is the front page, running on Meta's Muse Spark through the Meta Model API. I load the sample notes, confirm they are synthetic, and start. The agent works in four steps: detect identifiers, verify the ones it is unsure about with a second call, replace them consistently, and finally a red-team agent reads the cleaned note and tries to work out who it is about. [Sped up, say so on screen.] Sixty-four replacements, two items left for a person, risk rated low. That rating is a model's opinion, not a guarantee."
+**0:20 - 0:55 (live run).** "This is the front page. To keep the demo free and repeatable, it is playing back the replies Meta's Muse Spark gave on October 31 for these four sample notes; no model is called while I record. I load the sample notes, confirm they are synthetic, and start. The agent works in four steps: detect identifiers, verify the ones it is unsure about with a second call, replace them consistently, and finally a red-team agent reads the cleaned note and tries to work out who it is about. Sixty-four replacements, two items left for a person, risk rated low. That rating is a model's opinion, not a guarantee." On screen: a caption "Replay of saved Muse Spark replies (recorded Oct 31)".
 
 **0:55 - 1:30 (evidence and review).** "Each change keeps its evidence. I click a replacement: here are the original's character offsets, the detector that found it and its confidence, the verifier's verdict, and the rule that rewrote it. Dates shift by one amount per patient, so intervals survive; one fake name per real name across a patient's notes. I disagree with this one, so I reject it, and the original comes back. Anything I leave undecided stays replaced. The tool is built so doing nothing never exposes a name."
 
