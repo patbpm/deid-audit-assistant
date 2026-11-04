@@ -10,7 +10,7 @@ Nothing here is submitted or published. Every number traces to a row in `docs/CL
 
 **Representative / team:** Patrick Matshumba. No other contributors.
 
-**Repository:** https://github.com/patbpm/deid-audit-assistant  **Demo video (3 min):** [link, accessible without login]
+**Repository:** https://github.com/patbpm/deid-audit-assistant  **Demo video (3 min):** https://youtu.be/L5D1HGefjqA
 
 **One line (under 140 characters):** An open-source assistant that de-identifies clinical notes with Meta's Muse Spark, shows evidence for every change, and leaves the hard calls to a person.
 
