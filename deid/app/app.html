@@ -185,9 +185,7 @@ function optionsPanel(job) {
     " Also read each patient's cleaned notes together, to catch details that are harmless alone but identify together (one more model call per patient)."));
   if (family === "notes") parts.push(h("label", {class: "opt"}, "Local names to remove (one per line): ",
     h("div", {class: "muted small"}, "Your clinic's own hospital, building, ward and unit names. Each is replaced by 'Facility N'. Optional."),
-    h("textarea", {id: "o-site", rows: "3", style: "width:100%;max-width:34em", placeholder: "Hartwell Regional Hospital
-Birch Pavilion
-MICU-3"}),
+    h("textarea", {id: "o-site", rows: "3", style: "width:100%;max-width:34em", placeholder: "Hartwell Regional Hospital\nBirch Pavilion\nMICU-3"}),
     h("input", {id: "o-site-notes", type: "text", maxlength: "600", style: "width:100%;max-width:34em", placeholder: "Hint for names not listed, e.g. wings here are named after trees"})));
   if (family === "tables") {
     parts.push(h("label", {class: "opt"}, "First row is a header: ", h("select", {id: "o-header"},
