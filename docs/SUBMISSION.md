@@ -74,4 +74,4 @@ Run the whole pipeline and the held-out and adversarial sets on Muse Spark Open 
 
 ## Anti-project check (for my own use, not for the form)
 
-Not medical advice, not a RAG app, not an image analyzer, not a generic chatbot: it is a multi-agent tool that finds, changes and audits identifiers in text. The organizers' "Best Agentic Use-Case" fits the red-team loop and watch mode; "Best Build on Meta Open Weight Models" does not apply because no open-weights run was made.
+Not medical advice, not a RAG app, not an image analyzer, not a generic chatbot: it is a multi-agent tool that finds, changes and audits identifiers in text. The organizers' "Best Agentic Use-Case" fits the red-team loop and watch mode; "Best Build on Meta Open Weight Models" is a weaker fit: Muse Spark Open on Baseten was run, but only as the detector (200 dev and 400 held-out notes), not inside the full agent.
