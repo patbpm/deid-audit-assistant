@@ -1,0 +1,19 @@
+Narration for ElevenLabs, shortened to fit 3:00 (plain text, stage directions removed). Same claims and numbers as docs/DEMO_SCRIPT.md, with detail cut. One block per clip: generate each separately.
+
+=== Clip 1: problem (target 0:00 - 0:18) ===
+Clinical notes can't be shared for research until the identifiers are out. In this synthetic note, 'Sage Fair' is the patient, but 'Fair skin' and 'Sage tea' are ordinary words. Replace every match and you scrub the medicine. Skip common words and you leave a real name behind. This assistant tells a person where it can't be sure.
+
+=== Clip 2: front page (target 0:18 - 0:50) ===
+This is the front page. To keep the demo free and repeatable, it plays back the replies Meta's Muse Spark gave on October 31 for these four sample notes; no model is called while I record. The agent detects identifiers, verifies the doubtful ones, replaces them consistently, and a red-team agent tries to work out who the cleaned note is about. Sixty-four replacements, two items for a person, risk rated low. That rating is a model's opinion, not a guarantee.
+
+=== Clip 3: evidence and review (target 0:50 - 1:20) ===
+Each change keeps its evidence: the original's character offsets, the detector and its confidence, the verifier's verdict, and the rule that rewrote it. Dates shift by one amount per patient, so intervals survive. I disagree with this one, so I reject it, and the original comes back. Anything I leave undecided stays replaced, so doing nothing never exposes a name.
+
+=== Clip 4: hard case and result (target 1:20 - 2:10) ===
+Back to the hard case. 'Ms. Fair' is replaced. 'Fair skin' is left as written and listed for review, with a button to replace it after all. If the name check fails or is unsure, the name is replaced. On a second adversarial set of 200 short synthetic notes that I wrote, one run: all 609 identifiers covered, and one false positive at detection. Philter makes 0.83 false positives per note on the same set, Presidio 1.55. Treat it as evidence, not proof. On 400 held-out notes of easy template text, all 5,992 identifiers found, no false positives.
+
+=== Clip 5: agents and watch mode (target 2:10 - 2:30) ===
+The red-team agent sends identifiers it finds back to the detector, and clues like a rare condition or a small town to the reviewer. In watch mode, notes dropped into a folder are cleaned as they arrive. This clip uses the offline rules engine; I have not run watch mode with a hosted model.
+
+=== Clip 6: close (target 2:30 - 3:00) ===
+Muse Spark does the detecting, verifying, name check and red-team reading, and Muse Voice Transcribe and the vision model take dictated and scanned notes. I also ran Muse Spark Open, Meta's open-weights model, as the detector on 400 held-out notes: 98.9 percent found, no false positives, against 100 for Muse Spark. Everything was built during the hackathon, and everything it saw was synthetic. It is an assistant for human review, not a compliance certification. The code and the commands to reproduce every number are in the repository.
